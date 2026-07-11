@@ -1,0 +1,45 @@
+[config]
+type = "pipeline"
+chartbook_format_version = "0.0.2"
+
+[site]
+title = "p03_lopez-salido_stein_zakrajsek_2017"
+author = "Your Name"
+copyright = "2025"
+logo_path = ""
+favicon_path = ""
+
+[pipeline]
+id = "P0"
+pipeline_name = "p03_lopez-salido_stein_zakrajsek_2017"
+pipeline_description = "A data science project"
+lead_pipeline_developer = "Your Name"
+contributors = ["Your Name"]
+software_modules_command = "module load anaconda3/3.11.4 TeXLive/2023"
+runs_on_grid_or_windows_or_other = "Windows/Linux/MacOS"
+git_repo_URL = ""
+README_file_path = "./README.md"
+site_dir = "./docs_src/"
+
+[notebooks]
+
+
+[notebooks.01_example_notebook_interactive]
+notebook_name = "Example Notebook Interactive"
+notebook_description = "Example notebook for demonstrating how to construct a Chartbook notebook."
+notebook_path = "_output/01_example_notebook_interactive.ipynb"
+
+
+[notebooks.02_example_with_dependencies]
+notebook_name = "Example Notebook with Dependencies"
+notebook_description = "Example notebook demonstrating dependencies on data pulls."
+notebook_path = "_output/02_example_with_dependencies.ipynb"
+
+
+
+
+[dataframes]
+
+
+[charts]
+

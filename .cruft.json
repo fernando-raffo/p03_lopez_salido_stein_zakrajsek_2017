@@ -1,0 +1,43 @@
+{
+  "template": "https://github.com/backofficedev/cookiecutter_chartbook",
+  "commit": "038010fa2e6d420f0697d433e31259593fea1e11",
+  "checkout": null,
+  "context": {
+    "cookiecutter": {
+      "project_name": "p03_lopez-salido_stein_zakrajsek_2017",
+      "project_slug": "p03_lopez_salido_stein_zakrajsek_2017",
+      "project_description": "A data science project",
+      "author_name": "Your Name",
+      "author_email": "your.email@example.com",
+      "python_version": "3.12",
+      "environment_manager": "conda",
+      "include_latex_reports": true,
+      "include_jupyter_notebooks": true,
+      "include_r_scripts": false,
+      "include_stata_scripts": false,
+      "include_chartbook": true,
+      "include_github_actions": true,
+      "include_fred": true,
+      "include_fed_yield_curve": false,
+      "include_ofr_api": false,
+      "include_bloomberg": false,
+      "include_crsp_stock": false,
+      "include_crsp_compustat": false,
+      "_copy_without_render": [
+        "*.bst",
+        "*.sty",
+        "*.eps",
+        "*.ipe",
+        "*.png",
+        "*.pdf",
+        "*.tex",
+        "*.bib",
+        ".github/workflows/*.yml",
+        ".claude/skills/*/*.md"
+      ],
+      "_template": "https://github.com/backofficedev/cookiecutter_chartbook",
+      "_commit": "038010fa2e6d420f0697d433e31259593fea1e11"
+    }
+  },
+  "directory": null
+}
