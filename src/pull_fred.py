@@ -1,3 +1,22 @@
+"""
+Pull and cache macro/financial time series from FRED (Federal Reserve
+Economic Data) via `pandas_datareader`.
+
+The set of series to download is defined in `series_to_pull`, which maps
+each FRED series ID to a human-readable description. Running this module
+as a script will:
+
+1. Download all series in `series_to_pull` between START_DATE and today.
+2. Save the resulting DataFrame to `fred.parquet` and `fred.csv` in
+   RAW_DATA_DIR.
+3. Write a `fred_data_dictionary.md` file to RAW_DATA_DIR that documents
+   which column in the saved DataFrame corresponds to which FRED series
+   and description.
+
+Other modules should use `load_fred` to read the cached parquet file
+rather than re-pulling from FRED.
+"""
+
 from pathlib import Path
 
 import numpy as np
@@ -6,152 +25,124 @@ import pandas_datareader.data as web
 
 from settings import config
 
-DATA_DIR = Path(config("DATA_DIR"))
-START_DATE = config("START_DATE")
-END_DATE = config("END_DATE")
+DATA_DIR = Path(config("RAW_DATA_DIR"))
+START_DATE = config("REPLICATION_START_DATE")
+END_DATE = config("REPLICATION_END_DATE")
 
 
+# Maps each FRED series ID to a human-readable description. Used both to
+# request the series from FRED and to label the corresponding column when
+# generating the data dictionary in `save_data_dictionary`.
 series_to_pull = {
-    ## Macro
-    "GDP": "GDP",
-    "CPIAUCNS": "Consumer Price Index for All Urban Consumers: All Items in U.S. City Average",
-    "GDPC1": "Real Gross Domestic Product",
-    ## Finance
-    "DPCREDIT": "Discount Window Primary Credit Rate",
-    # 'DISCOUNT': 'Discount Rate Changes (OLD)', #Discount Rate Changes:
-    # Historical Dates of Changes and Rates (DISCONTINUED)
-    "EFFR": "Effective Federal Funds Rate",
-    "OBFR": "Overnight Bank Funding Rate",
-    "SOFR": "SOFR",
-    "IORR": "Interest on Required Reserves",
-    "IOER": "Interest on Excess Reserves",
-    "IORB": "Interest on Reserve Balances",
-    "DFEDTARU": "Federal Funds Target Range - Upper Limit",
-    "DFEDTARL": "Federal Funds Target Range - Lower Limit",
-    "WALCL": "Federal Reserve Total Assets",  # Millions, converted to billions below
-    # Assets: Total Assets: Total Assets (Less Eliminations from Consolidation):
-    # Wednesday Level
-    "TOTRESNS": "Reserves of Depository Institutions: Total",  # Billions
-    "TREAST": "Treasuries Held by Federal Reserve",  # Millions, Converted to Billions below
-    # Assets: Securities Held Outright:
-    # U.S. Treasury Securities: All: Wednesday Level. ( total face value of U.S.
-    # Treasury securities held by the Federal Reserve)
-    "CURRCIR": "Currency in Circulation",  # Billions
-    "GFDEBTN": "Federal Debt: Total Public Debt",  # Millions, Converted to Billions below
-    "WTREGEN": "Treasury General Account",  # Billions # Liabilities and Capital: Liabilities: Deposits with F.R. Banks,
-    # Other Than Reserve Balances: U.S. Treasury, General Account: Week Average
-    "RRPONTSYAWARD": "Fed ON/RRP Award Rate",  # Overnight Reverse Repurchase Agreements
-    # Award Rate: Treasury Securities Sold by the Federal Reserve in the Temporary
-    # Open Market Operations
-    "RRPONTSYD": "Treasuries Fed Sold In Temp Open Mark",  # Billions
-    # Overnight Reverse Repurchase Agreements:
-    # Total Securities Sold by the Federal Reserve in the Temporary Open Market Operations
-    "RPONTSYD": "Treasuries Fed Purchased In Temp Open Mark",  # Billions
-    # Overnight Repurchase Agreements:
-    # Treasury Securities Purchased by the Federal Reserve in the Temporary
-    # Open Market Operations
-    "WSDONTL": "SOMA Sec Overnight Lending Volume",  # Millions, Converted to Billions below
-    # Memorandum Items: Securities Lent to Dealers: Overnight Facility: Wednesday Level
-}
-
-series_descriptions = series_to_pull.copy()
-series_descriptions["MY_RPONTSYAWARD"] = "Fed ON/RP Award Rate"  # As far as I can tell,
-# the standing repo facility rate is set equal to the upper limit of the fed's target range.
-# The ON/RRP rate appears to be set at 5 bps higher than the lower limit of the fed's
-# target range.
-# The ON/RRP has a counterparty limit. the ON/RP has an aggregate limit that appears to
-# have been equal to $500 billion since it started in July 2021 until the time of writing
-# (Oct 2023).
-series_descriptions["Gen_IORB"] = "Interest on Reserves"  # Backfilled with
-# interest on excess reserves
-series_descriptions["ONRRP_CTPY_LIMIT"] = "Counter-party Limit at Fed ON/RRP Facility"
-series_descriptions["ONRP_AGG_LIMIT"] = "Aggregate Limit at Fed Standing Repo Facility"
-# For foreign official institutions, there is a $60 billion per counterparty limit
-
-manual_ONRRP_cntypty_limits = {  # in $ Billions
-    "2013-Sep-22": 0,
-    "2013-Sep-23": 1,
-    "2014-Jan-29": 3,
-    "2014-Feb-3": 7,
-    "2014-Feb-21": 10,
-    "2014-Jul-11": 30,
-    "2021-Mar-17": 80,
-    "2021-Jun-3": 160,
+    "AAA": "Moody's Seasoned Aaa Corporate Bond Yield (monthly)",
+    "BAA": "Moody's Seasoned Baa Corporate Bond Yield (monthly)",
+    "DGS10": "Market Yield on U.S. Treasury Securities at 10-Year Constant Maturity (daily)",
+    "M1333AUSM156NNBR": "Yield on Long-Term United States Bonds (monthly)",
+    "M1329AUSM193NNBR": "Yields on Short-Term United States Securities, Three-Six Month Treasury Notes and Certificates, Three Month Treasury Bills (monthly)",
+    "M1329BUSM193NNBR": "Yields on Short-Term United States Securities, Three-Six Month Treasury Notes and Certificates, Three Month Treasury Bills (monthly)",
+    "TB3MS": "3-Month Treasury Bill Secondary Market Rate, Discount Basis (monthly)",
+    "CPIAUCNS": "Consumer Price Index for All Urban Consumers: All Items in U.S. City Average (monthly)",
+    "B230RC0Q173SBEA": "Population (quarterly)",
+    "POPH": "National Population (annual)",
+    "GDPC1": "Real Gross Domestic Product (quarterly)",
+    "GDPCA": "Real Gross Domestic Product (annual)",
 }
 
 
-def pull_fred(start_date=START_DATE, end_date=END_DATE, ffill=True):
+def pull_fred(start_date=START_DATE, end_date=END_DATE, ffill=False):
     """
-    Lookup series code, e.g., like this:
-    https://fred.stlouisfed.org/series/RPONTSYD
+    Download all series listed in `series_to_pull` from FRED.
+
+    Parameters
+    ----------
+    start_date : str or datetime, default START_DATE
+        First date of the requested date range.
+    end_date : str or datetime, default END_DATE
+        Last date of the requested date range.
+    ffill : bool, default False
+        Unused placeholder for forward-filling lower-frequency series
+        (e.g. quarterly/annual) up to the daily/monthly index. Kept as a
+        parameter for callers that may want to opt into this behavior.
+
+    Returns
+    -------
+    pandas.DataFrame
+        DataFrame indexed by date, with one column per FRED series ID
+        in `series_to_pull`.
     """
     df = web.DataReader(list(series_to_pull.keys()), "fred", start_date, end_date)
-
-    millions_to_billions = ["TREAST", "GFDEBTN", "WALCL", "WSDONTL"]
-    for s in millions_to_billions:
-        df[s] = df[s] / 1_000
-
-    # forward_fill = ['DISCOUNT', 'OBFR', 'DPCREDIT', 'TREAST', 'TOTRESNS']
-    if ffill:
-        forward_fill = [
-            "OBFR",
-            "DPCREDIT",
-            "TREAST",
-            "TOTRESNS",
-            "WTREGEN",
-            "WALCL",
-            "CURRCIR",
-            "RRPONTSYAWARD",
-            "WSDONTL",
-        ]
-        for s in forward_fill:
-            df[s] = df[s].ffill()
-
-    # fill_zeros = ['RRPONTSYD', 'RPONTSYD']
-    # for s in fill_zeros:
-    #     df[s] = df[s].fillna(0)
-
-    # When IORB is missing, use excess reserve rate
-    df["Gen_IORB"] = df["IORB"].fillna(df["IOER"])
-    # df['Gen_DISCOUNT'] = df['DPCREDIT'].fillna(df['DISCOUNT'])
-
-    df["ONRRP_CTPY_LIMIT"] = np.nan
-    for key in manual_ONRRP_cntypty_limits.keys():
-        date = pd.to_datetime(key)
-        df.loc[date, "ONRRP_CTPY_LIMIT"] = manual_ONRRP_cntypty_limits[key]
-    df["ONRRP_CTPY_LIMIT"] = df["ONRRP_CTPY_LIMIT"].ffill()
-
-    df["ONRP_AGG_LIMIT"] = np.nan
-    df.loc["2021-Jul-28", "ONRP_AGG_LIMIT"] = 500
-    df["ONRP_AGG_LIMIT"] = df["ONRP_AGG_LIMIT"].ffill()
-
-    df_focused = df.drop(columns=["IORR", "IOER", "IORB"])
-    # df_focused.isna().sum()
-    # df_focused['WTREGEN'].plot()
-    # df_focused['WTREGEN'].ffill().plot()
-    return df_focused
+    return df
 
 
 def load_fred(data_dir=DATA_DIR):
     """
-    Must first run this module as main to pull and save data.
+    Load the previously pulled FRED data from disk.
+
+    Must first run this module as main (or call `pull_fred` and save its
+    output) to create `fred.parquet` in `data_dir`.
+
+    Parameters
+    ----------
+    data_dir : str or Path, default DATA_DIR
+        Directory containing `fred.parquet`.
+
+    Returns
+    -------
+    pandas.DataFrame
+        The cached FRED DataFrame, indexed by date.
     """
     file_path = Path(data_dir) / "fred.parquet"
     df = pd.read_parquet(file_path)
-    # df = pd.read_csv(file_path, parse_dates=["DATE"])
-    # df = df.set_index("DATE")
     return df
 
 
-def demo():
-    df = load_fred()
+def save_data_dictionary(df, data_dir=DATA_DIR):
+    """
+    Write a Markdown data dictionary describing each column of `df`.
+
+    For every column in `df` that corresponds to a known FRED series
+    (i.e. is a key in `series_to_pull`), record its FRED series ID and
+    human-readable description in a Markdown table. This makes it easy
+    to look up what each column of `fred.parquet`/`fred.csv` represents
+    without cross-referencing this module's source code.
+
+    Parameters
+    ----------
+    df : pandas.DataFrame
+        The DataFrame returned by `pull_fred`, whose columns are FRED
+        series IDs.
+    data_dir : str or Path, default DATA_DIR
+        Directory to write `fred_data_dictionary.md` into.
+
+    Returns
+    -------
+    Path
+        Path to the written Markdown file.
+    """
+    filedir = Path(data_dir)
+    filedir.mkdir(parents=True, exist_ok=True)
+    file_path = filedir / "fred_data_dictionary.md"
+
+    lines = [
+        "# FRED Data Dictionary",
+        "",
+        "This file documents the columns found in `fred.parquet`, "
+        "generated by `pull_fred.py`.",
+        "",
+        "| Column (FRED Series ID) | Description |",
+        "| --- | --- |",
+    ]
+    for column in df.columns:
+        description = series_to_pull.get(column, "Unknown series")
+        lines.append(f"| {column} | {description} |")
+
+    file_path.write_text("\n".join(lines) + "\n")
+    return file_path
 
 
 if __name__ == "__main__":
-    today = pd.Timestamp.today().strftime("%Y-%m-%d")
-    end_date = today
-    df = pull_fred(START_DATE, end_date)
+    df = pull_fred(START_DATE, END_DATE)
     filedir = Path(DATA_DIR)
     filedir.mkdir(parents=True, exist_ok=True)
     df.to_parquet(filedir / "fred.parquet")
-    df.to_csv(filedir / "fred.csv")
+    save_data_dictionary(df, filedir)

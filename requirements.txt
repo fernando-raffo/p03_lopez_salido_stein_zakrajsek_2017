@@ -39,9 +39,5 @@ jupyterlab
 jupytext
 notebook
 
-
 # Documentation/notebook rendering dependencies
 chartbook[all]>=0.0.14
-
-
-
