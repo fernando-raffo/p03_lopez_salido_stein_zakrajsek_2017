@@ -30,6 +30,23 @@ Construction logic (following Greenwood and Hanson 2013)
    investment grade (below Baa3 / BBB-).
 4. For each year, ``HYS = (high-yield issuance) / (total issuance)``.
 
+Known limitations of the FISD reconstruction
+--------------------------------------------
+1. **Coverage.** FISD's usable issuance history effectively begins in the early
+   1980s. Stray offering dates reach back to 1902, but those years contain a
+   handful of issues and produce degenerate shares of exactly 0 or 1. The
+   ``n_issues`` column is provided so these thin years can be screened out
+   (e.g. ``df.loc[df.n_issues >= 25]``). This series therefore cannot cover the
+   1929 start of the sample in Lopez-Salido, Stein, and Zakrajsek (2017); their
+   pre-1980s high-yield share comes from other historical sources.
+2. **Moody's-rated denominator.** Following Greenwood and Hanson (2013), an
+   issue's grade is taken from its first Moody's rating (``rating_type = 'MR'``)
+   and issues with no Moody's rating are excluded entirely. Issues rated only by
+   S&P or Fitch therefore drop out of the denominator, which can bias the
+   computed share upward relative to a definition that accepts any agency
+   rating. Worth checking before the series is used in the first-step
+   regression.
+
 Naming conventions
 ------------------
 - ``pull_greenwood_hanson`` obtains the data from an external source (FISD via
@@ -165,15 +182,24 @@ def compute_hy_share(issues):
     """
     issues = issues.copy()
     if "nonfinancial" in issues.columns:
-        issues = issues.loc[issues["nonfinancial"].astype(bool)]
+        # Coerce via pandas' nullable "boolean" dtype so this works whether the
+        # caller passes plain numpy bools or the nullable dtypes that database
+        # drivers (e.g. WRDS/psycopg2) return. Unknown (NA) is treated as
+        # nonfinancial so that issues with a missing SIC code are kept rather
+        # than silently dropped; see `_clean_fisd_issues`.
+        keep = issues["nonfinancial"].astype("boolean").fillna(True).astype(bool)
+        issues = issues.loc[keep]
 
     issues["offering_amt"] = pd.to_numeric(issues["offering_amt"], errors="coerce")
-    issues["high_yield"] = issues["high_yield"].astype(bool)
+    issues["high_yield"] = (
+        issues["high_yield"].astype("boolean").fillna(False).astype(bool)
+    )
     issues = issues.dropna(subset=["year", "offering_amt"])
     issues["year"] = issues["year"].astype(int)
 
     grouped = issues.groupby("year")
     total = grouped["offering_amt"].sum().rename("total_issuance")
+    n_issues = grouped.size().rename("n_issues")
     hy = (
         issues.loc[issues["high_yield"]]
         .groupby("year")["offering_amt"]
@@ -182,7 +208,12 @@ def compute_hy_share(issues):
         .rename("hy_issuance")
     )
 
-    out = pd.concat([hy, total], axis=1)
+    out = pd.concat([hy, total, n_issues], axis=1)
+    # Cast to plain float64 first: nullable dtypes make numpy emit a spurious
+    # "divide by zero encountered in log" warning for the zero-share years.
+    out["hy_issuance"] = out["hy_issuance"].astype("float64")
+    out["total_issuance"] = out["total_issuance"].astype("float64")
+    out["n_issues"] = out["n_issues"].astype("int64")
     out["hy_share"] = out["hy_issuance"] / out["total_issuance"]
     out["ln_hy_share"] = np.log(out["hy_share"].where(out["hy_share"] > 0))
     out.index.name = "year"
@@ -196,54 +227,111 @@ def compute_hy_share(issues):
 # SQL selecting gross corporate bond issuance with the first rating assigned at
 # (or just after) issuance. Table / column names follow the standard WRDS FISD
 # schema; adjust here if your WRDS FISD vintage differs.
+# U.S. *corporate* bond_type codes in FISD. This is an allowlist rather than a
+# blocklist: FISD also carries agency debentures (ADEB/AMTN/ASPZ), Treasury
+# issues (USBN/USBL/USNT/USSP/USSI), foreign government debt (FGOV), preferred
+# stock (PS/PSTK) and trust-preferred securities (TPCS), none of which belong in
+# corporate bond issuance. Verified against the bond_type frequency counts in
+# the WRDS FISD vintage used here.
+_CORPORATE_BOND_TYPES = (
+    "CDEB",  # U.S. corporate debenture (the bulk of straight corporate debt)
+    "CMTN",  # U.S. corporate medium-term note
+    "CMTZ",  # U.S. corporate MTN, zero coupon
+    "CZ",  # U.S. corporate zero coupon
+    "CS",  # U.S. corporate structured
+    "CPAS",  # U.S. corporate pass-through
+    "CPIK",  # U.S. corporate payment-in-kind
+    "CCOV",  # U.S. corporate covered
+    "CCUR",  # U.S. corporate currency-linked
+)
+
+# One row per corporate issue, carrying the *first Moody's* rating assigned to
+# that issue (the rating at issuance). Notes on the joins:
+#   - fisd_ratings holds ~4.4m rows because every rating action is a row, so we
+#     collapse to one rating per issue with DISTINCT ON (PostgreSQL).
+#   - rating_type = 'MR' selects Moody's, matching Greenwood and Hanson (2013).
+#   - the `investment_grade` column is left unused: it is NULL for the large
+#     majority of rows in this vintage, so grade is inferred from the letter
+#     rating instead (see :func:`is_high_yield`).
 _FISD_SQL = """
-    SELECT i.issue_id,
-           i.offering_amt,
-           i.offering_date,
-           r.rating,
-           r.rating_type,
+    WITH corp AS (
+        SELECT i.issue_id,
+               i.issuer_id,
+               i.offering_amt,
+               i.offering_date
+        FROM fisd.fisd_mergedissue AS i
+        WHERE i.offering_date IS NOT NULL
+          AND i.offering_amt IS NOT NULL
+          AND i.bond_type IN %(bond_types)s
+          AND i.convertible = 'N'
+          AND i.asset_backed = 'N'
+          AND i.foreign_currency = 'N'
+    ),
+    first_moody AS (
+        SELECT DISTINCT ON (r.issue_id)
+               r.issue_id,
+               r.rating,
+               r.rating_date
+        FROM fisd.fisd_ratings AS r
+        WHERE r.rating_type = 'MR'
+          AND r.rating IS NOT NULL
+        ORDER BY r.issue_id, r.rating_date
+    )
+    SELECT c.issue_id,
+           c.offering_amt,
+           c.offering_date,
+           fm.rating,
            iss.sic_code,
            iss.country_domicile
-    FROM fisd.fisd_mergedissue AS i
+    FROM corp AS c
+    LEFT JOIN first_moody AS fm
+           ON c.issue_id = fm.issue_id
     LEFT JOIN fisd.fisd_mergedissuer AS iss
-           ON i.issuer_id = iss.issuer_id
-    LEFT JOIN fisd.fisd_ratings AS r
-           ON i.issue_id = r.issue_id
-    WHERE i.offering_date IS NOT NULL
-      AND i.offering_amt IS NOT NULL
-      AND i.bond_type NOT IN ('TXMU', 'USBN', 'USBL', 'ABS', 'CMO')
-      AND i.convertible = 'N'
-      AND i.foreign_currency = 'N'
+           ON c.issuer_id = iss.issuer_id
 """
 
 
-def _clean_fisd_issues(raw):
+def _clean_fisd_issues(raw, max_year=None):
     """Turn the raw FISD query result into the tidy frame ``compute_hy_share``
     expects (one row per issue with ``year``, ``offering_amt``, ``high_yield``,
-    ``nonfinancial``)."""
-    raw = raw.copy()
-    raw["offering_date"] = pd.to_datetime(raw["offering_date"], errors="coerce")
+    ``nonfinancial``).
 
-    # Keep the first (earliest) rating per issue as the "rating at issuance".
-    raw = raw.sort_values(["issue_id", "offering_date"])
-    first_rating = raw.dropna(subset=["rating"]).groupby("issue_id")["rating"].first()
+    The SQL already returns one row per issue with its first Moody's rating, so
+    this step only applies the sample filters:
 
-    issues = (
-        raw.drop(columns=["rating", "rating_type"])
-        .drop_duplicates(subset="issue_id")
-        .set_index("issue_id")
-    )
-    issues["rating"] = first_rating
+    - **Rated issues only.** Issues with no Moody's rating are dropped, so the
+      high-yield share is the fraction of *rated* nonfinancial issuance that is
+      speculative grade. Keeping unrated issues in the denominator would bias
+      the share downward.
+    - **U.S. issuers only**, via ``country_domicile``.
+    - **Plausible offering years only.** FISD contains a small number of
+      malformed or forward-dated offering dates (the raw column spans 1894 to
+      2030), which would otherwise create spurious years.
+    """
+    if max_year is None:
+        max_year = pd.Timestamp.today().year
+
+    issues = raw.copy()
+    issues["offering_date"] = pd.to_datetime(issues["offering_date"], errors="coerce")
     issues["year"] = issues["offering_date"].dt.year
+
+    # Rated issues only (see docstring).
+    issues = issues.dropna(subset=["rating"])
     issues["high_yield"] = issues["rating"].map(is_high_yield)
 
-    sic = pd.to_numeric(issues["sic_code"], errors="coerce")
-    issues["nonfinancial"] = ~sic.between(6000, 6999)
+    sic = pd.to_numeric(issues["sic_code"], errors="coerce").astype("float64")
+    # `between` on a nullable dtype propagates NA, so resolve it explicitly:
+    # an issue whose issuer has no SIC code is treated as nonfinancial (kept),
+    # rather than being dropped from the sample.
+    is_financial = sic.between(6000, 6999).fillna(False).astype(bool)
+    issues["nonfinancial"] = ~is_financial
 
     domicile = issues["country_domicile"].fillna("USA").str.upper()
     issues = issues.loc[domicile.isin({"USA", "US", "UNITED STATES"})]
 
-    return issues.reset_index()[["year", "offering_amt", "high_yield", "nonfinancial"]]
+    issues = issues.loc[issues["year"].between(1900, max_year)]
+
+    return issues[["year", "offering_amt", "high_yield", "nonfinancial"]]
 
 
 def pull_hy_share_from_fisd(wrds_username=WRDS_USERNAME):
@@ -264,7 +352,7 @@ def pull_hy_share_from_fisd(wrds_username=WRDS_USERNAME):
 
     db = wrds.Connection(wrds_username=wrds_username or None)
     try:
-        raw = db.raw_sql(_FISD_SQL)
+        raw = db.raw_sql(_FISD_SQL, params={"bond_types": tuple(_CORPORATE_BOND_TYPES)})
     finally:
         db.close()
 

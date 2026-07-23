@@ -39,9 +39,11 @@ def test_compute_hy_share_basic():
     assert list(out.columns) == [
         "hy_issuance",
         "total_issuance",
+        "n_issues",
         "hy_share",
         "ln_hy_share",
     ]
+    assert out.loc[1990, "n_issues"] == 3
 
 
 def test_compute_hy_share_nonfinancial_filter():
@@ -71,6 +73,42 @@ def test_compute_hy_share_zero_hy():
     assert out.loc[2010, "hy_share"] == pytest.approx(0.0)
     # ln(0) is undefined and stored as NaN rather than -inf.
     assert np.isnan(out.loc[2010, "ln_hy_share"])
+
+
+def test_compute_hy_share_nullable_dtypes():
+    """WRDS/psycopg2 return pandas nullable dtypes, where a missing SIC code
+    makes `between` evaluate to NA rather than False. Guards against the
+    'cannot convert float NaN to bool' failure that caused."""
+    issues = pd.DataFrame(
+        {
+            "year": pd.array([2000, 2000, 2000], dtype="Int64"),
+            "offering_amt": pd.array([100.0, 100.0, 100.0], dtype="Float64"),
+            "high_yield": pd.array([True, False, True], dtype="boolean"),
+            "nonfinancial": pd.array([True, True, None], dtype="boolean"),
+        }
+    )
+    out = gh.compute_hy_share(issues)
+    # The NA row is treated as nonfinancial and kept: 200 HY / 300 total.
+    assert out.loc[2000, "total_issuance"] == pytest.approx(300.0)
+    assert out.loc[2000, "hy_share"] == pytest.approx(2 / 3)
+
+
+def test_clean_fisd_issues_missing_sic():
+    """A missing SIC code should not drop the issue or raise."""
+    raw = pd.DataFrame(
+        {
+            "issue_id": [1, 2],
+            "offering_amt": pd.array([100.0, 100.0], dtype="Float64"),
+            "offering_date": ["1995-03-01", "1995-06-01"],
+            "rating": ["Ba1", "Aaa"],
+            "sic_code": pd.array([None, "6021"], dtype="string"),
+            "country_domicile": ["USA", "USA"],
+        }
+    )
+    out = gh._clean_fisd_issues(raw, max_year=2026)
+    assert len(out) == 2
+    assert bool(out["nonfinancial"].iloc[0]) is True  # missing SIC -> kept
+    assert bool(out["nonfinancial"].iloc[1]) is False  # 6021 -> financial
 
 
 def test_pull_hy_share_from_raw_issue_level(tmp_path):
