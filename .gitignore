@@ -9,6 +9,16 @@
 # Exclude _output directory since it's should generated automatically
 /_output/*
 
+# Issue #3: never commit the Shiller or Greenwood-Hanson data, wherever it lands.
+# (These are already covered by /_data/* above, but listed explicitly so the
+#  raw high-yield-share issuance file kept in data_manual is not committed.)
+shiller_pe*.csv
+shiller_pe*.parquet
+ie_data.xls
+greenwood_hanson_hys*.csv
+greenwood_hanson_hys*.parquet
+data_manual/gh_high_yield_share_raw.*
+
 # Exclude PDFs generated from source LaTeX files, which are kept in the reports directory
 /reports/*.pdf
 

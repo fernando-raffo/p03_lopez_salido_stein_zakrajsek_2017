@@ -98,6 +98,34 @@ def task_pull():
         "file_dep": ["./src/settings.py", "./src/pull_fred.py"],
         "clean": [],
     }
+    yield {
+        "name": "shiller",
+        "doc": "Pull Robert Shiller's stock-market data (CAPE / P/E10)",
+        "actions": [
+            "python ./src/settings.py",
+            "python ./src/pull_shiller.py",
+        ],
+        "targets": [
+            DATA_DIR / "shiller_pe.parquet",
+            DATA_DIR / "shiller_pe_annual.parquet",
+        ],
+        "file_dep": ["./src/settings.py", "./src/pull_shiller.py"],
+        "clean": [],
+    }
+    yield {
+        "name": "greenwood_hanson",
+        "doc": (
+            "Build the Greenwood-Hanson high-yield share (needs WRDS/Mergent "
+            "FISD, or a raw issuance file in data_manual with GH_HYS_SOURCE=raw)"
+        ),
+        "actions": [
+            "python ./src/settings.py",
+            "python ./src/pull_greenwood_hanson.py",
+        ],
+        "targets": [DATA_DIR / "greenwood_hanson_hys.parquet"],
+        "file_dep": ["./src/settings.py", "./src/pull_greenwood_hanson.py"],
+        "clean": [],
+    }
 
 
 def task_summary_stats():

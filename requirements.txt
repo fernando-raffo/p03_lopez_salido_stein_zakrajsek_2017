@@ -33,6 +33,12 @@ xlwings>=0.33.3
 zstandard>=0.23.0
 linearmodels>=6.1
 
+# Optional: needed only to reconstruct the Greenwood-Hanson high-yield share
+# from Mergent FISD (pull_greenwood_hanson.py, source="fisd"). Requires WRDS
+# credentials. The module imports it lazily, so it is safe to omit if you use
+# source="raw" instead.
+wrds>=3.1.6
+
 # Jupyter dependencies
 jupyter
 jupyterlab
