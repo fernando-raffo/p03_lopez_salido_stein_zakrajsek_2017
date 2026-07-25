@@ -95,6 +95,7 @@ else:
 
 
 ## Dates
+defaults["BUFFER_START_DATE"] = datetime.strptime("1928-01-01", "%Y-%m-%d")
 defaults["REPLICATION_START_DATE"] = datetime.strptime("1929-01-01", "%Y-%m-%d")
 defaults["REPLICATION_END_DATE"] = datetime.strptime("2015-12-31", "%Y-%m-%d")
 defaults["EXTENSION_START_DATE"] = datetime.strptime("2016-01-01", "%Y-%m-%d")
@@ -125,7 +126,7 @@ defaults = {
 
 # Additional subdirectories for data and output
 defaults["RAW_DATA_DIR"] = if_relative_make_abs(Path("_data/raw_data"))
-defaults["PROCESSED_DATA_DIR"] = if_relative_make_abs(Path("_output/processed_data"))
+defaults["PROCESSED_DATA_DIR"] = if_relative_make_abs(Path("_data/processed_data"))
 
 
 def config(

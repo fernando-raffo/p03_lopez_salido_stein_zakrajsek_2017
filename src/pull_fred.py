@@ -25,7 +25,7 @@ import pandas_datareader.data as web
 from settings import config
 
 DATA_DIR = Path(config("RAW_DATA_DIR"))
-START_DATE = config("REPLICATION_START_DATE")
+START_DATE = config("BUFFER_START_DATE")
 END_DATE = config("EXTENSION_END_DATE")
 
 

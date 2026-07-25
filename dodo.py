@@ -22,6 +22,7 @@ DOIT_CONFIG = {"backend": "sqlite3", "dep_file": "./.doit-db.sqlite"}
 
 BASE_DIR = config("BASE_DIR")
 RAW_DATA_DIR = config("RAW_DATA_DIR")
+PROCESSED_DATA_DIR = config("PROCESSED_DATA_DIR")
 DATA_DIR = config("DATA_DIR")
 MANUAL_DATA_DIR = config("MANUAL_DATA_DIR")
 OUTPUT_DIR = config("OUTPUT_DIR")
@@ -92,10 +93,33 @@ def task_pull_fred():
         "name": "FRED",
         "doc": "Pull data from FRED",
         "actions": [
-            "python ./src/settings.py",
             "python ./src/pull_fred.py",
         ],
-        "targets": [DATA_DIR / "fred.parquet", DATA_DIR / "fred_data_dictionary.md"],
+        "targets": [
+            RAW_DATA_DIR / "fred.parquet",
+            RAW_DATA_DIR / "fred_data_dictionary.md",
+        ],
         "file_dep": ["./src/settings.py", "./src/pull_fred.py"],
+        "clean": [],
+    }
+
+
+def task_process_fred_data():
+    """Process FRED data"""
+    yield {
+        "name": "Clean FRED data",
+        "doc": "Create clean series required for replication from FRED data",
+        "actions": [
+            "python ./src/process_fred_data.py",
+        ],
+        "targets": [
+            PROCESSED_DATA_DIR / "fred_final_series.parquet",
+            PROCESSED_DATA_DIR / "fred_final_series_data_dictionary.md",
+        ],
+        "file_dep": [
+            "./src/settings.py",
+            "./src/process_fred_data.py",
+            RAW_DATA_DIR / "fred.parquet",
+        ],
         "clean": [],
     }
