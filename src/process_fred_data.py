@@ -483,6 +483,26 @@ def save_data_readme(df, data_dir=PROCESSED_DATA_DIR):
 
 
 def clean_fred_data(df):
+    """
+    Build the full cleaned annual series DataFrame used in the replication.
+
+    Combines `final_gdp_series`, `final_population_series`,
+    `calculate_gdp_per_capita`, `final_cpi_series`, `final_baa_series`,
+    `final_aaa_series`, `final_10yr_treasury_series`, and
+    `final_3mo_treasury_series` into a single DataFrame indexed by year.
+
+    Parameters
+    ----------
+    df : pandas.DataFrame
+        DataFrame indexed by date, containing the raw FRED series required
+        by each of the individual `final_*_series` functions.
+
+    Returns
+    -------
+    pandas.DataFrame
+        Annual DataFrame with columns GDP, Population, GDP_per_capita,
+        CPI_inflation, BAA, AAA, Treasury_10yr, and Treasury_3mo.
+    """
     gdp = final_gdp_series(df)
     pop = final_population_series(df)
     gdp_per_capita = calculate_gdp_per_capita(gdp, pop)
