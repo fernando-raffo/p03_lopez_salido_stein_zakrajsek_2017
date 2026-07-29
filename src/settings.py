@@ -95,7 +95,7 @@ else:
 
 
 ## Dates
-defaults["BUFFER_START_DATE"] = datetime.strptime("1928-01-01", "%Y-%m-%d")
+defaults["BUFFER_START_DATE"] = datetime.strptime("1925-01-01", "%Y-%m-%d")
 defaults["REPLICATION_START_DATE"] = datetime.strptime("1929-01-01", "%Y-%m-%d")
 defaults["REPLICATION_END_DATE"] = datetime.strptime("2015-12-31", "%Y-%m-%d")
 defaults["EXTENSION_START_DATE"] = datetime.strptime("2016-01-01", "%Y-%m-%d")

@@ -18,7 +18,6 @@ rather than re-pulling from FRED.
 
 from pathlib import Path
 
-import numpy as np
 import pandas as pd
 import pandas_datareader.data as web
 
@@ -45,6 +44,7 @@ series_to_pull = {
     "POPH": "National Population (annual)",
     "GDPC1": "Real Gross Domestic Product (quarterly)",
     "GDPCA": "Real Gross Domestic Product (annual)",
+    "USREC": "NBER based Recession Indicators for the United States from the Period following the Peak through the Trough (monthly)",
 }
 
 

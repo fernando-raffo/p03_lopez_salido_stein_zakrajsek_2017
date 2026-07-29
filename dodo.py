@@ -107,18 +107,35 @@ def task_pull_fred():
 def task_process_fred_data():
     """Process FRED data"""
     yield {
-        "name": "Clean FRED data",
-        "doc": "Create clean series required for replication from FRED data",
+        "name": "Clean FRED annual data",
+        "doc": "Create clean series required for replication from FRED data (annual)",
         "actions": [
-            "python ./src/process_fred_data.py",
+            "python ./src/process_fred_data_annual.py",
         ],
         "targets": [
-            PROCESSED_DATA_DIR / "fred_final_series.parquet",
-            PROCESSED_DATA_DIR / "fred_final_series_data_dictionary.md",
+            PROCESSED_DATA_DIR / "fred_final_series_annual.parquet",
+            PROCESSED_DATA_DIR / "fred_final_series_annual_readme.md",
         ],
         "file_dep": [
             "./src/settings.py",
-            "./src/process_fred_data.py",
+            "./src/process_fred_data_annual.py",
+            RAW_DATA_DIR / "fred.parquet",
+        ],
+        "clean": [],
+    }
+    yield {
+        "name": "Clean FRED monthly data",
+        "doc": "Create clean series required for replication from FRED data (monthly)",
+        "actions": [
+            "python ./src/process_fred_data_monthly.py",
+        ],
+        "targets": [
+            PROCESSED_DATA_DIR / "fred_final_series_monthly.parquet",
+            PROCESSED_DATA_DIR / "fred_final_series_monthly_readme.md",
+        ],
+        "file_dep": [
+            "./src/settings.py",
+            "./src/process_fred_data_monthly.py",
             RAW_DATA_DIR / "fred.parquet",
         ],
         "clean": [],
