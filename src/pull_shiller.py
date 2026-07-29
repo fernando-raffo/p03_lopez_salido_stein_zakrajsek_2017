@@ -73,8 +73,8 @@ def _config_or(var_name, default):
 
 
 DATA_DIR = Path(config("DATA_DIR"))
-START_DATE = config("START_DATE")
-END_DATE = config("END_DATE")
+START_DATE = config("REPLICATION_START_DATE")
+END_DATE = config("REPLICATION_END_DATE")
 
 # The canonical location of Shiller's spreadsheet. Kept configurable because
 # Shiller has moved the file in the past (it is now also mirrored on

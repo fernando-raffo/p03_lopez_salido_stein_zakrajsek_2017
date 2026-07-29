@@ -92,8 +92,8 @@ def _config_or(var_name, default):
 
 DATA_DIR = Path(config("DATA_DIR"))
 MANUAL_DATA_DIR = Path(config("MANUAL_DATA_DIR"))
-START_DATE = config("START_DATE")
-END_DATE = config("END_DATE")
+START_DATE = config("REPLICATION_START_DATE")
+END_DATE = config("REPLICATION_END_DATE")
 
 # Which source to use by default: "fisd" (WRDS Mergent FISD) or "raw"
 # (a manually supplied issuance file in MANUAL_DATA_DIR). Configurable via env
