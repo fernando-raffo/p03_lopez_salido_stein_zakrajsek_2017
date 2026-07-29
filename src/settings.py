@@ -1,44 +1,11 @@
-"""Load project configurations from .env files or from the command line.
+"""
+Load project configurations from .env files or from the command line.
 
 Provides easy access to paths and credentials used in the project.
 Meant to be used as an imported module.
 
 If `settings.py` is run on its own, it will create the appropriate
 directories.
-
-For information about the rationale behind decouple and this module,
-see https://pypi.org/project/python-decouple/
-
-Note that decouple mentions that it will help to ensure that
-the project has "only one configuration module to rule all your instances."
-This is achieved by putting all the configuration into the `.env` file.
-You can have different sets of variables for difference instances,
-such as `.env.development` or `.env.production`. You would only
-need to copy over the settings from one into `.env` to switch
-over to the other configuration, for example.
-
-
-Example
--------
-Create a file called `myexample.py` with the following content:
-```
-from settings import config
-DATA_DIR = config("DATA_DIR")
-
-print(f"Using DATA_DIR: {DATA_DIR}")
-```
-and run
-```
->>> python myexample.py --DATA_DIR=/path/to/data
-/path/to/data
-```
-and compare to
-```
->>> export DATA_DIR=/path/to/other
->>> python myexample.py
-/path/to/other
-```
-
 """
 
 import sys
@@ -50,33 +17,12 @@ from decouple import config as _config
 
 
 def find_all_caps_cli_vars(argv=sys.argv):
-    """Find all command line arguments that are all caps.
+    """
+    Find all command line arguments that are all caps.
 
     Find all command line arguments that are all caps and defined
     with a long option, for example, --DATA_DIR or --MANUAL_DATA_DIR.
     When that option is found, the value of the option is returned.
-
-    For example, if the command line is:
-    ```
-    python settings.py --DATA_DIR=/path/to/data --MANUAL_DATA_DIR=/path/to/manual_data
-    ```
-    Then the function will return:
-    ```
-    {'DATA_DIR': '/path/to/data', 'MANUAL_DATA_DIR': '/path/to/manual_data'}
-    ```
-
-    For example:
-    ```
-    >>> argv = [
-        '/opt/homebrew/Caskroom/mambaforge/base/envs/ftsf/lib/python3.12/site-packages/ipykernel_launcher.py',
-        '--f=/Users/jbejarano/Library/Jupyter/runtime/kernel-v37ea18e94713e364855d5610175b766ee99909eab.json',
-        '--DATA_DIR=/path/to/data',
-        '--MANUAL_DATA_DIR=/path/to/manual_data'
-    ]
-    >>> cli_vars = find_all_caps_cli_vars(argv)
-    >>> cli_vars
-    {'DATA_DIR': '/path/to/data', 'MANUAL_DATA_DIR': '/path/to/manual_data'}
-    ```
     """
     result = {}
     i = 0
@@ -147,25 +93,20 @@ if "STATA_EXE" in cli_vars:
 else:
     defaults["STATA_EXE"] = get_stata_exe()
 
+
 ## Dates
-defaults["START_DATE"] = datetime.strptime("1913-01-01", "%Y-%m-%d")
-defaults["END_DATE"] = datetime.strptime("2024-12-31", "%Y-%m-%d")
+defaults["BUFFER_START_DATE"] = datetime.strptime("1925-01-01", "%Y-%m-%d")
+defaults["REPLICATION_START_DATE"] = datetime.strptime("1929-01-01", "%Y-%m-%d")
+defaults["REPLICATION_END_DATE"] = datetime.strptime("2015-12-31", "%Y-%m-%d")
+defaults["EXTENSION_START_DATE"] = datetime.strptime("2016-01-01", "%Y-%m-%d")
+defaults["EXTENSION_END_DATE"] = datetime.today()
 
 
 ## File paths
 def if_relative_make_abs(path):
-    """If a relative path is given, make it absolute, assuming
+    """
+    If a relative path is given, make it absolute, assuming
     that it is relative to the project root directory (BASE_DIR)
-
-    Example
-    -------
-    ```
-    >>> if_relative_make_abs(Path('_data'))
-    WindowsPath('C:/Users/jdoe/GitRepositories/cookiecutter_chartbook/_data')
-
-    >>> if_relative_make_abs(Path("C:/Users/jdoe/GitRepositories/cookiecutter_chartbook/_output"))
-    WindowsPath('C:/Users/jdoe/GitRepositories/cookiecutter_chartbook/_output')
-    ```
     """
     path = Path(path)
     if path.is_absolute():
@@ -183,6 +124,11 @@ defaults = {
 }
 
 
+# Additional subdirectories for data and output
+defaults["RAW_DATA_DIR"] = if_relative_make_abs(Path("_data/raw_data"))
+defaults["PROCESSED_DATA_DIR"] = if_relative_make_abs(Path("_data/processed_data"))
+
+
 def config(
     var_name,
     default=None,
@@ -191,7 +137,8 @@ def config(
     cli_vars=cli_vars,
     convert_dir_vars_to_abs_path=True,
 ):
-    """Config defines a variable that can be used in the project. The definition of variables follows
+    """
+    Config defines a variable that can be used in the project. The definition of variables follows
     an order of precedence:
     1. Command line arguments
     2. Environment variables
