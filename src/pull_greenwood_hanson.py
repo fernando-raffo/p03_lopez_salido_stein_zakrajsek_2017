@@ -47,6 +47,17 @@ Known limitations of the FISD reconstruction
    rating. Worth checking before the series is used in the first-step
    regression.
 
+Reaching 1929: the published historical series
+----------------------------------------------
+Because FISD cannot reach the 1929 start of the sample, this module also ships
+the published Greenwood-Hanson (2013) high-yield share for 1926-2008 (their
+Table 2), whose pre-1983 values come from printed NBER studies (Hickman 1960;
+Atkinson 1967) and hand-collected Moody's Bond Surveys. ``source="spliced"``
+(the default) returns those published values through 2008 and appends the local
+FISD reconstruction for later years, giving a continuous series that covers the
+full 1929-2015 sample. ``source="historical"`` returns just the published
+1926-2008 series and needs no WRDS access.
+
 Naming conventions
 ------------------
 - ``pull_greenwood_hanson`` obtains the data from an external source (FISD via
@@ -59,6 +70,7 @@ Running this file as a script pulls the data and caches it to ``DATA_DIR``
 (the git-ignored ``_data`` folder), so no data is ever committed to the repo.
 """
 
+import warnings
 from pathlib import Path
 
 import numpy as np
@@ -86,7 +98,7 @@ END_DATE = config("END_DATE")
 # Which source to use by default: "fisd" (WRDS Mergent FISD) or "raw"
 # (a manually supplied issuance file in MANUAL_DATA_DIR). Configurable via env
 # var GH_HYS_SOURCE or --GH_HYS_SOURCE.
-GH_HYS_SOURCE = _config_or("GH_HYS_SOURCE", "fisd")
+GH_HYS_SOURCE = _config_or("GH_HYS_SOURCE", "spliced")
 WRDS_USERNAME = _config_or("WRDS_USERNAME", "")
 
 # Moody's / S&P letter grades at or above these are investment grade; anything
@@ -245,14 +257,16 @@ _CORPORATE_BOND_TYPES = (
     "CCUR",  # U.S. corporate currency-linked
 )
 
-# One row per corporate issue, carrying the *first Moody's* rating assigned to
-# that issue (the rating at issuance). Notes on the joins:
-#   - fisd_ratings holds ~4.4m rows because every rating action is a row, so we
-#     collapse to one rating per issue with DISTINCT ON (PostgreSQL).
-#   - rating_type = 'MR' selects Moody's, matching Greenwood and Hanson (2013).
-#   - the `investment_grade` column is left unused: it is NULL for the large
-#     majority of rows in this vintage, so grade is inferred from the letter
-#     rating instead (see :func:`is_high_yield`).
+#   - convertible = 'N'                      -> convertibles are only folded in
+#     for 1966-1982; in the FISD period they are not part of the base
+#   - foreign_currency = 'N'                 -> USD issuance
+#   - exchange offers are excluded too, but the column that flags them varies
+#     across FISD vintages, so that predicate is added at runtime by
+#     `_exchange_offer_clause` (see below) rather than hard-coded here.
+# Financials (SIC 6000-6999) are dropped later, in `_clean_fisd_issues`, once
+# the issuer SIC code is joined on. rating_type = 'MR' selects Moody's, and the
+# denominator is restricted to *rated* issuance (HY + IG) by dropping issues
+# with no Moody's rating, exactly as in Equation 9.
 _FISD_SQL = """
     WITH corp AS (
         SELECT i.issue_id,
@@ -265,7 +279,7 @@ _FISD_SQL = """
           AND i.bond_type IN %(bond_types)s
           AND i.convertible = 'N'
           AND i.asset_backed = 'N'
-          AND i.foreign_currency = 'N'
+          AND i.foreign_currency = 'N'{exchange_offer_clause}
     ),
     first_moody AS (
         SELECT DISTINCT ON (r.issue_id)
@@ -289,6 +303,31 @@ _FISD_SQL = """
     LEFT JOIN fisd.fisd_mergedissuer AS iss
            ON c.issuer_id = iss.issuer_id
 """
+
+# Candidate column names FISD has used to flag exchange offers, in preference
+# order. Greenwood and Hanson (2013) exclude exchange offers; whichever of these
+# the local FISD vintage exposes is used, and if none is present the exclusion
+# is skipped (with a warning) rather than erroring.
+_EXCHANGE_OFFER_COLUMNS = ("exchange_offer", "exchangeable", "exchange")
+
+
+def _exchange_offer_clause(db):
+    """Return a SQL predicate excluding exchange offers, adapted to the FISD
+    vintage. Returns an empty string (and warns) if no known column exists."""
+    try:
+        cols = set(db.describe_table("fisd", "fisd_mergedissue")["name"])
+    except Exception:  # noqa: BLE001 - fall back to no predicate on any error
+        cols = set()
+    for col in _EXCHANGE_OFFER_COLUMNS:
+        if col in cols:
+            return f"\n          AND i.{col} = 'N'"
+    warnings.warn(
+        "No exchange-offer column found in fisd.fisd_mergedissue; exchange "
+        "offers will NOT be excluded. Greenwood and Hanson (2013) exclude them, "
+        "so the high-yield share may be slightly biased.",
+        stacklevel=2,
+    )
+    return ""
 
 
 def _clean_fisd_issues(raw, max_year=None):
@@ -352,7 +391,8 @@ def pull_hy_share_from_fisd(wrds_username=WRDS_USERNAME):
 
     db = wrds.Connection(wrds_username=wrds_username or None)
     try:
-        raw = db.raw_sql(_FISD_SQL, params={"bond_types": tuple(_CORPORATE_BOND_TYPES)})
+        sql = _FISD_SQL.format(exchange_offer_clause=_exchange_offer_clause(db))
+        raw = db.raw_sql(sql, params={"bond_types": tuple(_CORPORATE_BOND_TYPES)})
     finally:
         db.close()
 
@@ -422,22 +462,228 @@ def pull_hy_share_from_raw(raw_path=None, manual_data_dir=MANUAL_DATA_DIR):
     return compute_hy_share(raw)
 
 
-def pull_greenwood_hanson(source=GH_HYS_SOURCE, **kwargs):
+# ---------------------------------------------------------------------------
+# Source 3: the published Greenwood-Hanson historical series (1926-2008)
+# ---------------------------------------------------------------------------
+
+# The pre-1983 high-yield share cannot be pulled from any database: it comes
+# from printed NBER studies. Greenwood and Hanson (2013) publish the full
+# spliced annual series in Table 2 of "Issuer Quality and Corporate Bond
+# Returns" (Review of Financial Studies 26(6), 1483-1525). Their splice is:
+#   1926-1943  Hickman (1960), Table V2
+#   1944-1965  Atkinson (1967), Table B-1
+#   1966-1982  hand-collected from Moody's Bond Surveys
+#   1983-2008  Mergent FISD (the same source `pull_hy_share_from_fisd` uses)
+#
+# These are historical facts, not a copyrightable work, and are reproduced here
+# because they are the canonical series the target paper (Lopez-Salido, Stein,
+# and Zakrajsek 2017) relies on for years before FISD coverage begins, and they
+# exist only in print. Values are the dollar fraction of nonfinancial corporate
+# bond issuance rated high yield by Moody's (Ba1/BB+ or lower).
+_GH2013_TABLE2_HYS = {
+    1926: 0.182,
+    1927: 0.177,
+    1928: 0.270,
+    1929: 0.262,
+    1930: 0.135,
+    1931: 0.108,
+    1932: 0.229,
+    1933: 0.639,
+    1934: 0.212,
+    1935: 0.150,
+    1936: 0.062,
+    1937: 0.129,
+    1938: 0.053,
+    1939: 0.261,
+    1940: 0.151,
+    1941: 0.045,
+    1942: 0.137,
+    1943: 0.104,
+    1944: 0.026,
+    1945: 0.044,
+    1946: 0.037,
+    1947: 0.007,
+    1948: 0.010,
+    1949: 0.023,
+    1950: 0.031,
+    1951: 0.023,
+    1952: 0.013,
+    1953: 0.011,
+    1954: 0.044,
+    1955: 0.076,
+    1956: 0.107,
+    1957: 0.077,
+    1958: 0.041,
+    1959: 0.146,
+    1960: 0.079,
+    1961: 0.056,
+    1962: 0.030,
+    1963: 0.082,
+    1964: 0.166,
+    1965: 0.210,
+    1966: 0.193,
+    1967: 0.214,
+    1968: 0.137,
+    1969: 0.141,
+    1970: 0.033,
+    1971: 0.081,
+    1972: 0.056,
+    1973: 0.038,
+    1974: 0.002,
+    1975: 0.002,
+    1976: 0.006,
+    1977: 0.062,
+    1978: 0.128,
+    1979: 0.099,
+    1980: 0.139,
+    1981: 0.132,
+    1982: 0.146,
+    1983: 0.217,
+    1984: 0.294,
+    1985: 0.353,
+    1986: 0.264,
+    1987: 0.424,
+    1988: 0.561,
+    1989: 0.394,
+    1990: 0.049,
+    1991: 0.074,
+    1992: 0.285,
+    1993: 0.336,
+    1994: 0.389,
+    1995: 0.258,
+    1996: 0.420,
+    1997: 0.496,
+    1998: 0.409,
+    1999: 0.306,
+    2000: 0.180,
+    2001: 0.200,
+    2002: 0.250,
+    2003: 0.395,
+    2004: 0.493,
+    2005: 0.391,
+    2006: 0.375,
+    2007: 0.337,
+    2008: 0.177,
+}
+
+
+def load_greenwood_hanson_historical():
+    """Return the published Greenwood-Hanson (2013) high-yield share, 1926-2008.
+
+    This is the authoritative spliced series from Table 2 of Greenwood and
+    Hanson (2013). Use it for the pre-FISD period (before 1983), which cannot be
+    reconstructed from any database, or as a ready-made 1926-2008 series.
+
+    Returns
+    -------
+    pandas.DataFrame
+        Indexed by ``year`` with ``hy_share``, ``ln_hy_share`` and a ``source``
+        label ('gh2013').
+
+    Examples
+    --------
+    >>> h = load_greenwood_hanson_historical()
+    >>> int(h.index.min()), int(h.index.max())
+    (1926, 2008)
+    >>> float(h.loc[1929, "hy_share"])
+    0.262
+    """
+    out = pd.DataFrame({"hy_share": pd.Series(_GH2013_TABLE2_HYS)}).sort_index()
+    out.index.name = "year"
+    out["ln_hy_share"] = np.log(out["hy_share"].where(out["hy_share"] > 0))
+    out["source"] = "gh2013"
+    return out
+
+
+def splice_hy_share(fisd=None, first_fisd_year=2009, historical=None):
+    """Splice the published historical series with the FISD reconstruction.
+
+    Produces a single continuous high-yield share running from 1926 to whatever
+    the FISD reconstruction covers, so the series spans the full sample of
+    Lopez-Salido, Stein, and Zakrajsek (2017) rather than starting in the 1980s.
+
+    The published Greenwood-Hanson values are used through ``first_fisd_year - 1``
+    (they already incorporate FISD for 1983-2008 using the authors' exact
+    filters), and the locally reconstructed FISD series is appended from
+    ``first_fisd_year`` onward. Defaulting the handoff to 2009 means every year
+    the original paper covers comes straight from the published series, and only
+    the post-2008 extension relies on the local reconstruction.
+
+    Parameters
+    ----------
+    fisd : pandas.DataFrame, optional
+        Output of :func:`pull_hy_share_from_fisd` / :func:`compute_hy_share`.
+        If ``None``, only the historical series is returned.
+    first_fisd_year : int
+        First year to take from ``fisd`` rather than the published series.
+    historical : pandas.DataFrame, optional
+        Override the historical series (defaults to the published GH table).
+
+    Returns
+    -------
+    pandas.DataFrame
+        Indexed by ``year`` with ``hy_share``, ``ln_hy_share`` and ``source``
+        ('gh2013' or 'fisd') marking where each year came from.
+
+    Examples
+    --------
+    >>> import pandas as pd, numpy as np
+    >>> fisd = pd.DataFrame(
+    ...     {"hy_share": [0.30, 0.35]},
+    ...     index=pd.Index([2009, 2010], name="year"),
+    ... )
+    >>> fisd["ln_hy_share"] = np.log(fisd["hy_share"])
+    >>> full = splice_hy_share(fisd=fisd)
+    >>> int(full.index.min()), int(full.index.max())
+    (1926, 2010)
+    >>> full.loc[2008, "source"], full.loc[2009, "source"]
+    ('gh2013', 'fisd')
+    """
+    if historical is None:
+        historical = load_greenwood_hanson_historical()
+    hist = historical.loc[historical.index < first_fisd_year].copy()
+
+    if fisd is None:
+        return hist
+
+    tail = fisd.loc[fisd.index >= first_fisd_year, ["hy_share", "ln_hy_share"]].copy()
+    tail["source"] = "fisd"
+
+    full = pd.concat([hist[["hy_share", "ln_hy_share", "source"]], tail])
+    full = full.sort_index()
+    full.index.name = "year"
+    return full
+
+
+def pull_greenwood_hanson(source=GH_HYS_SOURCE, first_fisd_year=2009, **kwargs):
     """Obtain the annual Greenwood-Hanson high-yield share.
 
     Parameters
     ----------
-    source : {"fisd", "raw"}
-        ``"fisd"`` reconstructs the series from Mergent FISD via WRDS;
-        ``"raw"`` builds it from a manual issuance file in ``MANUAL_DATA_DIR``.
+    source : {"spliced", "fisd", "raw", "historical"}
+        ``"spliced"`` (recommended for the full sample) returns the published
+        1926-2008 series spliced with the local FISD reconstruction for later
+        years, covering 1929 onward as the paper requires;
+        ``"fisd"`` reconstructs the series from Mergent FISD via WRDS (1983+);
+        ``"raw"`` builds it from a manual issuance file in ``MANUAL_DATA_DIR``;
+        ``"historical"`` returns only the published 1926-2008 series (no WRDS
+        needed).
+    first_fisd_year : int
+        For ``source="spliced"``, the first year taken from the FISD
+        reconstruction rather than the published series.
     **kwargs
-        Forwarded to the underlying puller.
+        Forwarded to the FISD puller.
     """
+    if source == "historical":
+        return load_greenwood_hanson_historical()
+    if source == "spliced":
+        fisd = pull_hy_share_from_fisd(**kwargs)
+        return splice_hy_share(fisd=fisd, first_fisd_year=first_fisd_year)
     if source == "fisd":
         return pull_hy_share_from_fisd(**kwargs)
     if source == "raw":
         return pull_hy_share_from_raw(**kwargs)
-    raise ValueError("`source` must be 'fisd' or 'raw'.")
+    raise ValueError("`source` must be 'spliced', 'fisd', 'raw', or 'historical'.")
 
 
 def load_greenwood_hanson(data_dir=DATA_DIR):
@@ -455,9 +701,25 @@ def _demo():
 
 
 if __name__ == "__main__":
-    df = pull_greenwood_hanson(GH_HYS_SOURCE)
-
     filedir = Path(DATA_DIR)
     filedir.mkdir(parents=True, exist_ok=True)
-    df.to_parquet(filedir / "greenwood_hanson_hys.parquet")
-    df.to_csv(filedir / "greenwood_hanson_hys.csv")
+
+    # Always cache the published historical series (needs no WRDS).
+    historical = load_greenwood_hanson_historical()
+    historical.to_parquet(filedir / "greenwood_hanson_hys_historical.parquet")
+    historical.to_csv(filedir / "greenwood_hanson_hys_historical.csv")
+
+    # The FISD reconstruction and the full spliced series require WRDS. If that
+    # is unavailable, still leave the historical (1926-2008) series in place.
+    try:
+        fisd = pull_hy_share_from_fisd()
+        fisd.to_parquet(filedir / "greenwood_hanson_hys_fisd.parquet")
+        fisd.to_csv(filedir / "greenwood_hanson_hys_fisd.csv")
+
+        full = splice_hy_share(fisd=fisd)
+    except Exception as exc:  # noqa: BLE001 - want a clear message, keep going
+        print(f"FISD pull unavailable ({exc}); writing historical series only.")
+        full = historical
+
+    full.to_parquet(filedir / "greenwood_hanson_hys.parquet")
+    full.to_csv(filedir / "greenwood_hanson_hys.csv")
