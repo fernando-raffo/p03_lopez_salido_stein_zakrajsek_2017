@@ -140,3 +140,17 @@ def task_process_fred_data():
         ],
         "clean": [],
     }
+
+
+def task_replicate_figure_1():
+    """Replicate LSZ (2017) Figure I: Baa-Treasury credit spread, 1929-2015."""
+    return {
+        "actions": ["python ./src/replicate_figure_1.py"],
+        "targets": [OUTPUT_DIR / "figure_1.png"],
+        "file_dep": [
+            "./src/settings.py",
+            "./src/replicate_figure_1.py",
+            PROCESSED_DATA_DIR / "fred_final_series_monthly.parquet",
+        ],
+        "clean": [],
+    }
