@@ -72,7 +72,8 @@ def _config_or(var_name, default):
         return default
 
 
-DATA_DIR = Path(config("DATA_DIR"))
+RAW_DATA_DIR = Path(config("RAW_DATA_DIR"))
+PROCESSED_DATA_DIR = Path(config("PROCESSED_DATA_DIR"))
 START_DATE = config("REPLICATION_START_DATE")
 END_DATE = config("REPLICATION_END_DATE")
 
@@ -226,18 +227,18 @@ def process_shiller_annual(df_monthly, how="last"):
     return annual
 
 
-def load_shiller(data_dir=DATA_DIR):
+def load_shiller(data_dir=RAW_DATA_DIR):
     """Load the cached monthly Shiller data from the ``_data`` directory.
 
     Must first run this module as ``__main__`` to pull and save the data.
     """
-    file_path = Path(data_dir) / "shiller_pe.parquet"
+    file_path = Path(data_dir) / "shiller_data.parquet"
     return pd.read_parquet(file_path)
 
 
-def load_shiller_annual(data_dir=DATA_DIR):
+def load_shiller_annual(data_dir=PROCESSED_DATA_DIR):
     """Load the cached annual Shiller data from the ``_data`` directory."""
-    file_path = Path(data_dir) / "shiller_pe_annual.parquet"
+    file_path = Path(data_dir) / "shiller_data_annual.parquet"
     return pd.read_parquet(file_path)
 
 
@@ -251,10 +252,12 @@ if __name__ == "__main__":
     df_monthly = pull_shiller(SHILLER_URL, START_DATE, today)
     df_annual = process_shiller_annual(df_monthly, how="last")
 
-    filedir = Path(DATA_DIR)
+    filedir = Path(RAW_DATA_DIR)
     filedir.mkdir(parents=True, exist_ok=True)
+    df_monthly.to_parquet(filedir / "shiller_data.parquet")
+    df_monthly.to_csv(filedir / "shiller_data.csv")
 
-    df_monthly.to_parquet(filedir / "shiller_pe.parquet")
-    df_monthly.to_csv(filedir / "shiller_pe.csv")
-    df_annual.to_parquet(filedir / "shiller_pe_annual.parquet")
-    df_annual.to_csv(filedir / "shiller_pe_annual.csv")
+    filedir = Path(PROCESSED_DATA_DIR)
+    filedir.mkdir(parents=True, exist_ok=True)
+    df_annual.to_parquet(filedir / "shiller_data_annual.parquet")
+    df_annual.to_csv(filedir / "shiller_data_annual.csv")

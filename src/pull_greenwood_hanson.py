@@ -61,13 +61,18 @@ full 1929-2015 sample. ``source="historical"`` returns just the published
 Naming conventions
 ------------------
 - ``pull_greenwood_hanson`` obtains the data from an external source (FISD via
-  WRDS, or a raw manual file) and returns an annual DataFrame.
-- ``load_greenwood_hanson`` reads the cached copy from the ``_data`` directory.
+  WRDS, a raw manual file, or the published-historical manual file) and
+  returns an annual DataFrame.
+- ``load_greenwood_hanson`` reads the cached, combined copy from the
+  ``_data/processed_data`` directory.
 - ``compute_hy_share`` is the pure aggregation step and is unit-tested with
   synthetic data (it needs no network or credentials).
 
-Running this file as a script pulls the data and caches it to ``DATA_DIR``
-(the git-ignored ``_data`` folder), so no data is ever committed to the repo.
+Running this file as a script pulls the data and caches it under ``_data``
+(the git-ignored data folder), so no data is ever committed to the repo: the
+historical (source 3) and FISD (source 1) series are each cached to
+``RAW_DATA_DIR``, and the final spliced annual series used downstream is
+cached to ``PROCESSED_DATA_DIR``.
 """
 
 import warnings
@@ -90,7 +95,8 @@ def _config_or(var_name, default):
         return default
 
 
-DATA_DIR = Path(config("DATA_DIR"))
+RAW_DATA_DIR = Path(config("RAW_DATA_DIR"))
+PROCESSED_DATA_DIR = Path(config("PROCESSED_DATA_DIR"))
 MANUAL_DATA_DIR = Path(config("MANUAL_DATA_DIR"))
 START_DATE = config("REPLICATION_START_DATE")
 END_DATE = config("REPLICATION_END_DATE")
@@ -401,68 +407,6 @@ def pull_hy_share_from_fisd(wrds_username=WRDS_USERNAME):
 
 
 # ---------------------------------------------------------------------------
-# Source 2: a manually supplied raw issuance file (fallback, no WRDS needed)
-# ---------------------------------------------------------------------------
-
-
-def pull_hy_share_from_raw(raw_path=None, manual_data_dir=MANUAL_DATA_DIR):
-    """Build the high-yield share from a manually supplied issuance file.
-
-    The file may be either:
-
-    - **issue-level** (one row per bond) with columns ``year``,
-      ``offering_amt`` and either ``high_yield`` (bool) or ``rating`` (letter
-      grade, converted via :func:`is_high_yield`); or
-    - **pre-aggregated annual** totals with columns ``year``,
-      ``hy_issuance`` and ``total_issuance`` (or directly ``hy_share``).
-
-    Accepts ``.csv``, ``.parquet``, ``.xls`` and ``.xlsx``. This path lets
-    collaborators without WRDS reproduce the series (e.g. from SIFMA
-    investment-grade vs. high-yield issuance totals, or an export of the
-    Greenwood-Hanson replication data).
-    """
-    if raw_path is None:
-        raw_path = Path(manual_data_dir) / "gh_high_yield_share_raw.csv"
-    raw_path = Path(raw_path)
-    if not raw_path.exists():
-        raise FileNotFoundError(
-            f"No raw high-yield-share file found at {raw_path}. Provide one, or "
-            "use source='fisd' to reconstruct it from Mergent FISD via WRDS."
-        )
-
-    suffix = raw_path.suffix.lower()
-    if suffix == ".csv":
-        raw = pd.read_csv(raw_path)
-    elif suffix == ".parquet":
-        raw = pd.read_parquet(raw_path)
-    elif suffix in {".xls", ".xlsx"}:
-        raw = pd.read_excel(raw_path)
-    else:
-        raise ValueError(f"Unsupported raw file type: {suffix}")
-
-    cols = {c.lower(): c for c in raw.columns}
-    raw = raw.rename(columns={v: k for k, v in cols.items()})
-
-    # Case 1: already contains an annual hy_share.
-    if "hy_share" in raw.columns and "year" in raw.columns:
-        out = raw.set_index("year").sort_index()
-        out["ln_hy_share"] = np.log(out["hy_share"].where(out["hy_share"] > 0))
-        return out
-
-    # Case 2: pre-aggregated annual issuance totals.
-    if {"year", "hy_issuance", "total_issuance"}.issubset(raw.columns):
-        out = raw.set_index("year").sort_index()
-        out["hy_share"] = out["hy_issuance"] / out["total_issuance"]
-        out["ln_hy_share"] = np.log(out["hy_share"].where(out["hy_share"] > 0))
-        return out
-
-    # Case 3: issue-level data -> aggregate.
-    if "high_yield" not in raw.columns and "rating" in raw.columns:
-        raw["high_yield"] = raw["rating"].map(is_high_yield)
-    return compute_hy_share(raw)
-
-
-# ---------------------------------------------------------------------------
 # Source 3: the published Greenwood-Hanson historical series (1926-2008)
 # ---------------------------------------------------------------------------
 
@@ -479,100 +423,23 @@ def pull_hy_share_from_raw(raw_path=None, manual_data_dir=MANUAL_DATA_DIR):
 # because they are the canonical series the target paper (Lopez-Salido, Stein,
 # and Zakrajsek 2017) relies on for years before FISD coverage begins, and they
 # exist only in print. Values are the dollar fraction of nonfinancial corporate
-# bond issuance rated high yield by Moody's (Ba1/BB+ or lower).
-_GH2013_TABLE2_HYS = {
-    1926: 0.182,
-    1927: 0.177,
-    1928: 0.270,
-    1929: 0.262,
-    1930: 0.135,
-    1931: 0.108,
-    1932: 0.229,
-    1933: 0.639,
-    1934: 0.212,
-    1935: 0.150,
-    1936: 0.062,
-    1937: 0.129,
-    1938: 0.053,
-    1939: 0.261,
-    1940: 0.151,
-    1941: 0.045,
-    1942: 0.137,
-    1943: 0.104,
-    1944: 0.026,
-    1945: 0.044,
-    1946: 0.037,
-    1947: 0.007,
-    1948: 0.010,
-    1949: 0.023,
-    1950: 0.031,
-    1951: 0.023,
-    1952: 0.013,
-    1953: 0.011,
-    1954: 0.044,
-    1955: 0.076,
-    1956: 0.107,
-    1957: 0.077,
-    1958: 0.041,
-    1959: 0.146,
-    1960: 0.079,
-    1961: 0.056,
-    1962: 0.030,
-    1963: 0.082,
-    1964: 0.166,
-    1965: 0.210,
-    1966: 0.193,
-    1967: 0.214,
-    1968: 0.137,
-    1969: 0.141,
-    1970: 0.033,
-    1971: 0.081,
-    1972: 0.056,
-    1973: 0.038,
-    1974: 0.002,
-    1975: 0.002,
-    1976: 0.006,
-    1977: 0.062,
-    1978: 0.128,
-    1979: 0.099,
-    1980: 0.139,
-    1981: 0.132,
-    1982: 0.146,
-    1983: 0.217,
-    1984: 0.294,
-    1985: 0.353,
-    1986: 0.264,
-    1987: 0.424,
-    1988: 0.561,
-    1989: 0.394,
-    1990: 0.049,
-    1991: 0.074,
-    1992: 0.285,
-    1993: 0.336,
-    1994: 0.389,
-    1995: 0.258,
-    1996: 0.420,
-    1997: 0.496,
-    1998: 0.409,
-    1999: 0.306,
-    2000: 0.180,
-    2001: 0.200,
-    2002: 0.250,
-    2003: 0.395,
-    2004: 0.493,
-    2005: 0.391,
-    2006: 0.375,
-    2007: 0.337,
-    2008: 0.177,
-}
+# bond issuance rated high yield by Moody's (Ba1/BB+ or lower). Since they exist
+# only in print, they are transcribed once into
+# ``MANUAL_DATA_DIR / "greenwood_hanson_hys_historical.csv"`` (see
+# ``data_manual/data_README.md``) rather than re-derived here.
+_HISTORICAL_MANUAL_FILENAME = "greenwood_hanson_hys_historical.csv"
 
 
-def load_greenwood_hanson_historical():
+def pull_greenwood_hanson_historical(
+    manual_data_dir=MANUAL_DATA_DIR, filename=_HISTORICAL_MANUAL_FILENAME
+):
     """Return the published Greenwood-Hanson (2013) high-yield share, 1926-2008.
 
     This is the authoritative spliced series from Table 2 of Greenwood and
-    Hanson (2013). Use it for the pre-FISD period (before 1983), which cannot be
-    reconstructed from any database, or as a ready-made 1926-2008 series.
+    Hanson (2013), transcribed by hand into a CSV in ``MANUAL_DATA_DIR`` since
+    it exists only in print. Use it for the pre-FISD period (before 1983),
+    which cannot be reconstructed from any database, or as a ready-made
+    1926-2008 series.
 
     Returns
     -------
@@ -582,13 +449,20 @@ def load_greenwood_hanson_historical():
 
     Examples
     --------
-    >>> h = load_greenwood_hanson_historical()
+    >>> h = pull_greenwood_hanson_historical()
     >>> int(h.index.min()), int(h.index.max())
     (1926, 2008)
     >>> float(h.loc[1929, "hy_share"])
     0.262
     """
-    out = pd.DataFrame({"hy_share": pd.Series(_GH2013_TABLE2_HYS)}).sort_index()
+    path = Path(manual_data_dir) / filename
+    if not path.exists():
+        raise FileNotFoundError(
+            f"No published Greenwood-Hanson historical series found at {path}. "
+            "It is transcribed from Table 2 of Greenwood and Hanson (2013) and "
+            "checked into the repo; see data_manual/data_README.md."
+        )
+    out = pd.read_csv(path).set_index("year").sort_index()
     out.index.name = "year"
     out["ln_hy_share"] = np.log(out["hy_share"].where(out["hy_share"] > 0))
     out["source"] = "gh2013"
@@ -640,7 +514,7 @@ def splice_hy_share(fisd=None, first_fisd_year=2009, historical=None):
     ('gh2013', 'fisd')
     """
     if historical is None:
-        historical = load_greenwood_hanson_historical()
+        historical = pull_greenwood_hanson_historical()
     hist = historical.loc[historical.index < first_fisd_year].copy()
 
     if fisd is None:
@@ -675,19 +549,18 @@ def pull_greenwood_hanson(source=GH_HYS_SOURCE, first_fisd_year=2009, **kwargs):
         Forwarded to the FISD puller.
     """
     if source == "historical":
-        return load_greenwood_hanson_historical()
+        return pull_greenwood_hanson_historical()
     if source == "spliced":
         fisd = pull_hy_share_from_fisd(**kwargs)
         return splice_hy_share(fisd=fisd, first_fisd_year=first_fisd_year)
     if source == "fisd":
         return pull_hy_share_from_fisd(**kwargs)
-    if source == "raw":
-        return pull_hy_share_from_raw(**kwargs)
     raise ValueError("`source` must be 'spliced', 'fisd', 'raw', or 'historical'.")
 
 
-def load_greenwood_hanson(data_dir=DATA_DIR):
-    """Load the cached high-yield-share data from the ``_data`` directory.
+def load_greenwood_hanson(data_dir=PROCESSED_DATA_DIR):
+    """Load the cached, final combined high-yield-share data from the
+    ``_data/processed_data`` directory.
 
     Must first run this module as ``__main__`` to pull and save the data.
     """
@@ -701,25 +574,29 @@ def _demo():
 
 
 if __name__ == "__main__":
-    filedir = Path(DATA_DIR)
-    filedir.mkdir(parents=True, exist_ok=True)
+    raw_dir = Path(RAW_DATA_DIR)
+    raw_dir.mkdir(parents=True, exist_ok=True)
+    processed_dir = Path(PROCESSED_DATA_DIR)
+    processed_dir.mkdir(parents=True, exist_ok=True)
 
-    # Always cache the published historical series (needs no WRDS).
-    historical = load_greenwood_hanson_historical()
-    historical.to_parquet(filedir / "greenwood_hanson_hys_historical.parquet")
-    historical.to_csv(filedir / "greenwood_hanson_hys_historical.csv")
+    # Source 3: always cache the published historical series (needs no WRDS;
+    # pulled straight from the manual transcription in MANUAL_DATA_DIR).
+    historical = pull_greenwood_hanson_historical()
+    historical.to_parquet(raw_dir / "greenwood_hanson_hys_historical.parquet")
+    historical.to_csv(raw_dir / "greenwood_hanson_hys_historical.csv")
 
-    # The FISD reconstruction and the full spliced series require WRDS. If that
-    # is unavailable, still leave the historical (1926-2008) series in place.
+    # Source 1: the FISD reconstruction and the full spliced series require
+    # WRDS. If that is unavailable, still leave the historical (1926-2008)
+    # series in place as the combined output.
     try:
         fisd = pull_hy_share_from_fisd()
-        fisd.to_parquet(filedir / "greenwood_hanson_hys_fisd.parquet")
-        fisd.to_csv(filedir / "greenwood_hanson_hys_fisd.csv")
+        fisd.to_parquet(raw_dir / "greenwood_hanson_hys_fisd.parquet")
+        fisd.to_csv(raw_dir / "greenwood_hanson_hys_fisd.csv")
 
-        full = splice_hy_share(fisd=fisd)
+        full = splice_hy_share(fisd=fisd, historical=historical)
     except Exception as exc:  # noqa: BLE001 - want a clear message, keep going
         print(f"FISD pull unavailable ({exc}); writing historical series only.")
         full = historical
 
-    full.to_parquet(filedir / "greenwood_hanson_hys.parquet")
-    full.to_csv(filedir / "greenwood_hanson_hys.csv")
+    full.to_parquet(processed_dir / "greenwood_hanson_hys.parquet")
+    full.to_csv(processed_dir / "greenwood_hanson_hys.csv")

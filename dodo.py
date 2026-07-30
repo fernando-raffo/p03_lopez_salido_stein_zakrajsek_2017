@@ -18,8 +18,6 @@ from pathlib import Path
 from settings import config
 
 DOIT_CONFIG = {"backend": "sqlite3", "dep_file": "./.doit-db.sqlite"}
-
-
 BASE_DIR = config("BASE_DIR")
 RAW_DATA_DIR = config("RAW_DATA_DIR")
 PROCESSED_DATA_DIR = config("PROCESSED_DATA_DIR")
@@ -87,10 +85,10 @@ def task_config():
     }
 
 
-def task_pull_fred():
-    """Pull FRED data"""
+def task_pull_data():
+    """Pull data from FRED, Shiller, and Greenwood-Hanson (high-yield share)"""
     yield {
-        "name": "FRED",
+        "name": "FRED data",
         "doc": "Pull data from FRED",
         "actions": [
             "python ./src/pull_fred.py",
@@ -103,21 +101,21 @@ def task_pull_fred():
         "clean": [],
     }
     yield {
-        "name": "shiller",
+        "name": "Shiller data",
         "doc": "Pull Robert Shiller's stock-market data (CAPE / P/E10)",
         "actions": [
             "python ./src/settings.py",
             "python ./src/pull_shiller.py",
         ],
         "targets": [
-            DATA_DIR / "shiller_pe.parquet",
-            DATA_DIR / "shiller_pe_annual.parquet",
+            RAW_DATA_DIR / "shiller_data.parquet",
+            PROCESSED_DATA_DIR / "shiller_data_annual.parquet",
         ],
         "file_dep": ["./src/settings.py", "./src/pull_shiller.py"],
         "clean": [],
     }
     yield {
-        "name": "greenwood_hanson",
+        "name": "Greenwood-Hanson high-yield share data",
         "doc": (
             "Build the Greenwood-Hanson high-yield share (needs WRDS/Mergent "
             "FISD, or a raw issuance file in data_manual with GH_HYS_SOURCE=raw)"
@@ -126,8 +124,16 @@ def task_pull_fred():
             "python ./src/settings.py",
             "python ./src/pull_greenwood_hanson.py",
         ],
-        "targets": [DATA_DIR / "greenwood_hanson_hys.parquet"],
-        "file_dep": ["./src/settings.py", "./src/pull_greenwood_hanson.py"],
+        "targets": [
+            PROCESSED_DATA_DIR / "greenwood_hanson_hys.parquet",
+            RAW_DATA_DIR / "greenwood_hanson_hys_fisd.parquet",
+            RAW_DATA_DIR / "greenwood_hanson_hys_historical.parquet",
+        ],
+        "file_dep": [
+            "./src/settings.py",
+            "./src/pull_greenwood_hanson.py",
+            MANUAL_DATA_DIR / "greenwood_hanson_hys_historical.csv",
+        ],
         "clean": [],
     }
 
