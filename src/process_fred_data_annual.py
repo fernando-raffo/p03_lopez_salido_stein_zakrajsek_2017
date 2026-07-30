@@ -533,4 +533,5 @@ if __name__ == "__main__":
     filedir = Path(PROCESSED_DATA_DIR)
     filedir.mkdir(parents=True, exist_ok=True)
     cleaned_df.to_parquet(filedir / "fred_final_series_annual.parquet")
+    cleaned_df.to_csv(filedir / "fred_final_series_annual.csv")
     save_data_readme(cleaned_df, filedir)
