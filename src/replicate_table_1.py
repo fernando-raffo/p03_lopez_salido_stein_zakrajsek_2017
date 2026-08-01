@@ -16,6 +16,7 @@ CRSP; it is NOT in the FRED pipeline yet (see issue #3 / Shiller & equity data).
 Only the FRED-buildable credit-only column (1) is produced here; the equity
 columns are left for #3.
 """
+
 from pathlib import Path
 
 import numpy as np
@@ -40,8 +41,9 @@ def run_column_1(df):
     d = df.loc[REP_START:REP_END, ["dy_next"] + regressors].dropna()
     X = sm.add_constant(d[regressors])
     y = d["dy_next"]
-    return sm.OLS(y, X).fit(cov_type="HAC",
-                            cov_kwds={"maxlags": newey_west_lags(len(d))})
+    return sm.OLS(y, X).fit(
+        cov_type="HAC", cov_kwds={"maxlags": newey_west_lags(len(d))}
+    )
 
 
 def main():
@@ -50,28 +52,33 @@ def main():
 
     df["wwii"] = df.index.isin(range(1941, 1946)).astype(int)
     df["korea"] = df.index.isin(range(1950, 1954)).astype(int)
-    df["dy_next"] = df["gdp_pc_growth"].shift(-1)   # delta-y_{t+1}
+    df["dy_next"] = df["gdp_pc_growth"].shift(-1)  # delta-y_{t+1}
 
     res = run_column_1(df)
 
-    table = pd.DataFrame({
-        "(1) Credit only": {
-            "$\\Delta s_t$": f"{res.params['d_credit_spread']:.3f}",
-            "\\quad (s.e.)": f"({res.bse['d_credit_spread']:.3f})",
-            "$\\Delta y_t$": f"{res.params['gdp_pc_growth']:.3f}",
-            "\\quad (s.e.) ": f"({res.bse['gdp_pc_growth']:.3f})",
-            "$\\bar R^2$": f"{res.rsquared_adj:.3f}",
-            "N": str(int(res.nobs)),
+    table = pd.DataFrame(
+        {
+            "(1) Credit only": {
+                "$\\Delta s_t$": f"{res.params['d_credit_spread']:.3f}",
+                "\\quad (s.e.)": f"({res.bse['d_credit_spread']:.3f})",
+                "$\\Delta y_t$": f"{res.params['gdp_pc_growth']:.3f}",
+                "\\quad (s.e.) ": f"({res.bse['gdp_pc_growth']:.3f})",
+                "$\\bar R^2$": f"{res.rsquared_adj:.3f}",
+                "N": str(int(res.nobs)),
+            }
         }
-    })
+    )
     table.columns.name = (
         f"Dep. var: $\\Delta y_{{t+1}}$, real GDP p.c. (pct.), {REP_START}-{REP_END}"
     )
     (OUTPUT_DIR / "table_1.tex").write_text(table.to_latex(escape=False))
 
     print(table)
-    print("\ndelta-s_t =", round(res.params["d_credit_spread"], 3),
-          "(paper col 1 target ~ -2.0)")
+    print(
+        "\ndelta-s_t =",
+        round(res.params["d_credit_spread"], 3),
+        "(paper col 1 target ~ -2.0)",
+    )
     print("wrote", OUTPUT_DIR / "table_1.tex")
     print("NOTE: cols 2-4 need the CRSP/Shiller equity return (issue #3).")
 

@@ -76,6 +76,16 @@ column_descriptions = {
         "available), converted to a bond-equivalent yield and then to "
         "the December value of each calendar year."
     ),
+    "BAA_Treasury_spread": (
+        "Annual spread between the Baa corporate bond yield and the "
+        "10-year Treasury yield, computed by "
+        "`calculate_baa_treasury_spread` as BAA minus Treasury_10yr."
+    ),
+    "AAA_Treasury_spread": (
+        "Annual spread between the Aaa corporate bond yield and the "
+        "10-year Treasury yield, computed by "
+        "`calculate_aaa_treasury_spread` as AAA minus Treasury_10yr."
+    ),
 }
 
 
@@ -438,6 +448,54 @@ def final_3mo_treasury_series(df, latest_col="TB3MS", older_col="M1329AUSM193NNB
     return treasury_3mo
 
 
+def calculate_baa_treasury_spread(baa_series, treasury_series):
+    """
+    Calculate the annual Baa-Treasury spread by subtracting the 10-year
+    Treasury yield from the Baa corporate bond yield.
+
+    Parameters
+    ----------
+    baa_series : pandas.Series
+        Series containing annual Baa corporate bond yield values, indexed
+        by year.
+    treasury_series : pandas.Series
+        Series containing annual 10-year Treasury yield values, indexed
+        by year.
+
+    Returns
+    -------
+    pandas.Series
+        Annual Baa-Treasury spread, indexed by year.
+    """
+    spread = baa_series - treasury_series
+    spread.name = "BAA_Treasury_spread"
+    return spread
+
+
+def calculate_aaa_treasury_spread(aaa_series, treasury_series):
+    """
+    Calculate the annual Aaa-Treasury spread by subtracting the 10-year
+    Treasury yield from the Aaa corporate bond yield.
+
+    Parameters
+    ----------
+    aaa_series : pandas.Series
+        Series containing annual Aaa corporate bond yield values, indexed
+        by year.
+    treasury_series : pandas.Series
+        Series containing annual 10-year Treasury yield values, indexed
+        by year.
+
+    Returns
+    -------
+    pandas.Series
+        Annual Aaa-Treasury spread, indexed by year.
+    """
+    spread = aaa_series - treasury_series
+    spread.name = "AAA_Treasury_spread"
+    return spread
+
+
 def save_data_readme(df, data_dir=PROCESSED_DATA_DIR):
     """
     Write a Markdown README describing how each column of `df` is
@@ -489,8 +547,9 @@ def clean_fred_data_annual(df):
 
     Combines `final_gdp_series`, `final_population_series`,
     `calculate_gdp_per_capita`, `final_cpi_series`, `final_baa_series_annual`,
-    `final_aaa_series`, `final_10yr_treasury_series_annual`, and
-    `final_3mo_treasury_series` into a single DataFrame indexed by year.
+    `final_aaa_series`, `final_10yr_treasury_series_annual`,
+    `final_3mo_treasury_series`, `calculate_baa_treasury_spread`, and
+    `calculate_aaa_treasury_spread` into a single DataFrame indexed by year.
 
     Parameters
     ----------
@@ -502,7 +561,8 @@ def clean_fred_data_annual(df):
     -------
     pandas.DataFrame
         Annual DataFrame with columns GDP, Population, GDP_per_capita,
-        CPI_inflation, BAA, AAA, Treasury_10yr, and Treasury_3mo.
+        CPI_inflation, BAA, AAA, Treasury_10yr, Treasury_3mo,
+        BAA_Treasury_spread, and AAA_Treasury_spread.
     """
     gdp = final_gdp_series(df)
     pop = final_population_series(df)
@@ -512,6 +572,8 @@ def clean_fred_data_annual(df):
     aaa = final_aaa_series(df)
     treasury_10yr = final_10yr_treasury_series_annual(df)
     treasury_3mo = final_3mo_treasury_series(df)
+    baa_treasury_spread = calculate_baa_treasury_spread(baa, treasury_10yr)
+    aaa_treasury_spread = calculate_aaa_treasury_spread(aaa, treasury_10yr)
 
     return pd.DataFrame(
         {
@@ -523,6 +585,8 @@ def clean_fred_data_annual(df):
             "AAA": aaa,
             "Treasury_10yr": treasury_10yr,
             "Treasury_3mo": treasury_3mo,
+            "BAA_Treasury_spread": baa_treasury_spread,
+            "AAA_Treasury_spread": aaa_treasury_spread,
         }
     )
 

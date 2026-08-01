@@ -40,6 +40,15 @@ column_descriptions = {
         "10-year Treasury yield, computed by "
         "`calculate_baa_treasury_spread` as BAA minus Treasury_10yr."
     ),
+    "AAA": (
+        "Monthly Moody's Seasoned Aaa Corporate Bond Yield, taken as-is "
+        "from the monthly AAA series by `final_aaa_series`."
+    ),
+    "AAA_Treasury_spread": (
+        "Monthly spread between the Aaa corporate bond yield and the "
+        "10-year Treasury yield, computed by "
+        "`calculate_aaa_treasury_spread` as AAA minus Treasury_10yr."
+    ),
 }
 
 
@@ -159,6 +168,30 @@ def final_baa_series(df, baa_col="BAA"):
     return baa
 
 
+def final_aaa_series(df, aaa_col="AAA"):
+    """
+    Build a monthly series of Moody's Seasoned Aaa Corporate Bond Yield,
+    which is available monthly since 1919.
+
+    Parameters
+    ----------
+    df : pandas.DataFrame
+        DataFrame indexed by date, containing at least `aaa_col`.
+    aaa_col : str, default "AAA"
+        Column name of the monthly Aaa corporate bond yield series.
+
+    Returns
+    -------
+    pandas.Series
+        Monthly Aaa corporate bond yield, indexed by month.
+    """
+    aaa = df[aaa_col].dropna().copy()
+    aaa.index.name = "date"
+    aaa.name = "AAA"
+    aaa = _trim_to_replication_range(aaa)
+    return aaa
+
+
 def calculate_baa_treasury_spread(baa_series, treasury_series):
     """
     Calculate the monthly Baa-Treasury spread by subtracting the 10-year
@@ -180,6 +213,30 @@ def calculate_baa_treasury_spread(baa_series, treasury_series):
     """
     spread = baa_series - treasury_series
     spread.name = "BAA_Treasury_spread"
+    return spread
+
+
+def calculate_aaa_treasury_spread(aaa_series, treasury_series):
+    """
+    Calculate the monthly Aaa-Treasury spread by subtracting the 10-year
+    Treasury yield from the Aaa corporate bond yield.
+
+    Parameters
+    ----------
+    aaa_series : pandas.Series
+        Series containing monthly Aaa corporate bond yield values,
+        indexed by month.
+    treasury_series : pandas.Series
+        Series containing monthly 10-year Treasury yield values, indexed
+        by month.
+
+    Returns
+    -------
+    pandas.Series
+        Monthly Aaa-Treasury spread, indexed by month.
+    """
+    spread = aaa_series - treasury_series
+    spread.name = "AAA_Treasury_spread"
     return spread
 
 
@@ -235,8 +292,9 @@ def clean_fred_data_monthly(df):
     replication.
 
     Combines `final_recession_indicator_series`, `final_10yr_treasury_series`,
-    `final_baa_series`, and `calculate_baa_treasury_spread` into a single
-    DataFrame indexed by month.
+    `final_baa_series`, `calculate_baa_treasury_spread`, `final_aaa_series`,
+    and `calculate_aaa_treasury_spread` into a single DataFrame indexed by
+    month.
 
     Parameters
     ----------
@@ -248,12 +306,15 @@ def clean_fred_data_monthly(df):
     -------
     pandas.DataFrame
         Monthly DataFrame with columns hist_recession_indicator,
-        Treasury_10yr, BAA, and BAA_Treasury_spread.
+        Treasury_10yr, BAA, BAA_Treasury_spread, AAA, and
+        AAA_Treasury_spread.
     """
     recession_indicator = final_recession_indicator_series(df)
     treasury_10yr = final_10yr_treasury_series(df)
     baa = final_baa_series(df)
     baa_treasury_spread = calculate_baa_treasury_spread(baa, treasury_10yr)
+    aaa = final_aaa_series(df)
+    aaa_treasury_spread = calculate_aaa_treasury_spread(aaa, treasury_10yr)
 
     return pd.DataFrame(
         {
@@ -261,6 +322,8 @@ def clean_fred_data_monthly(df):
             "Treasury_10yr": treasury_10yr,
             "BAA": baa,
             "BAA_Treasury_spread": baa_treasury_spread,
+            "AAA": aaa,
+            "AAA_Treasury_spread": aaa_treasury_spread,
         }
     )
 
