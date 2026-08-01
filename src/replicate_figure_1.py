@@ -4,6 +4,7 @@ the Baa-Treasury credit spread over the 1929-2015 replication sample.
 Reads the cleaned monthly FRED series produced by process_fred_data_monthly.py
 and shades NBER recessions using the hist_recession_indicator column.
 """
+
 from pathlib import Path
 
 import pandas as pd
@@ -45,5 +46,7 @@ fig.tight_layout()
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 out = OUTPUT_DIR / "figure_1.png"
 fig.savefig(out, dpi=200)
-print(f"saved {out}  (n={len(spread)}, "
-      f"{spread.index.min().date()}..{spread.index.max().date()})")
+print(
+    f"saved {out}  (n={len(spread)}, "
+    f"{spread.index.min().date()}..{spread.index.max().date()})"
+)

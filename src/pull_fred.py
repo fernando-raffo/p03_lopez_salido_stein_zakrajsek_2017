@@ -144,4 +144,5 @@ if __name__ == "__main__":
     filedir = Path(DATA_DIR)
     filedir.mkdir(parents=True, exist_ok=True)
     df.to_parquet(filedir / "fred.parquet")
+    df.to_csv(filedir / "fred.csv")
     save_data_dictionary(df, filedir)

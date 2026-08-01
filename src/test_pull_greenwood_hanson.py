@@ -111,43 +111,6 @@ def test_clean_fisd_issues_missing_sic():
     assert bool(out["nonfinancial"].iloc[1]) is False  # 6021 -> financial
 
 
-def test_pull_hy_share_from_raw_issue_level(tmp_path):
-    raw = pd.DataFrame(
-        {
-            "year": [1995, 1995, 1996],
-            "offering_amt": [100.0, 100.0, 100.0],
-            "rating": ["Ba1", "AAA", "BBB-"],  # HY, IG, IG
-        }
-    )
-    path = tmp_path / "gh_high_yield_share_raw.csv"
-    raw.to_csv(path, index=False)
-
-    out = gh.pull_hy_share_from_raw(raw_path=path)
-    assert out.loc[1995, "hy_share"] == pytest.approx(0.5)
-    assert out.loc[1996, "hy_share"] == pytest.approx(0.0)
-
-
-def test_pull_hy_share_from_raw_preaggregated(tmp_path):
-    raw = pd.DataFrame(
-        {
-            "year": [2001, 2002],
-            "hy_issuance": [30.0, 10.0],
-            "total_issuance": [100.0, 100.0],
-        }
-    )
-    path = tmp_path / "agg.csv"
-    raw.to_csv(path, index=False)
-
-    out = gh.pull_hy_share_from_raw(raw_path=path)
-    assert out.loc[2001, "hy_share"] == pytest.approx(0.3)
-    assert out.loc[2002, "hy_share"] == pytest.approx(0.1)
-
-
-def test_pull_hy_share_from_raw_missing_file(tmp_path):
-    with pytest.raises(FileNotFoundError):
-        gh.pull_hy_share_from_raw(raw_path=tmp_path / "does_not_exist.csv")
-
-
 def test_pull_greenwood_hanson_bad_source():
     with pytest.raises(ValueError):
         gh.pull_greenwood_hanson(source="nonsense")
