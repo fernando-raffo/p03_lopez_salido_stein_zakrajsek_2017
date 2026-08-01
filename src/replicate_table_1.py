@@ -1,20 +1,23 @@
 """
-Replicate Table 1 of Lopez-Salido, Stein & Zakrajsek (2017) (issue #5).
+Replicate Table I of Lopez-Salido, Stein & Zakrajsek (2017).
 
-Table 1 forecasts next-year real GDP-per-capita growth (delta-y_{t+1}) with the
-current-year change in the Baa-Treasury spread (delta-s_t), lagged growth, and
-WWII / Korean-War dummies, using Newey-West (HAC) standard errors.
+Table I forecasts next-year real GDP-per-capita growth on the current-year
+change in the Baa-Treasury spread with lagged growth, Newey-West (HAC) errors:
 
-    delta-y_{t+1} = b1*delta-s_t + b2*delta-y_t + controls + e
+    dy_{t+1} = b1 * d_credit_spread_t + b2 * dy_t (+ war dummies) + e
 
-Paper target (FEDS 1929-2013, col 1): delta-s_t = -2.007 (0.744), R2bar = 0.501.
-This repo runs 1929-2015, so expect a value close to but not equal to -2.0.
+Published QJE (1929-2015, col 1): d_s = -1.997 (0.746), R2bar = 0.425.
 
-SCOPE: Table 1 cols (2)-(4) pit the credit spread against the value-weighted
-stock-market return r^M_t. Per the paper's data appendix that series is from
-CRSP; it is NOT in the FRED pipeline yet (see issue #3 / Shiller & equity data).
-Only the FRED-buildable credit-only column (1) is produced here; the equity
-columns are left for #3.
+Two spec choices are emitted side by side because the published Table I note is
+ambiguous about controls (it lists only "a constant"):
+  - "dummies": includes WWII (1941-45) and Korea (1950-53), as in the FEDS
+    working paper. Reproduces our earlier -1.984 with dy_t ~ 0.549.
+  - "nodummies": constant only, the literal reading of the QJE note. Expected
+    to move dy_t toward the published 0.479.
+
+Each spec is run over two windows: the 1929-2015 replication sample and a
+1929-2025 extension. Equity columns (2)-(3), which need the Shiller S&P 500
+return, are not built here (that data lands via #3).
 """
 
 from pathlib import Path
@@ -23,12 +26,14 @@ import numpy as np
 import pandas as pd
 import statsmodels.api as sm
 
+from helper_functions import year_over_year_growth
 from settings import config
 
 PROCESSED_DATA_DIR = Path(config("PROCESSED_DATA_DIR"))
 OUTPUT_DIR = Path(config("OUTPUT_DIR"))
 REP_START = config("REPLICATION_START_DATE").year
 REP_END = config("REPLICATION_END_DATE").year
+EXT_END = config("EXTENSION_END_DATE").year
 
 
 def newey_west_lags(n_obs):
@@ -36,26 +41,28 @@ def newey_west_lags(n_obs):
     return max(int(np.floor(4 * (n_obs / 100.0) ** (2 / 9))), 1)
 
 
-def run_column_1(df):
-    regressors = ["d_credit_spread", "gdp_pc_growth", "wwii", "korea"]
-    d = df.loc[REP_START:REP_END, ["dy_next"] + regressors].dropna()
+def build_panel():
+    df = pd.read_parquet(PROCESSED_DATA_DIR / "fred_final_series_annual.parquet")
+    df["gdp_pc_growth"] = year_over_year_growth(df["GDP_per_capita"])
+    df["d_credit_spread"] = df["BAA_Treasury_spread"].diff()
+    df["dy_next"] = df["gdp_pc_growth"].shift(-1)
+    df["wwii"] = df.index.isin(range(1941, 1946)).astype(int)
+    df["korea"] = df.index.isin(range(1950, 1954)).astype(int)
+    return df
+
+
+def run_column_1(df, start, end, use_dummies):
+    regressors = ["d_credit_spread", "gdp_pc_growth"]
+    if use_dummies:
+        regressors += ["wwii", "korea"]
+    d = df.loc[start:end, ["dy_next"] + regressors].dropna()
     X = sm.add_constant(d[regressors])
-    y = d["dy_next"]
-    return sm.OLS(y, X).fit(
+    return sm.OLS(d["dy_next"], X).fit(
         cov_type="HAC", cov_kwds={"maxlags": newey_west_lags(len(d))}
     )
 
 
-def main():
-    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-    df = pd.read_parquet(PROCESSED_DATA_DIR / "fred_growth_series_annual.parquet")
-
-    df["wwii"] = df.index.isin(range(1941, 1946)).astype(int)
-    df["korea"] = df.index.isin(range(1950, 1954)).astype(int)
-    df["dy_next"] = df["gdp_pc_growth"].shift(-1)  # delta-y_{t+1}
-
-    res = run_column_1(df)
-
+def emit(res, start, end, label):
     table = pd.DataFrame(
         {
             "(1) Credit only": {
@@ -69,18 +76,22 @@ def main():
         }
     )
     table.columns.name = (
-        f"Dep. var: $\\Delta y_{{t+1}}$, real GDP p.c. (pct.), {REP_START}-{REP_END}"
+        f"Dep. var: $\\Delta y_{{t+1}}$, real GDP p.c. (pct.), {start}-{end}"
     )
-    (OUTPUT_DIR / "table_1.tex").write_text(table.to_latex(escape=False))
+    out = OUTPUT_DIR / f"table_1_{label}.tex"
+    out.write_text(table.to_latex(escape=False))
+    print(f"{label}: d_s={res.params['d_credit_spread']:.3f}, "
+          f"dy_t={res.params['gdp_pc_growth']:.3f}, N={int(res.nobs)} -> {out.name}")
 
-    print(table)
-    print(
-        "\ndelta-s_t =",
-        round(res.params["d_credit_spread"], 3),
-        "(paper col 1 target ~ -2.0)",
-    )
-    print("wrote", OUTPUT_DIR / "table_1.tex")
-    print("NOTE: cols 2-4 need the CRSP/Shiller equity return (issue #3).")
+
+def main():
+    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+    df = build_panel()
+    for use_dummies, tag in [(True, "dummies"), (False, "nodummies")]:
+        emit(run_column_1(df, REP_START, REP_END, use_dummies),
+             REP_START, REP_END, f"replication_{tag}")
+        emit(run_column_1(df, REP_START, EXT_END, use_dummies),
+             REP_START, EXT_END, f"extended_{tag}")
 
 
 if __name__ == "__main__":
