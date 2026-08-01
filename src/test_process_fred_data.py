@@ -195,11 +195,43 @@ def test_clean_fred_data_annual_produces_expected_columns():
         "AAA",
         "Treasury_10yr",
         "Treasury_3mo",
+        "BAA_Treasury_spread",
+        "AAA_Treasury_spread",
     }
     assert expected_columns == set(cleaned.columns)
     assert cleaned.loc[2010, "GDP_per_capita"] == pytest.approx(
         cleaned.loc[2010, "GDP"] / cleaned.loc[2010, "Population"]
     )
+    assert cleaned.loc[2010, "BAA_Treasury_spread"] == pytest.approx(
+        cleaned.loc[2010, "BAA"] - cleaned.loc[2010, "Treasury_10yr"]
+    )
+    assert cleaned.loc[2010, "AAA_Treasury_spread"] == pytest.approx(
+        cleaned.loc[2010, "AAA"] - cleaned.loc[2010, "Treasury_10yr"]
+    )
+
+
+def test_calculate_baa_treasury_spread_annual():
+    years = [2009, 2010]
+    baa = pd.Series([5.0, 5.5], index=years)
+    treasury = pd.Series([3.0, 3.2], index=years)
+
+    spread = annual.calculate_baa_treasury_spread(baa, treasury)
+
+    assert spread.loc[2009] == pytest.approx(2.0)
+    assert spread.loc[2010] == pytest.approx(2.3)
+    assert spread.name == "BAA_Treasury_spread"
+
+
+def test_calculate_aaa_treasury_spread_annual():
+    years = [2009, 2010]
+    aaa = pd.Series([4.0, 4.5], index=years)
+    treasury = pd.Series([3.0, 3.2], index=years)
+
+    spread = annual.calculate_aaa_treasury_spread(aaa, treasury)
+
+    assert spread.loc[2009] == pytest.approx(1.0)
+    assert spread.loc[2010] == pytest.approx(1.3)
+    assert spread.name == "AAA_Treasury_spread"
 
 
 def test_save_data_readme_annual(tmp_path):
@@ -268,6 +300,28 @@ def test_calculate_baa_treasury_spread():
     assert spread.name == "BAA_Treasury_spread"
 
 
+def test_final_aaa_series_monthly():
+    dates = pd.to_datetime(["2010-01-01", "2010-02-01"])
+    df = pd.DataFrame({"AAA": [4.0, 4.2]}, index=dates)
+
+    result = monthly.final_aaa_series(df)
+
+    assert list(result.values) == [4.0, 4.2]
+    assert result.name == "AAA"
+
+
+def test_calculate_aaa_treasury_spread():
+    dates = pd.to_datetime(["2010-01-01", "2010-02-01"])
+    aaa = pd.Series([4.0, 4.5], index=dates)
+    treasury = pd.Series([3.0, 3.2], index=dates)
+
+    spread = monthly.calculate_aaa_treasury_spread(aaa, treasury)
+
+    assert spread.loc[dates[0]] == pytest.approx(1.0)
+    assert spread.loc[dates[1]] == pytest.approx(1.3)
+    assert spread.name == "AAA_Treasury_spread"
+
+
 def test_clean_fred_data_monthly_produces_expected_columns():
     dates = pd.to_datetime(["2010-01-01", "2010-02-01"])
     df = pd.DataFrame(
@@ -277,6 +331,7 @@ def test_clean_fred_data_monthly_produces_expected_columns():
             "M1333BUSM156NNBR": [np.nan, np.nan],
             "M1333AUSM156NNBR": [np.nan, np.nan],
             "BAA": [5.0, 5.2],
+            "AAA": [4.0, 4.1],
         },
         index=dates,
     )
@@ -288,9 +343,12 @@ def test_clean_fred_data_monthly_produces_expected_columns():
         "Treasury_10yr",
         "BAA",
         "BAA_Treasury_spread",
+        "AAA",
+        "AAA_Treasury_spread",
     }
     assert expected_columns == set(cleaned.columns)
     assert cleaned.loc[dates[0], "BAA_Treasury_spread"] == pytest.approx(2.0)
+    assert cleaned.loc[dates[0], "AAA_Treasury_spread"] == pytest.approx(1.0)
 
 
 def test_save_data_readme_monthly(tmp_path):
