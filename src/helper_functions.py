@@ -22,3 +22,16 @@ def forward_cumulative_growth(level_series, horizon):
     """Cumulative log growth (percent) from t to t+horizon."""
     s = np.log(level_series.astype(float).sort_index())
     return 100.0 * (s.shift(-horizon) - s)
+
+
+def log_total_return(price, income):
+    """Annual log total return (percent) of an asset paying periodic income
+    (e.g. dividends): 100 * ln((P_t + income_t) / P_{t-1})."""
+    p = price.astype(float).sort_index()
+    inc = income.astype(float).sort_index()
+    return 100.0 * np.log((p + inc) / p.shift(1))
+
+
+def to_percent(series):
+    """Convert a decimal (fractional) series to percentage-point units."""
+    return 100.0 * series.astype(float)
