@@ -21,7 +21,6 @@ import statsmodels.api as sm
 from helper_functions import year_over_year_growth
 from settings import config
 
-DATA_DIR = Path(config("DATA_DIR"))
 PROCESSED_DATA_DIR = Path(config("PROCESSED_DATA_DIR"))
 OUTPUT_DIR = Path(config("OUTPUT_DIR"))
 REP_START = config("REPLICATION_START_DATE").year
@@ -29,7 +28,7 @@ REP_END = config("REPLICATION_END_DATE").year
 EXT_END = config("EXTENSION_END_DATE").year
 
 # Shiller annual file (from pull_shiller.py) and the columns we use.
-SHILLER_FILE = DATA_DIR / "shiller_pe_annual.parquet"
+SHILLER_FILE = PROCESSED_DATA_DIR / "shiller_data_annual.parquet"
 PRICE_COL = "sp500_price"
 DIV_COL = "dividend"
 
@@ -83,19 +82,34 @@ def emit(df, start, end, use_dummies, label):
     specs = {
         "(1)": ["d_credit_spread"] + base,
         "(2)": ["sp_return"] + base,
-        "(3)": ["d_credit_spread", "sp_return", "d_treasury_3mo",
-                "d_treasury_10yr", "CPI_inflation"] + base,
+        "(3)": [
+            "d_credit_spread",
+            "sp_return",
+            "d_treasury_3mo",
+            "d_treasury_10yr",
+            "CPI_inflation",
+        ]
+        + base,
     }
-    rows = ["$\\Delta s_t$", "\\quad (s.e.)", "$r^{SP}_t$", "\\quad (s.e.) ",
-            "$\\Delta y_t$", "$\\bar R^2$", "N"]
+    rows = [
+        "$\\Delta s_t$",
+        "\\quad (s.e.)",
+        "$r^{SP}_t$",
+        "\\quad (s.e.) ",
+        "$\\Delta y_t$",
+        "$\\bar R^2$",
+        "N",
+    ]
     table = {}
     for col, regs in specs.items():
         res = run_regression(df, regs, start, end)
         ds, ds_se = cell(res, "d_credit_spread")
         rs, rs_se = cell(res, "sp_return")
         table[col] = {
-            "$\\Delta s_t$": ds, "\\quad (s.e.)": ds_se,
-            "$r^{SP}_t$": rs, "\\quad (s.e.) ": rs_se,
+            "$\\Delta s_t$": ds,
+            "\\quad (s.e.)": ds_se,
+            "$r^{SP}_t$": rs,
+            "\\quad (s.e.) ": rs_se,
             "$\\Delta y_t$": f"{res.params['gdp_pc_growth']:.3f}",
             "$\\bar R^2$": f"{res.rsquared_adj:.3f}",
             "N": str(int(res.nobs)),
@@ -104,18 +118,21 @@ def emit(df, start, end, use_dummies, label):
     out.columns.name = f"Dep. var: $\\Delta y_{{t+1}}$, {start}-{end}"
     path = OUTPUT_DIR / f"table_1_{label}.tex"
     path.write_text(out.to_latex(escape=False))
-    print(f"{label}: col1 d_s={table['(1)']['$\\Delta s_t$']}, "
-          f"col2 r_sp={table['(2)']['$r^{SP}_t$']}, "
-          f"col3 d_s={table['(3)']['$\\Delta s_t$']}/r_sp={table['(3)']['$r^{SP}_t$']} "
-          f"-> {path.name}")
+    print(
+        f"{label}: col1 d_s={table['(1)']['$\\Delta s_t$']}, "
+        f"col2 r_sp={table['(2)']['$r^{SP}_t$']}, "
+        f"col3 d_s={table['(3)']['$\\Delta s_t$']}/r_sp={table['(3)']['$r^{SP}_t$']} "
+        f"-> {path.name}"
+    )
 
 
 def main():
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     df = build_panel()
-    for use_dummies, tag in [(True, "dummies"), (False, "nodummies")]:
-        emit(df, REP_START, REP_END, use_dummies, f"replication_{tag}")
-        emit(df, REP_START, EXT_END, use_dummies, f"extended_{tag}")
+    for use_dummies in (True, False):
+        suffix = "_dummies" if use_dummies else ""
+        emit(df, REP_START, REP_END, use_dummies, f"replication{suffix}")
+        emit(df, REP_START, EXT_END, use_dummies, f"extended{suffix}")
 
 
 if __name__ == "__main__":
