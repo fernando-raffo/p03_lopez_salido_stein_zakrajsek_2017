@@ -81,7 +81,7 @@ def task_config():
         "actions": ["python ./src/settings.py"],
         "targets": [DATA_DIR, OUTPUT_DIR],
         "file_dep": ["./src/settings.py"],
-        "clean": [],
+        "clean": True,
     }
 
 
@@ -96,9 +96,10 @@ def task_pull_data():
         "targets": [
             RAW_DATA_DIR / "fred.parquet",
             RAW_DATA_DIR / "fred_data_dictionary.md",
+            RAW_DATA_DIR / "fred.csv",
         ],
         "file_dep": ["./src/settings.py", "./src/pull_fred.py"],
-        "clean": [],
+        "clean": True,
     }
     yield {
         "name": "Shiller data",
@@ -110,9 +111,11 @@ def task_pull_data():
         "targets": [
             RAW_DATA_DIR / "shiller_data.parquet",
             PROCESSED_DATA_DIR / "shiller_data_annual.parquet",
+            RAW_DATA_DIR / "shiller_data.csv",
+            PROCESSED_DATA_DIR / "shiller_data_annual.csv",
         ],
         "file_dep": ["./src/settings.py", "./src/pull_shiller.py"],
-        "clean": [],
+        "clean": True,
     }
     yield {
         "name": "Greenwood-Hanson high-yield share data",
@@ -128,13 +131,16 @@ def task_pull_data():
             PROCESSED_DATA_DIR / "greenwood_hanson_hys.parquet",
             RAW_DATA_DIR / "greenwood_hanson_hys_fisd.parquet",
             RAW_DATA_DIR / "greenwood_hanson_hys_historical.parquet",
+            RAW_DATA_DIR / "greenwood_hanson_hys_historical.csv",
+            RAW_DATA_DIR / "greenwood_hanson_hys_fisd.csv",
+            PROCESSED_DATA_DIR / "greenwood_hanson_hys.csv",
         ],
         "file_dep": [
             "./src/settings.py",
             "./src/pull_greenwood_hanson.py",
             MANUAL_DATA_DIR / "greenwood_hanson_hys_historical.csv",
         ],
-        "clean": [],
+        "clean": True,
     }
 
 
@@ -149,13 +155,14 @@ def task_process_fred_data():
         "targets": [
             PROCESSED_DATA_DIR / "fred_final_series_annual.parquet",
             PROCESSED_DATA_DIR / "fred_final_series_annual_readme.md",
+            PROCESSED_DATA_DIR / "fred_final_series_annual.csv",
         ],
         "file_dep": [
             "./src/settings.py",
             "./src/process_fred_data_annual.py",
             RAW_DATA_DIR / "fred.parquet",
         ],
-        "clean": [],
+        "clean": True,
     }
     yield {
         "name": "Clean FRED monthly data",
@@ -166,25 +173,88 @@ def task_process_fred_data():
         "targets": [
             PROCESSED_DATA_DIR / "fred_final_series_monthly.parquet",
             PROCESSED_DATA_DIR / "fred_final_series_monthly_readme.md",
+            PROCESSED_DATA_DIR / "fred_final_series_monthly.csv",
         ],
         "file_dep": [
             "./src/settings.py",
             "./src/process_fred_data_monthly.py",
             RAW_DATA_DIR / "fred.parquet",
         ],
-        "clean": [],
+        "clean": True,
     }
 
 
 def task_replicate_figure_1():
-    """Replicate LSZ (2017) Figure I: Baa-Treasury credit spread, 1929-2015."""
+    """Replicate LSZ (2017) Figure I: Baa-Treasury credit spread, 1925-2015."""
     return {
         "actions": ["python ./src/replicate_figure_1.py"],
-        "targets": [OUTPUT_DIR / "figure_1.png"],
+        "targets": [
+            OUTPUT_DIR / "figure_1_replication.pdf",
+            OUTPUT_DIR / "figure_1_extended.pdf",
+        ],
         "file_dep": [
             "./src/settings.py",
             "./src/replicate_figure_1.py",
+            "./src/plot_style.py",
             PROCESSED_DATA_DIR / "fred_final_series_monthly.parquet",
         ],
-        "clean": [],
+        "clean": True,
+    }
+
+
+def task_replicate_table_1():
+    """Replicate LSZ (2017) Table I."""
+    return {
+        "actions": ["python ./src/replicate_table_1.py"],
+        "targets": [
+            OUTPUT_DIR / "table_1_replication.tex",
+            OUTPUT_DIR / "table_1_extended.tex",
+        ],
+        "file_dep": [
+            "./src/settings.py",
+            "./src/replicate_table_1.py",
+            PROCESSED_DATA_DIR / "fred_final_series_monthly.parquet",
+            PROCESSED_DATA_DIR / "shiller_data_annual.parquet",
+        ],
+        "clean": True,
+    }
+
+
+def task_replicate_table_2():
+    """Replicate LSZ (2017) Table II."""
+    return {
+        "actions": ["python ./src/replicate_table_2.py"],
+        "targets": [
+            OUTPUT_DIR / "table_2_replication.tex",
+            OUTPUT_DIR / "table_2_extended.tex",
+        ],
+        "file_dep": [
+            "./src/settings.py",
+            "./src/replicate_table_2.py",
+            PROCESSED_DATA_DIR / "fred_final_series_monthly.parquet",
+            PROCESSED_DATA_DIR / "shiller_data_annual.parquet",
+            PROCESSED_DATA_DIR / "greenwood_hanson_hys.parquet",
+        ],
+        "clean": True,
+    }
+
+
+def task_replicate_figure_2():
+    """Replicate LSZ (2017) Figure II: Credit-market sentiment and economic growth, 1929-2015."""
+    return {
+        "actions": ["python ./src/replicate_figure_2.py"],
+        "targets": [
+            OUTPUT_DIR / "figure_2_replication.pdf",
+            OUTPUT_DIR / "figure_2_extended.pdf",
+        ],
+        "file_dep": [
+            "./src/settings.py",
+            "./src/replicate_figure_2.py",
+            "./src/plot_style.py",
+            "./src/replicate_table_2.py",
+            PROCESSED_DATA_DIR / "fred_final_series_monthly.parquet",
+            PROCESSED_DATA_DIR / "shiller_data_annual.parquet",
+            PROCESSED_DATA_DIR / "greenwood_hanson_hys.parquet",
+        ],
+        "clean": True,
     }
