@@ -251,6 +251,7 @@ if __name__ == "__main__":
     today = pd.Timestamp.today().strftime("%Y-%m-%d")
     df_monthly = pull_shiller(SHILLER_URL, START_DATE, today)
     df_annual = process_shiller_annual(df_monthly, how="last")
+    df_annual = df_annual[["sp500_price", "dividend", "pe10", "ln_pe10"]]
 
     filedir = Path(RAW_DATA_DIR)
     filedir.mkdir(parents=True, exist_ok=True)
