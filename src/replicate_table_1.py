@@ -5,7 +5,9 @@ Three columns matching the published QJE table, Newey-West (HAC) errors:
     (1) credit only, (2) equity only, (3) both + rate/inflation controls.
 Published QJE (1929-2015): col1 d_s=-1.997, col2 r^SP=0.081, col3 d_s=-2.061.
 
-Two war-dummy variants x two windows (1929-2015, 1929-2025) are emitted.
+Two war-dummy variants x two windows (1929-2015, 1929-2025) are emitted for
+the Baa-Treasury spread; the Aaa-Treasury spread variant only emits the
+no-dummy tables (war dummies aren't the point of the Aaa comparison).
 Shiller inputs: sp500_price + dividend, to build the annual S&P 500 total log
 return r_t = 100*log((P_t + D_t)/P_{t-1}). All other controls come from FRED.
 Note: Shiller data ends 2023, so the equity columns of the extended window
@@ -51,10 +53,10 @@ def load_sp_return():
     return (100.0 * np.log((P + D) / P.shift(1))).rename("sp_return")
 
 
-def build_panel():
+def build_panel(spread_col="BAA_Treasury_spread"):
     df = pd.read_parquet(PROCESSED_DATA_DIR / "fred_final_series_annual.parquet")
     df["gdp_pc_growth"] = year_over_year_growth(df["GDP_per_capita"])
-    df["d_credit_spread"] = df["BAA_Treasury_spread"].diff()
+    df["d_credit_spread"] = df[spread_col].diff()
     df["d_treasury_3mo"] = df["Treasury_3mo"].diff()
     df["d_treasury_10yr"] = df["Treasury_10yr"].diff()
     df = df.join(load_sp_return(), how="left")
@@ -77,7 +79,7 @@ def cell(res, name):
     return f"{res.params[name]:.3f}", f"({res.bse[name]:.3f})"
 
 
-def emit(df, start, end, use_dummies, label):
+def emit(df, start, end, use_dummies, label, spread_col="BAA_Treasury_spread"):
     base = ["gdp_pc_growth"] + (["wwii", "korea"] if use_dummies else [])
     specs = {
         "(1)": ["d_credit_spread"] + base,
@@ -117,7 +119,8 @@ def emit(df, start, end, use_dummies, label):
     out = pd.DataFrame(table).reindex(rows)
     out.columns.name = f"Dep. var: $\\Delta y_{{t+1}}$, {start}-{end}"
     path = OUTPUT_DIR / f"table_1_{label}.tex"
-    path.write_text(out.to_latex(escape=False))
+    comment = f"% Table I replication ({label}): {start}-{end}, credit spread = {spread_col}\n"
+    path.write_text(comment + out.to_latex(escape=False))
     print(
         f"{label}: col1 d_s={table['(1)']['$\\Delta s_t$']}, "
         f"col2 r_sp={table['(2)']['$r^{SP}_t$']}, "
@@ -126,13 +129,27 @@ def emit(df, start, end, use_dummies, label):
     )
 
 
+# (label tag, spread column, dummy variants to emit) triples. The Baa tag
+# is empty so its filenames match the original, unsuffixed `table_1_*.tex`
+# names; only the Baa variant emits the war-dummy tables.
+SPREAD_VARIANTS = [
+    ("", "BAA_Treasury_spread", (True, False)),
+    ("aaa", "AAA_Treasury_spread", (False,)),
+]
+
+
 def main():
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-    df = build_panel()
-    for use_dummies in (True, False):
-        suffix = "_dummies" if use_dummies else ""
-        emit(df, REP_START, REP_END, use_dummies, f"replication{suffix}")
-        emit(df, REP_START, EXT_END, use_dummies, f"extended{suffix}")
+    for spread_tag, spread_col, dummy_variants in SPREAD_VARIANTS:
+        df = build_panel(spread_col=spread_col)
+        for use_dummies in dummy_variants:
+            dummy_suffix = "_dummies" if use_dummies else ""
+            for window_tag, start, end in (
+                ("replication", REP_START, REP_END),
+                ("extended", REP_START, EXT_END),
+            ):
+                label = "_".join(p for p in (spread_tag, window_tag) if p) + dummy_suffix
+                emit(df, start, end, use_dummies, label, spread_col=spread_col)
 
 
 if __name__ == "__main__":

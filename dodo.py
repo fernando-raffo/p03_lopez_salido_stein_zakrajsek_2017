@@ -185,12 +185,14 @@ def task_process_fred_data():
 
 
 def task_replicate_figure_1():
-    """Replicate LSZ (2017) Figure I: Baa-Treasury credit spread, 1925-2015."""
+    """Replicate LSZ (2017) Figure I: Baa- and Aaa-Treasury credit spread, 1925-2015."""
     return {
         "actions": ["python ./src/replicate_figure_1.py"],
         "targets": [
             OUTPUT_DIR / "figure_1_replication.pdf",
             OUTPUT_DIR / "figure_1_extended.pdf",
+            OUTPUT_DIR / "figure_1_aaa_replication.pdf",
+            OUTPUT_DIR / "figure_1_aaa_extended.pdf",
         ],
         "file_dep": [
             "./src/settings.py",
@@ -203,12 +205,16 @@ def task_replicate_figure_1():
 
 
 def task_replicate_table_1():
-    """Replicate LSZ (2017) Table I."""
+    """Replicate LSZ (2017) Table I (Baa spread, plus an Aaa-spread variant)."""
     return {
         "actions": ["python ./src/replicate_table_1.py"],
         "targets": [
             OUTPUT_DIR / "table_1_replication.tex",
             OUTPUT_DIR / "table_1_extended.tex",
+            OUTPUT_DIR / "table_1_replication_dummies.tex",
+            OUTPUT_DIR / "table_1_extended_dummies.tex",
+            OUTPUT_DIR / "table_1_aaa_replication.tex",
+            OUTPUT_DIR / "table_1_aaa_extended.tex",
         ],
         "file_dep": [
             "./src/settings.py",
@@ -221,12 +227,14 @@ def task_replicate_table_1():
 
 
 def task_replicate_table_2():
-    """Replicate LSZ (2017) Table II."""
+    """Replicate LSZ (2017) Table II (Baa spread, plus an Aaa-spread variant)."""
     return {
         "actions": ["python ./src/replicate_table_2.py"],
         "targets": [
             OUTPUT_DIR / "table_2_replication.tex",
             OUTPUT_DIR / "table_2_extended.tex",
+            OUTPUT_DIR / "table_2_aaa_replication.tex",
+            OUTPUT_DIR / "table_2_aaa_extended.tex",
         ],
         "file_dep": [
             "./src/settings.py",
@@ -240,12 +248,14 @@ def task_replicate_table_2():
 
 
 def task_replicate_figure_2():
-    """Replicate LSZ (2017) Figure II: Credit-market sentiment and economic growth, 1929-2015."""
+    """Replicate LSZ (2017) Figure II: Credit-market sentiment and economic growth, 1929-2015 (Baa spread, plus an Aaa-spread variant)."""
     return {
         "actions": ["python ./src/replicate_figure_2.py"],
         "targets": [
             OUTPUT_DIR / "figure_2_replication.pdf",
             OUTPUT_DIR / "figure_2_extended.pdf",
+            OUTPUT_DIR / "figure_2_aaa_replication.pdf",
+            OUTPUT_DIR / "figure_2_aaa_extended.pdf",
         ],
         "file_dep": [
             "./src/settings.py",

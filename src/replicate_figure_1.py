@@ -8,8 +8,10 @@ Styling is shared with Figure II via `plot_style.py` so both figures match
 the look of the printed article.
 
 Flexible like `replicate_figure_2.plot_figure_2`: pass any `start`/`end`
-window to `plot_figure_1`. `main()` saves both the 1925-2015 replication
-figure and a 1925-present extension, as PDFs, to `_output/`.
+window and `spread_col` to `plot_figure_1`. `main()` saves both the
+1925-2015 replication figure and a 1925-present extension, as PDFs, to
+`_output/`, once for the Baa-Treasury spread and once for the Aaa-Treasury
+spread.
 """
 
 from pathlib import Path
@@ -30,25 +32,28 @@ EXT_END = config("EXTENSION_END_DATE")
 set_paper_style()
 
 
-def plot_figure_1(df, start=BUFFER_START, end=REP_END):
+def plot_figure_1(df, start=BUFFER_START, end=REP_END, spread_col="BAA_Treasury_spread"):
     """
-    Build the Figure I line plot (Baa-Treasury credit spread, with NBER
-    recessions shaded) over `df.loc[start:end]`.
+    Build the Figure I line plot (credit spread, with NBER recessions
+    shaded) over `df.loc[start:end]`.
 
     Parameters
     ----------
     df : pandas.DataFrame
         `fred_final_series_monthly.parquet`, indexed by date, with
-        `BAA_Treasury_spread` and `hist_recession_indicator` columns.
+        `spread_col` and `hist_recession_indicator` columns.
     start, end : datetime-like
         First and last date (inclusive) of the sample plotted.
+    spread_col : str, default "BAA_Treasury_spread"
+        Column of `df` to plot as the credit spread, e.g.
+        "BAA_Treasury_spread" or "AAA_Treasury_spread".
 
     Returns
     -------
     (fig, spread) : (matplotlib.figure.Figure, pandas.Series)
     """
     window = df.loc[(df.index >= start) & (df.index <= end)]
-    spread = window["BAA_Treasury_spread"].dropna()
+    spread = window[spread_col].dropna()
 
     fig, ax = plt.subplots(figsize=(10, 5))
     ax.plot(spread.index, spread.values, color=LINE_COLOR, lw=1.1)
@@ -95,6 +100,14 @@ def plot_figure_1(df, start=BUFFER_START, end=REP_END):
     return fig, spread
 
 
+# (label tag, spread column) pairs. The Baa tag is empty so its filenames
+# match the original, unsuffixed `figure_1_*.pdf` names.
+SPREAD_VARIANTS = [
+    ("", "BAA_Treasury_spread"),
+    ("aaa", "AAA_Treasury_spread"),
+]
+
+
 def main():
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     df = pd.read_parquet(PROCESSED_DATA_DIR / "fred_final_series_monthly.parquet")
@@ -103,15 +116,17 @@ def main():
         (BUFFER_START, REP_END, "replication"),
         (BUFFER_START, EXT_END, "extended"),
     ]
-    for start, end, label in windows:
-        fig, spread = plot_figure_1(df, start, end)
-        out = OUTPUT_DIR / f"figure_1_{label}.pdf"
-        fig.savefig(out)
-        plt.close(fig)
-        print(
-            f"{label} ({start.date()}..{end.date()}): saved {out.name}  "
-            f"(n={len(spread)}, {spread.index.min().date()}..{spread.index.max().date()})"
-        )
+    for spread_tag, spread_col in SPREAD_VARIANTS:
+        for start, end, window_label in windows:
+            fig, spread = plot_figure_1(df, start, end, spread_col=spread_col)
+            label = "_".join(p for p in (spread_tag, window_label) if p)
+            out = OUTPUT_DIR / f"figure_1_{label}.pdf"
+            fig.savefig(out)
+            plt.close(fig)
+            print(
+                f"{label} ({start.date()}..{end.date()}): saved {out.name}  "
+                f"(n={len(spread)}, {spread.index.min().date()}..{spread.index.max().date()})"
+            )
 
 
 if __name__ == "__main__":

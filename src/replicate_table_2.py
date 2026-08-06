@@ -39,9 +39,13 @@ effective estimation sample used here begins in 1931 rather than 1929.
 Data: all series come from the annual parquet files in
 `_data/processed_data`:
     - fred_final_series_annual.parquet: GDP_per_capita, CPI_inflation,
-      BAA_Treasury_spread, Treasury_10yr, Treasury_3mo
+      BAA_Treasury_spread / AAA_Treasury_spread, Treasury_10yr, Treasury_3mo
     - greenwood_hanson_hys.parquet: ln_hy_share (ln HYS)
     - shiller_data_annual.parquet: sp500_price, dividend, ln_pe10
+
+`build_panel`'s `spread_col` argument picks which of the two credit spreads
+feeds `s_t`; `main()` emits one full set of tables for each, the Aaa set
+suffixed with "aaa" (e.g. table_2_aaa_replication.tex).
 """
 
 from pathlib import Path
@@ -91,8 +95,15 @@ def newey_west_lags(n_obs):
     return max(int(np.floor(4 * (n_obs / 100.0) ** (2 / 9))), 1)
 
 
-def build_panel():
-    """Assemble the annual panel of series needed for Table II."""
+def build_panel(spread_col="BAA_Treasury_spread"):
+    """Assemble the annual panel of series needed for Table II.
+
+    Parameters
+    ----------
+    spread_col : str, default "BAA_Treasury_spread"
+        Column of `fred_final_series_annual.parquet` to use as the credit
+        spread `s_t`, e.g. "BAA_Treasury_spread" or "AAA_Treasury_spread".
+    """
     fred = pd.read_parquet(PROCESSED_DATA_DIR / "fred_final_series_annual.parquet")
     hys = pd.read_parquet(PROCESSED_DATA_DIR / "greenwood_hanson_hys.parquet")
     shiller = pd.read_parquet(PROCESSED_DATA_DIR / "shiller_data_annual.parquet")
@@ -103,7 +114,7 @@ def build_panel():
 
     df = fred.copy()
     df["dy"] = year_over_year_growth(df["GDP_per_capita"])
-    df["d_spread"] = df["BAA_Treasury_spread"].diff()
+    df["d_spread"] = df[spread_col].diff()
     df["d_3mo"] = df["Treasury_3mo"].diff()
     df["d_10yr"] = df["Treasury_10yr"].diff()
     df["inflation_pct"] = to_percent(df["CPI_inflation"])
@@ -114,7 +125,7 @@ def build_panel():
 
     # Auxiliary-regression predictors, lagged two years per the paper.
     df["ln_hys_lag2"] = df["ln_hys"].shift(2)
-    df["spread_lag2"] = df["BAA_Treasury_spread"].shift(2)
+    df["spread_lag2"] = df[spread_col].shift(2)
     df["ln_pe10_lag2"] = df["ln_pe10"].shift(2)
 
     # Predetermined (t-1) controls for the second-step regression.
@@ -215,13 +226,14 @@ def _aux_table(results):
     return table
 
 
-def emit_table_2(results, start, end, label):
+def emit_table_2(results, start, end, label, spread_col="BAA_Treasury_spread"):
     main_table = _main_table(results)
     aux_table = _aux_table(results)
 
     out = OUTPUT_DIR / f"table_2_{label}.tex"
     text = (
-        f"% Table II replication ({label}): {start}-{end}\n"
+        f"% Table II replication ({label}): {start}-{end}, "
+        f"credit spread = {spread_col}\n"
         + main_table.to_latex(escape=False)
         + "\n"
         + aux_table.to_latex(escape=False)
@@ -246,11 +258,26 @@ def emit_table_2(results, start, end, label):
     print(f"  -> {out.name}")
 
 
+# (label tag, spread column) pairs. The Baa tag is empty so its filenames
+# match the original, unsuffixed `table_2_*.tex` names.
+SPREAD_VARIANTS = [
+    ("", "BAA_Treasury_spread"),
+    ("aaa", "AAA_Treasury_spread"),
+]
+
+
 def main():
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-    df = build_panel()
-    emit_table_2(run_table_2(df, REP_START, REP_END), REP_START, REP_END, "replication")
-    emit_table_2(run_table_2(df, REP_START, EXT_END), REP_START, EXT_END, "extended")
+    for spread_tag, spread_col in SPREAD_VARIANTS:
+        df = build_panel(spread_col=spread_col)
+        for window_tag, start, end in (
+            ("replication", REP_START, REP_END),
+            ("extended", REP_START, EXT_END),
+        ):
+            label = "_".join(p for p in (spread_tag, window_tag) if p)
+            emit_table_2(
+                run_table_2(df, start, end), start, end, label, spread_col=spread_col
+            )
 
 
 if __name__ == "__main__":
