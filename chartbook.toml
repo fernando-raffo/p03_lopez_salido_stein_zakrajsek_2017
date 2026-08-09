@@ -1,45 +1,38 @@
-[config]
+[project]
 type = "pipeline"
-chartbook_format_version = "0.0.2"
-
-[site]
-title = "p03_lopez-salido_stein_zakrajsek_2017"
-author = "Your Name"
-copyright = "2025"
-logo_path = ""
-favicon_path = ""
-
-[pipeline]
-id = "P0"
-pipeline_name = "p03_lopez-salido_stein_zakrajsek_2017"
-pipeline_description = "A data science project"
-lead_pipeline_developer = "Your Name"
-contributors = ["Your Name"]
-software_modules_command = "module load anaconda3/3.11.4 TeXLive/2023"
-runs_on_grid_or_windows_or_other = "Windows/Linux/MacOS"
-git_repo_URL = ""
-README_file_path = "./README.md"
-site_dir = "./docs_src/"
+id = "P01"
+name = "Credit-Market Sentiment and the Business Cycle"
+description = "Replication of Tables I-II and Figures I-II from López-Salido, David, Jeremy C. Stein, and Egon Zakrajšek. \"Credit-Market Sentiment and the Business Cycle.\" The Quarterly Journal of Economics 132, no. 3 (2017): 1373–1426. Uses data from FRED, WRDS Mergent FISD, Robert Shiller’s website, Robin Greenwood’s HBS page. Additional extension to the work: testing the method with AAA-Treasury spread and out of sample test of the methdology for the 2020-2022 COVID shock and recovery."
+maintainer = "Fernando Raffo and Bangjie Xu"
+contributors = ["Fernando Raffo", "Bangjie Xu"]
+os_compatibility = ["Windows", "Linux", "macOS"]
+repo_url = "https://github.com/fernando-raffo/p03_lopez_salido_stein_zakrajsek_2017"
+copyright = "2026"
+logo = "assets/logo.png"
+build = """
+module load anaconda3/3.12 TeXLive/2026
+doit
+"""
 
 [notebooks]
 
 
-[notebooks.01_example_notebook_interactive]
-notebook_name = "Example Notebook Interactive"
-notebook_description = "Example notebook for demonstrating how to construct a Chartbook notebook."
-notebook_path = "_output/01_example_notebook_interactive.ipynb"
-
-
-[notebooks.02_example_with_dependencies]
-notebook_name = "Example Notebook with Dependencies"
-notebook_description = "Example notebook demonstrating dependencies on data pulls."
-notebook_path = "_output/02_example_with_dependencies.ipynb"
-
-
-
-
 [dataframes]
 
+[dataframes.fred]
+name = "FRED Macroeconomic Data"
+description = ""
+sources = ["FRED", "Office of Financial Research"]
+providers = ["FRED", "Office of Financial Research"]
+provider_links = ["https://fred.stlouisfed.org/"]
+tags = ["raw data", "macroeconomic data", "FRED"]
+access_types = ["Public"]
+license = "No"
+contact_required = "No"
+restrictions = "No"
+pull_method = "Web API via Python"
+path_to_parquet_data = "./_data/raw_data/fred.parquet"
+docs_path = "./_data/raw_data/fred_data_dictionary.md"
 
 [charts]
 

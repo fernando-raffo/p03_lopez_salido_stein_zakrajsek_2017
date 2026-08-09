@@ -188,3 +188,33 @@ def task_replicate_figure_1():
         ],
         "clean": [],
     }
+
+
+sphinx_targets = [
+    "./docs/index.html",
+]
+
+
+def task_build_chartbook_site():
+    """Compile Sphinx Docs"""
+    # notebook_scripts = [
+    #    Path(notebook_tasks[notebook]["path"])
+    #    for notebook in notebook_tasks.keys()
+    # ]
+    file_dep = [
+        "./README.md",
+        "./chartbook.toml",
+        # *notebook_scripts,
+    ]
+
+    return {
+        "actions": [
+            "chartbook build -f",
+        ],  # Use docs as build destination
+        "targets": sphinx_targets,
+        "file_dep": file_dep,
+        # "task_dep": [
+        #    "run_notebooks",
+        # ],
+        "clean": True,
+    }
