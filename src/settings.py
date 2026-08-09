@@ -99,7 +99,7 @@ defaults["BUFFER_START_DATE"] = datetime.strptime("1925-01-01", "%Y-%m-%d")
 defaults["REPLICATION_START_DATE"] = datetime.strptime("1929-01-01", "%Y-%m-%d")
 defaults["REPLICATION_END_DATE"] = datetime.strptime("2015-12-31", "%Y-%m-%d")
 defaults["EXTENSION_START_DATE"] = datetime.strptime("2016-01-01", "%Y-%m-%d")
-defaults["EXTENSION_END_DATE"] = datetime.today()
+defaults["EXTENSION_END_DATE"] = datetime.strptime("2025-12-31", "%Y-%m-%d")
 
 
 ## File paths

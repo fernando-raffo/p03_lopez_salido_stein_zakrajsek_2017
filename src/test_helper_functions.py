@@ -62,3 +62,32 @@ def test_forward_cumulative_growth_sorts_by_index_first():
     result = hf.forward_cumulative_growth(s, horizon=1)
 
     assert result.loc[2010] == pytest.approx(100.0 * (np.log(110.0) - np.log(100.0)))
+
+
+def test_log_total_return_matches_formula():
+    price = pd.Series([100.0, 110.0, 105.0], index=[2010, 2011, 2012])
+    income = pd.Series([2.0, 2.5, 3.0], index=[2010, 2011, 2012])
+
+    result = hf.log_total_return(price, income)
+
+    assert np.isnan(result.loc[2010])
+    assert result.loc[2011] == pytest.approx(100.0 * np.log(112.5 / 100.0))
+    assert result.loc[2012] == pytest.approx(100.0 * np.log(108.0 / 110.0))
+
+
+def test_log_total_return_sorts_by_index_first():
+    price = pd.Series([105.0, 100.0, 110.0], index=[2012, 2010, 2011])
+    income = pd.Series([3.0, 2.0, 2.5], index=[2012, 2010, 2011])
+
+    result = hf.log_total_return(price, income)
+
+    assert result.loc[2011] == pytest.approx(100.0 * np.log(112.5 / 100.0))
+    assert result.loc[2012] == pytest.approx(100.0 * np.log(108.0 / 110.0))
+
+
+def test_to_percent_scales_by_100():
+    s = pd.Series([0.05, -0.02, 0.0], index=[2010, 2011, 2012])
+
+    result = hf.to_percent(s)
+
+    assert result.tolist() == pytest.approx([5.0, -2.0, 0.0])
