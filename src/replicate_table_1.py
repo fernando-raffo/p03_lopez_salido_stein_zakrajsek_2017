@@ -5,9 +5,8 @@ Three columns matching the published QJE table, Newey-West (HAC) errors:
     (1) credit only, (2) equity only, (3) both + rate/inflation controls.
 Published QJE (1929-2015): col1 d_s=-1.997, col2 r^SP=0.081, col3 d_s=-2.061.
 
-Two war-dummy variants x two windows (1929-2015, 1929-2025) are emitted for
-the Baa-Treasury spread; the Aaa-Treasury spread variant only emits the
-no-dummy tables (war dummies aren't the point of the Aaa comparison).
+Two windows (1929-2015, 1929-2025) are emitted for both the Baa- and
+Aaa-Treasury spread variants.
 Shiller inputs: sp500_price + dividend, to build the annual S&P 500 total log
 return r_t = 100*log((P_t + D_t)/P_{t-1}). All other controls come from FRED.
 Note: Shiller data ends 2023, so the equity columns of the extended window
@@ -63,8 +62,6 @@ def build_panel(spread_col="BAA_Treasury_spread"):
     df["CPI_inflation"] = to_percent(df["CPI_inflation"])
     df = df.join(load_sp_return(), how="left")
     df["dy_next"] = df["gdp_pc_growth"].shift(-1)
-    df["wwii"] = df.index.isin(range(1941, 1946)).astype(int)
-    df["korea"] = df.index.isin(range(1950, 1954)).astype(int)
     return df
 
 
@@ -103,8 +100,8 @@ def standardized_effect(res, window, regressors, var):
     return f"{effect:.3f}"
 
 
-def emit(df, start, end, use_dummies, label, spread_col="BAA_Treasury_spread"):
-    base = ["gdp_pc_growth"] + (["wwii", "korea"] if use_dummies else [])
+def emit(df, start, end, label, spread_col="BAA_Treasury_spread"):
+    base = ["gdp_pc_growth"]
     specs = {
         "(1)": ["d_credit_spread"] + base,
         "(2)": ["sp_return"] + base,
@@ -153,27 +150,24 @@ def emit(df, start, end, use_dummies, label, spread_col="BAA_Treasury_spread"):
     )
 
 
-# (label tag, spread column, dummy variants to emit) triples. The Baa tag
-# is empty so its filenames match the original, unsuffixed `table_1_*.tex`
-# names; only the Baa variant emits the war-dummy tables.
+# (label tag, spread column) pairs. The Baa tag is empty so its filenames
+# match the original, unsuffixed `table_1_*.tex` names.
 SPREAD_VARIANTS = [
-    ("", "BAA_Treasury_spread", (True, False)),
-    ("aaa", "AAA_Treasury_spread", (False,)),
+    ("", "BAA_Treasury_spread"),
+    ("aaa", "AAA_Treasury_spread"),
 ]
 
 
 def main():
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-    for spread_tag, spread_col, dummy_variants in SPREAD_VARIANTS:
+    for spread_tag, spread_col in SPREAD_VARIANTS:
         df = build_panel(spread_col=spread_col)
-        for use_dummies in dummy_variants:
-            dummy_suffix = "_dummies" if use_dummies else ""
-            for window_tag, start, end in (
-                ("replication", REP_START, REP_END),
-                ("extended", REP_START, EXT_END),
-            ):
-                label = "_".join(p for p in (spread_tag, window_tag) if p) + dummy_suffix
-                emit(df, start, end, use_dummies, label, spread_col=spread_col)
+        for window_tag, start, end in (
+            ("replication", REP_START, REP_END),
+            ("extended", REP_START, EXT_END),
+        ):
+            label = "_".join(p for p in (spread_tag, window_tag) if p)
+            emit(df, start, end, label, spread_col=spread_col)
 
 
 if __name__ == "__main__":

@@ -211,8 +211,6 @@ def task_replicate_table_1():
         "targets": [
             OUTPUT_DIR / "table_1_replication.tex",
             OUTPUT_DIR / "table_1_extended.tex",
-            OUTPUT_DIR / "table_1_replication_dummies.tex",
-            OUTPUT_DIR / "table_1_extended_dummies.tex",
             OUTPUT_DIR / "table_1_aaa_replication.tex",
             OUTPUT_DIR / "table_1_aaa_extended.tex",
         ],
