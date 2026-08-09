@@ -55,6 +55,7 @@ import pandas as pd
 import statsmodels.api as sm
 
 from helper_functions import log_total_return, to_percent, year_over_year_growth
+from latex_format import coef_se_rows, two_row_header
 from settings import config
 
 PROCESSED_DATA_DIR = Path(config("PROCESSED_DATA_DIR"))
@@ -83,10 +84,28 @@ _MAIN_ROWS = [
 ]
 
 # Row order and LaTeX labels for the auxiliary (first-step) table.
+#
+# `ln_pe10_lag2` carries a 0.01 display scale to match the paper's own
+# convention. LSZ fit Delta y_t, Delta s_t and r_t^SP as decimal (fractional)
+# growth/return rates and only describe their magnitudes "as a percentage"
+# in prose; this repo instead computes those series in percentage-point
+# units throughout (see `helper_functions.year_over_year_growth` and
+# `log_total_return`). That 100x rescaling is invisible in every other cell
+# of Table II because it cancels whenever it appears on both sides of a
+# regression (e.g. Delta y_t on Delta y_{t-1}, or the second-step Delta y_t
+# on r_sp_hat, itself a fitted value of the rescaled r_t^SP). It does *not*
+# cancel here, because ln[P/E10] is a dimensionless log-ratio that is never
+# itself rescaled: the fitted coefficient on ln_pe10_lag2 comes out ~100x
+# the paper's published -0.134 (confirmed against the authors' 2015 FEDS
+# working-paper draft, which reports an analogous -0.136 for log[P/E]).
+# Scaling only this row's *display* by 0.01 reproduces the paper's own
+# convention of showing a rescaled coefficient for one specific auxiliary
+# regressor (they multiply their ln HYS row by 100; we divide this one by
+# 100) without touching the fitted values used anywhere downstream.
 _AUX_ROWS = [
     ("ln_hys_lag2", r"$\ln \mathrm{HYS}_{t-2}$"),
     ("spread_lag2", r"$s_{t-2}$"),
-    ("ln_pe10_lag2", r"$\ln[P/E10]_{t-2}$"),
+    ("ln_pe10_lag2", r"$\ln[P/E10]_{t-2}$", 0.01),
 ]
 
 
@@ -185,58 +204,50 @@ def run_table_2(df, start=REP_START, end=REP_END):
     return results
 
 
-def _coef_and_se(res, var):
-    if var not in res.params.index:
-        return "--", ""
-    return f"{res.params[var]:.3f}", f"({res.bse[var]:.3f})"
+def _main_table_lines(results):
+    cols = ["col1", "col2", "col3", "col4"]
+    res_list = [results[c] for c in cols]
+    ncols = len(cols)
+
+    lines = [f"\\begin{{tabular}}{{l{'c' * ncols}}}", "\\toprule"]
+    lines.append(two_row_header(ncols, r"Dependent variable: $\Delta y_t$"))
+    lines.append("\\midrule")
+    lines.extend(coef_se_rows(res_list, _MAIN_ROWS))
+    lines.append("\\midrule")
+    r2_vals = " & ".join(f"{res.rsquared:.3f}" for res in res_list)
+    lines.append(f"$R^2$ & {r2_vals} \\\\")
+    lines.append("\\bottomrule")
+    lines.append("\\end{tabular}")
+    return lines
 
 
-def _main_table(results):
-    columns = {}
-    for i, col in enumerate(["col1", "col2", "col3", "col4"], start=1):
-        res = results[col]
-        rows = {}
-        for var, label in _MAIN_ROWS:
-            coef, se = _coef_and_se(res, var)
-            rows[label] = coef
-            rows[f"{label} (se)"] = se
-        rows["$R^2$"] = f"{res.rsquared:.3f}"
-        rows["$N$"] = str(int(res.nobs))
-        columns[f"({i})"] = rows
-    table = pd.DataFrame(columns)
-    table.columns.name = r"Dependent variable: $\Delta y_t$"
-    return table
-
-
-def _aux_table(results):
+def _aux_table_lines(results):
     res_s = results["aux_spread"]
     res_r = results["aux_return"]
 
-    def col(res):
-        rows = {}
-        for var, label in _AUX_ROWS:
-            coef, se = _coef_and_se(res, var)
-            rows[label] = coef
-            rows[f"{label} (se)"] = se
-        rows["$R^2$"] = f"{res.rsquared:.3f}"
-        return rows
-
-    table = pd.DataFrame({r"$\Delta s_t$": col(res_s), r"$r_t^{SP}$": col(res_r)})
-    table.columns.name = "Auxiliary regressions"
-    return table
+    lines = [
+        "\\begin{tabular}{lcc}",
+        "\\toprule",
+        r"Auxiliary regressions & $\Delta s_t$ & $r_t^{SP}$ \\",
+        "\\midrule",
+    ]
+    lines.extend(coef_se_rows([res_s, res_r], _AUX_ROWS))
+    lines.append("\\midrule")
+    lines.append(f"$R^2$ & {res_s.rsquared:.3f} & {res_r.rsquared:.3f} \\\\")
+    lines.append("\\bottomrule")
+    lines.append("\\end{tabular}")
+    return lines
 
 
 def emit_table_2(results, start, end, label, spread_col="BAA_Treasury_spread"):
-    main_table = _main_table(results)
-    aux_table = _aux_table(results)
+    lines = _main_table_lines(results) + [""] + _aux_table_lines(results)
 
     out = OUTPUT_DIR / f"table_2_{label}.tex"
     text = (
         f"% Table II replication ({label}): {start}-{end}, "
         f"credit spread = {spread_col}\n"
-        + main_table.to_latex(escape=False)
+        + "\n".join(lines)
         + "\n"
-        + aux_table.to_latex(escape=False)
     )
     out.write_text(text)
 
