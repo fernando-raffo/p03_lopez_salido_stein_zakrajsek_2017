@@ -7,8 +7,10 @@ Both plotted variables come straight from `replicate_table_2.run_table_2`'s
 column-(1) results.
 
 Flexible like `replicate_table_2.run_table_2`: pass any `start`/`end`
-window to `plot_figure_2`. `main()` saves both the 1929-2015 replication
-figure and a 1929-present extension, as PDFs, to `_output/`.
+window to `plot_figure_2`. `main()` saves the 1929-2015 replication figure
+and a 1929-present extension, as PDFs, to `_output/`, once for the
+Baa-Treasury spread and once for the Aaa-Treasury spread (both via
+`replicate_table_2.build_panel`'s `spread_col` argument).
 """
 
 import numpy as np
@@ -151,20 +153,30 @@ def plot_figure_2(df, start=REP_START, end=REP_END):
     return fig
 
 
+# (label tag, spread column) pairs. The Baa tag is empty so its filenames
+# match the original, unsuffixed `figure_2_*.pdf` names.
+SPREAD_VARIANTS = [
+    ("", "BAA_Treasury_spread"),
+    ("aaa", "AAA_Treasury_spread"),
+]
+
+
 def main():
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-    df = build_panel()
 
     windows = [
         (REP_START, REP_END, "replication"),
         (REP_START, EXT_END, "extended"),
     ]
-    for start, end, label in windows:
-        fig = plot_figure_2(df, start, end)
-        out = OUTPUT_DIR / f"figure_2_{label}.pdf"
-        fig.savefig(out)
-        plt.close(fig)
-        print(f"{label} ({start}-{end}): -> {out.name}")
+    for spread_tag, spread_col in SPREAD_VARIANTS:
+        df = build_panel(spread_col=spread_col)
+        for start, end, window_label in windows:
+            fig = plot_figure_2(df, start, end)
+            label = "_".join(p for p in (spread_tag, window_label) if p)
+            out = OUTPUT_DIR / f"figure_2_{label}.pdf"
+            fig.savefig(out)
+            plt.close(fig)
+            print(f"{label} ({start}-{end}): -> {out.name}")
 
 
 if __name__ == "__main__":
