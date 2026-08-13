@@ -126,7 +126,7 @@ path = "./_data/processed_data/shiller_data_annual.parquet"
 date_col = "date"
 docs_path = "./_data/data_dictionaries/shiller_data_annual_dictionary.md"
 
-[dataframes.greenwood_hanson_hys_procssed_series]
+[dataframes.greenwood_hanson_hys_processed_series]
 name = "Greenwood-Hanson High-Yield Share"
 description = "Final continuous annual high-yield share used in the replication, splicing the published Greenwood-Hanson (2013) series (1926-2008) with the Mergent FISD reconstruction (2009 onward)."
 sources = ["Greenwood & Hanson (2013), \"Issuer Quality and Corporate Bond Returns,\" Review of Financial Studies 26(6), 1483–1525", "Review of Financial Studies", "Mergent FISD"]
@@ -146,7 +146,7 @@ docs_path = "./_data/data_dictionaries/greenwood_hanson_hys_dictionary.md"
 [charts.figure_1_replication]
 name = "Figure 1: Baa-Treasury Credit Spread (1925-2015)"
 description = "Interactive replication of Figure I: the monthly Baa-Treasury credit spread over the 1925-2015 sample, with NBER recessions shaded."
-dataframe = "fred_processed_series_monthly"
+dataframe = "fred_processed_monthly_series"
 path = "./_output/figure_1_replication.html"
 docs = "Baa (long-term corporate bond) yield minus the 10-year Treasury yield, monthly, 1925-2015. Recession shading uses the historical NBER indicator series."
 tags = ["Credit Spread", "Baa", "Figure 1"]
@@ -160,7 +160,7 @@ seasonal_adjustment = "Not Seasonally Adjusted"
 [charts.figure_1_extended]
 name = "Figure 1: Baa-Treasury Credit Spread (1925-2025, extended)"
 description = "Extension of Figure I past the paper's 2015 sample end, through the most recent available FRED data."
-dataframe = "fred_final_series_monthly"
+dataframe = "fred_processed_monthly_series"
 path = "./_output/figure_1_extended.html"
 docs = "Same construction as the replication chart, extended through the present, including the 2020 COVID shock and recovery."
 tags = ["Credit Spread", "Baa", "Figure 1", "Extension"]
@@ -173,7 +173,7 @@ seasonal_adjustment = "Not Seasonally Adjusted"
 [charts.figure_1_aaa_replication]
 name = "Figure 1 (Aaa variant): Aaa-Treasury Credit Spread (1925-2015)"
 description = "Analogous to Figure I, using the Aaa (instead of Baa) corporate bond spread."
-dataframe = "fred_final_series_monthly"
+dataframe = "fred_processed_monthly_series"
 path = "./_output/figure_1_aaa_replication.html"
 docs = "Aaa yield minus the 10-year Treasury yield, monthly, 1925-2015."
 tags = ["Credit Spread", "Aaa", "Figure 1", "Extension"]
@@ -186,7 +186,7 @@ seasonal_adjustment = "Not Seasonally Adjusted"
 [charts.figure_1_aaa_extended]
 name = "Figure 1 (Aaa variant): Aaa-Treasury Credit Spread (1925-2025, extended)"
 description = "Aaa-spread extension of Figure I through the most recent available FRED data."
-dataframe = "fred_final_series_monthly"
+dataframe = "fred_processed_monthly_series"
 path = "./_output/figure_1_aaa_extended.html"
 docs = "Same construction as the Aaa replication chart, extended through the present."
 tags = ["Credit Spread", "Aaa", "Figure 1", "Extension"]
@@ -199,7 +199,7 @@ seasonal_adjustment = "Not Seasonally Adjusted"
 [charts.figure_2_replication]
 name = "Figure 2: Credit-Market Sentiment and GDP Growth (1929-2015)"
 description = "Interactive replication of Figure II: credit-market sentiment at t-2 vs. real GDP-per-capita growth at t, both orthogonalized against Table II column (1)'s other regressor, with the fitted line and influential observations highlighted."
-dataframe = "fred_macroeconomic_variables"
+dataframe = "fred_processed_annual_series"
 path = "./_output/figure_2_replication.html"
 docs = "Combines FRED (GDP, interest rates, inflation), Robert Shiller's stock-market data (P/E10), and the Greenwood-Hanson high-yield share, per Table II column (1)."
 tags = ["Sentiment", "GDP Growth", "Baa", "Figure 2"]
@@ -212,7 +212,7 @@ seasonal_adjustment = "Mixed"
 [charts.figure_2_extended]
 name = "Figure 2: Credit-Market Sentiment and GDP Growth (1929-present, extended)"
 description = "Extension of Figure II past the paper's 2015 sample end, through the most recent available data."
-dataframe = "fred_macroeconomic_variables"
+dataframe = "fred_processed_annual_series"
 path = "./_output/figure_2_extended.html"
 docs = "Same construction as the replication chart, extended through the present, including the 2020 COVID shock and recovery."
 tags = ["Sentiment", "GDP Growth", "Baa", "Figure 2", "Extension"]
@@ -225,7 +225,7 @@ seasonal_adjustment = "Mixed"
 [charts.figure_2_aaa_replication]
 name = "Figure 2 (Aaa variant): Credit-Market Sentiment and GDP Growth (1929-2015)"
 description = "Analogous to Figure II, using the Aaa (instead of Baa) corporate bond spread as the credit-spread component of sentiment."
-dataframe = "fred_macroeconomic_variables"
+dataframe = "fred_processed_annual_series"
 path = "./_output/figure_2_aaa_replication.html"
 docs = "Same construction as the Figure II replication chart, with the Aaa-Treasury spread feeding the sentiment measure."
 tags = ["Sentiment", "GDP Growth", "Aaa", "Figure 2", "Extension Variant"]
@@ -238,7 +238,7 @@ seasonal_adjustment = "Mixed"
 [charts.figure_2_aaa_extended]
 name = "Figure 2 (Aaa variant): Credit-Market Sentiment and GDP Growth (1929-present, extended)"
 description = "Aaa-spread extension of Figure II through the most recent available data."
-dataframe = "fred_macroeconomic_variables"
+dataframe = "fred_processed_annual_series"
 path = "./_output/figure_2_aaa_extended.html"
 docs = "Same construction as the Aaa replication chart, extended through the present."
 tags = ["Sentiment", "GDP Growth", "Aaa", "Figure 2", "Extension Variant"]
