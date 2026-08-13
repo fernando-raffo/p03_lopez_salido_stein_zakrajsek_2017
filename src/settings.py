@@ -127,6 +127,7 @@ defaults = {
 # Additional subdirectories for data and output
 defaults["RAW_DATA_DIR"] = if_relative_make_abs(Path("_data/raw_data"))
 defaults["PROCESSED_DATA_DIR"] = if_relative_make_abs(Path("_data/processed_data"))
+defaults["DATA_DICTIONARY_DIR"] = if_relative_make_abs(Path("_data/data_dictionaries"))
 
 
 def config(

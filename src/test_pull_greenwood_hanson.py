@@ -119,3 +119,48 @@ def test_pull_greenwood_hanson_bad_source():
 def test_load_greenwood_hanson_invalid_dir():
     with pytest.raises(FileNotFoundError):
         gh.load_greenwood_hanson(data_dir="invalid_directory")
+
+
+def test_save_data_dictionary_historical(tmp_path):
+    df = pd.DataFrame(
+        {"hy_share": [0.2], "SOME_UNKNOWN_COLUMN": [1.0]}, index=[1990]
+    )
+
+    file_path = gh.save_data_dictionary_historical(df, data_dir=tmp_path)
+
+    assert file_path == tmp_path / "greenwood_hanson_hys_historical_dictionary.md"
+    text = file_path.read_text()
+    assert "hy_share" in text
+    assert gh._HISTORICAL_COLUMN_DESCRIPTIONS["hy_share"] in text
+    assert "SOME_UNKNOWN_COLUMN" in text
+    assert "Unknown series" in text
+
+
+def test_save_data_dictionary_fisd(tmp_path):
+    df = pd.DataFrame(
+        {"n_issues": [10], "SOME_UNKNOWN_COLUMN": [1.0]}, index=[2010]
+    )
+
+    file_path = gh.save_data_dictionary_fisd(df, data_dir=tmp_path)
+
+    assert file_path == tmp_path / "greenwood_hanson_hys_fisd_dictionary.md"
+    text = file_path.read_text()
+    assert "n_issues" in text
+    assert gh._FISD_COLUMN_DESCRIPTIONS["n_issues"] in text
+    assert "SOME_UNKNOWN_COLUMN" in text
+    assert "Unknown series" in text
+
+
+def test_save_data_dictionary_combined(tmp_path):
+    df = pd.DataFrame(
+        {"source": ["fisd"], "SOME_UNKNOWN_COLUMN": [1.0]}, index=[2010]
+    )
+
+    file_path = gh.save_data_dictionary_combined(df, data_dir=tmp_path)
+
+    assert file_path == tmp_path / "greenwood_hanson_hys_dictionary.md"
+    text = file_path.read_text()
+    assert "source" in text
+    assert gh._COMBINED_COLUMN_DESCRIPTIONS["source"] in text
+    assert "SOME_UNKNOWN_COLUMN" in text
+    assert "Unknown series" in text

@@ -43,6 +43,31 @@ def set_paper_style():
     )
 
 
+def recession_spans(window, indicator_col="hist_recession_indicator"):
+    """Return `(start, end)` pairs for each contiguous recession spell in
+    `window[indicator_col]`, for shading recession periods on a plot.
+
+    Parameters
+    ----------
+    window : pandas.DataFrame
+        Indexed by date, containing at least `indicator_col`.
+    indicator_col : str, default "hist_recession_indicator"
+        Column of `window` equal to 1 during NBER recessions, 0 otherwise.
+
+    Returns
+    -------
+    list of (pandas.Timestamp, pandas.Timestamp)
+        Start and end date of each recession spell found in `window`.
+    """
+    rec = window[indicator_col].fillna(0).astype(int)
+    in_rec = rec.eq(1)
+    if not in_rec.any():
+        return []
+    starts = window.index[in_rec & ~in_rec.shift(1, fill_value=False)]
+    ends = window.index[in_rec & ~in_rec.shift(-1, fill_value=False)]
+    return list(zip(starts, ends))
+
+
 def style_axes(ax):
     """Apply the box-style spines / inward ticks used across the paper's
     figures to a single Axes."""

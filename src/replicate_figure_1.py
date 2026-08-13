@@ -20,7 +20,13 @@ import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
 
-from plot_style import LINE_COLOR, RECESSION_COLOR, set_paper_style, style_axes
+from plot_style import (
+    LINE_COLOR,
+    RECESSION_COLOR,
+    recession_spans,
+    set_paper_style,
+    style_axes,
+)
 from settings import config
 
 PROCESSED_DATA_DIR = Path(config("PROCESSED_DATA_DIR"))
@@ -59,13 +65,8 @@ def plot_figure_1(df, start=BUFFER_START, end=REP_END, spread_col="BAA_Treasury_
     ax.plot(spread.index, spread.values, color=LINE_COLOR, lw=1.1)
 
     # Shade NBER recessions directly from the data
-    rec = window["hist_recession_indicator"].fillna(0).astype(int)
-    in_rec = rec.eq(1)
-    if in_rec.any():
-        starts = window.index[in_rec & ~in_rec.shift(1, fill_value=False)]
-        ends = window.index[in_rec & ~in_rec.shift(-1, fill_value=False)]
-        for s, e in zip(starts, ends):
-            ax.axvspan(s, e, color=RECESSION_COLOR, lw=0)
+    for s, e in recession_spans(window):
+        ax.axvspan(s, e, color=RECESSION_COLOR, lw=0)
 
     # X-axis: a tick every 6 years, exactly as in the printed Figure I.
     first_year = spread.index.year.min()
