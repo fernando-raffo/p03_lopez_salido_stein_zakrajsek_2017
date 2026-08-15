@@ -24,7 +24,7 @@ END_DATE = config("EXTENSION_END_DATE")
 # if END_DATE falls mid-year, that year is still incomplete and is
 # excluded).
 REPLICATION_START_YEAR = REPLICATION_START_DATE.year
-TARGET_END_YEAR = END_DATE.year - 1
+TARGET_END_YEAR = END_DATE.year
 
 
 # Maps each column of the cleaned DataFrame returned by
