@@ -54,8 +54,10 @@ Running this file as a script pulls the data and caches it to ``DATA_DIR``
 (the ``_data`` folder, which is git-ignored, so the data is never committed).
 """
 
+import re
 from io import BytesIO
 from pathlib import Path
+from urllib.parse import urljoin
 
 import numpy as np
 import pandas as pd
@@ -78,16 +80,20 @@ def _config_or(var_name, default):
 RAW_DATA_DIR = Path(config("RAW_DATA_DIR"))
 PROCESSED_DATA_DIR = Path(config("PROCESSED_DATA_DIR"))
 DATA_DICTIONARY_DIR = Path(config("DATA_DICTIONARY_DIR"))
-START_DATE = config("REPLICATION_START_DATE")
-END_DATE = config("REPLICATION_END_DATE")
+START_DATE = config("BUFFER_START_DATE")
+END_DATE = config("EXTENSION_END_DATE")
+PROCESSED_START_DATE = config("REPLICATION_START_DATE")
 
-# The canonical location of Shiller's spreadsheet. Kept configurable because
-# Shiller has moved the file in the past (it is now also mirrored on
-# https://shillerdata.com/). Override with the SHILLER_URL environment
-# variable or a --SHILLER_URL command-line argument if the link changes.
+# The canonical location of Shiller's data. Points at his data website's
+# landing page rather than a direct link to the workbook: shillerdata.com
+# serves ie_data.xls from a versioned CDN URL (a `?ver=...` query string) that
+# changes every time Shiller updates the file, so `_download_workbook` scrapes
+# the current link from this page instead of hard-coding it. Override with the
+# SHILLER_URL environment variable or a --SHILLER_URL command-line argument
+# (accepts either this landing page or a direct .xls link) if it changes.
 SHILLER_URL = _config_or(
     "SHILLER_URL",
-    "http://www.econ.yale.edu/~shiller/data/ie_data.xls",
+    "https://shillerdata.com/",
 )
 
 # A browser-like header avoids the occasional 403 from the host.
@@ -147,8 +153,43 @@ _ANNUAL_COLUMN_DESCRIPTIONS = {
 }
 
 
+# Matches the ie_data.xls link embedded in shillerdata.com's landing page,
+# e.g. `//img1.wsimg.com/.../ie_data.xls?ver=1785857394436`. The page also
+# mentions "ie_data.xls" in plain prose ("File is ie_data.xls below:"), so the
+# pattern requires a preceding "/" (present in any real URL path, absent in
+# prose) and excludes whitespace/quotes/angle brackets to avoid overrunning
+# into surrounding markup.
+_IE_DATA_LINK_RE = re.compile(r'[^\s"\'<>]*/ie_data\.xls[^\s"\'<>]*')
+
+
+def _resolve_shiller_xls_url(page_url):
+    """Scrape shillerdata.com's landing page for the current ie_data.xls link.
+
+    The page serves the workbook from a versioned CDN URL that changes every
+    time Shiller updates the file, so the direct link can't be hard-coded;
+    this re-derives it from the page on every pull instead.
+    """
+    response = requests.get(page_url, headers=_REQUEST_HEADERS, timeout=60)
+    response.raise_for_status()
+    match = _IE_DATA_LINK_RE.search(response.text)
+    if not match:
+        raise ValueError(
+            f"Could not find a link to 'ie_data.xls' on {page_url}. "
+            "shillerdata.com's page layout may have changed; inspect it "
+            "directly, or set SHILLER_URL to a direct .xls link."
+        )
+    return urljoin(page_url, match.group(0))
+
+
 def _download_workbook(url=SHILLER_URL):
-    """Download the raw Excel workbook and return it as an in-memory buffer."""
+    """Download the raw Excel workbook and return it as an in-memory buffer.
+
+    ``url`` may point either directly at an ``.xls`` file or at Shiller's data
+    landing page (e.g. the default ``https://shillerdata.com/``), in which
+    case the actual workbook link is scraped from the page first.
+    """
+    if not url.lower().split("?")[0].endswith(".xls"):
+        url = _resolve_shiller_xls_url(url)
     response = requests.get(url, headers=_REQUEST_HEADERS, timeout=60)
     response.raise_for_status()
     return BytesIO(response.content)
@@ -227,13 +268,21 @@ def pull_shiller(url=SHILLER_URL, start_date=START_DATE, end_date=END_DATE):
 def process_shiller_annual(df_monthly, how="last"):
     """Collapse monthly Shiller data to annual frequency and add ``ln_pe10``.
 
+    Only calendar years with the monthly data needed to actually compute the
+    requested annual value are kept. A year missing its December observation
+    (e.g. the most recent year, if the pull lags behind or ``END_DATE`` cuts
+    it off mid-year) is dropped rather than silently substituted with an
+    earlier month's value for ``how="last"``, or averaged over a partial year
+    for ``how="mean"``.
+
     Parameters
     ----------
     df_monthly : pandas.DataFrame
         Output of :func:`pull_shiller` / :func:`load_shiller`.
     how : {"last", "mean"}
-        ``"last"`` takes the December (year-end) observation of each year;
-        ``"mean"`` takes the calendar-year average. Greenwood-Hanson-style
+        ``"last"`` takes the December (year-end) observation of each
+        complete year; ``"mean"`` takes the calendar-year average of each
+        year that has all 12 months present. Greenwood-Hanson-style
         specifications typically use a year-end level, which is the default.
 
     Returns
@@ -254,13 +303,27 @@ def process_shiller_annual(df_monthly, how="last"):
     [12.0, 24.0]
     >>> bool(np.isclose(a["ln_pe10"].iloc[-1], np.log(24.0)))
     True
+
+    A trailing partial year (here, only through June 2001) is dropped rather
+    than treated as if June were the year-end value:
+
+    >>> m2 = m.iloc[:18]  # 2000 complete, 2001 only through June
+    >>> a2 = process_shiller_annual(m2, how="last")
+    >>> a2.index.year.tolist()
+    [2000]
     """
+    months_by_year = pd.Series(df_monthly.index.month, index=df_monthly.index.year)
+
     if how == "last":
+        complete_years = months_by_year.eq(12).groupby(level=0).any()
         annual = df_monthly.resample("YE").last()
     elif how == "mean":
+        complete_years = months_by_year.groupby(level=0).size().eq(12)
         annual = df_monthly.resample("YE").mean()
     else:
         raise ValueError("`how` must be 'last' or 'mean'.")
+
+    annual = annual.loc[annual.index.year.map(complete_years).fillna(False)]
 
     annual["ln_pe10"] = np.log(annual["pe10"])
     annual.index.name = "date"
@@ -378,9 +441,13 @@ def _demo():
 
 
 if __name__ == "__main__":
-    today = pd.Timestamp.today().strftime("%Y-%m-%d")
-    df_monthly = pull_shiller(SHILLER_URL, START_DATE, today)
+    df_monthly = pull_shiller(SHILLER_URL, START_DATE, END_DATE)
     df_annual = process_shiller_annual(df_monthly, how="last")
+    df_annual = df_annual.loc[
+        str(pd.Timestamp(PROCESSED_START_DATE).date()) : str(
+            pd.Timestamp(END_DATE).date()
+        )
+    ]
     df_annual = df_annual[["sp500_price", "dividend", "pe10", "ln_pe10"]]
 
     filedir = Path(RAW_DATA_DIR)

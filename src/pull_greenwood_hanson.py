@@ -103,8 +103,8 @@ RAW_DATA_DIR = Path(config("RAW_DATA_DIR"))
 PROCESSED_DATA_DIR = Path(config("PROCESSED_DATA_DIR"))
 MANUAL_DATA_DIR = Path(config("MANUAL_DATA_DIR"))
 DATA_DICTIONARY_DIR = Path(config("DATA_DICTIONARY_DIR"))
-START_DATE = config("REPLICATION_START_DATE")
-END_DATE = config("REPLICATION_END_DATE")
+END_DATE = config("EXTENSION_END_DATE")
+PROCESSED_START_DATE = config("REPLICATION_START_DATE")
 
 # Which source to use by default: "fisd" (WRDS Mergent FISD) or "raw"
 # (a manually supplied issuance file in MANUAL_DATA_DIR). Configurable via env
@@ -411,7 +411,7 @@ def _clean_fisd_issues(raw, max_year=None):
       2030), which would otherwise create spurious years.
     """
     if max_year is None:
-        max_year = pd.Timestamp.today().year
+        max_year = END_DATE.year
 
     issues = raw.copy()
     issues["offering_date"] = pd.to_datetime(issues["offering_date"], errors="coerce")
@@ -740,6 +740,10 @@ if __name__ == "__main__":
     except Exception as exc:  # noqa: BLE001 - want a clear message, keep going
         print(f"FISD pull unavailable ({exc}); writing historical series only.")
         full = historical
+
+    # Trim the processed series to the replication sample's start year (1929);
+    # the raw historical/FISD parquet files above are left uncut.
+    full = full.loc[full.index >= PROCESSED_START_DATE.year]
 
     full.to_parquet(processed_dir / "greenwood_hanson_hys.parquet")
     full.to_csv(processed_dir / "greenwood_hanson_hys.csv")
