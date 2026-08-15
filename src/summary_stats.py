@@ -22,23 +22,23 @@ from replicate_table_2 import build_panel
 
 OUTPUT_DIR = Path(config("OUTPUT_DIR"))
 
+# Curated key variables (in display order) with pretty labels, matched to the
+# actual build_panel() columns.
 LABELS = {
     "BAA_Treasury_spread": "Baa--Treasury spread (pp)",
     "AAA_Treasury_spread": "Aaa--Treasury spread (pp)",
-    "spread": "Credit spread (pp)",
-    "s_hat": "Fitted credit spread (pp)",
-    "d_y": "Real GDP growth (\\%)",
-    "gdp_growth": "Real GDP growth (\\%)",
-    "r_sp": "S\\&P 500 return (\\%)",
-    "hy_share": "High-yield issuance share",
-    "ln_hy_share": "Log high-yield share",
+    "ln_hys": "Log high-yield share",
+    "dy": "Real GDP growth (\\%)",
+    "sp_return": "S\\&P 500 return (\\%)",
     "ln_pe10": "Log Shiller P/E10",
-    "pe10": "Shiller P/E10",
-    "i3m": "3m Treasury yield (\\%)",
-    "i10y": "10y Treasury yield (\\%)",
-    "pi": "Inflation (\\%)",
-    "inflation": "Inflation (\\%)",
+    "inflation_pct": "Inflation (\\%)",
+    "Treasury_10yr": "10y Treasury yield (\\%)",
+    "Treasury_3mo": "3m Treasury yield (\\%)",
+    "d_spread": "Change in credit spread (pp)",
 }
+
+# Series shown in the companion chart (must exist in the panel).
+CHART_COLS = ["BAA_Treasury_spread", "ln_hys", "dy"]
 
 
 def _label(c):
@@ -49,8 +49,9 @@ def main():
     df = build_panel()
     num = df.select_dtypes(include="number").copy()
 
-    keys = [c for c in LABELS if c in num.columns]
-    cols = keys if len(keys) >= 3 else list(num.columns)
+    cols = [c for c in LABELS if c in num.columns]
+    if len(cols) < 3:
+        cols = list(num.columns)
     sub = num[cols]
 
     # ---- summary-statistics table ----
@@ -66,12 +67,10 @@ def main():
     print("wrote", OUTPUT_DIR / "table_summary_stats.tex")
 
     # ---- companion chart: standardized headline series over time ----
-    preferred = ["BAA_Treasury_spread", "spread", "s_hat", "hy_share",
-                 "ln_hy_share", "d_y", "gdp_growth"]
-    plot_cols = [c for c in preferred if c in sub.columns][:3]
-    if not plot_cols:
-        plot_cols = list(sub.columns)[:3]
-    z = (sub[plot_cols] - sub[plot_cols].mean()) / sub[plot_cols].std()
+    plot_cols = [c for c in CHART_COLS if c in num.columns]
+    if len(plot_cols) < 2:
+        plot_cols = list(num.columns)[:3]
+    z = (num[plot_cols] - num[plot_cols].mean()) / num[plot_cols].std()
     fig, ax = plt.subplots(figsize=(7.5, 3.2))
     for c in plot_cols:
         label = LABELS.get(c, c).replace("\\%", "%").replace("\\&", "&")
