@@ -16,7 +16,7 @@ python-decouple>=3.8
 requests>=2.34.2
 ruff
 cruft
-scipy>=1.18.0
+scipy>=1.15.3
 statsmodels>=0.14.6
 xlrd>=2.0.2
 wrds>=3.5.0
