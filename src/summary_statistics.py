@@ -4,7 +4,7 @@ file that feeds the whole LSZ (2017) replication pipeline:
     - fred_final_series_annual.parquet   (GDP, prices, yields; 1929-present)
     - fred_final_series_monthly.parquet  (Baa/Aaa-Treasury spreads; 1925-present)
     - greenwood_hanson_hys.parquet       (high-yield issuance share; 1926-present)
-    - shiller_data_annual.parquet        (S&P price/dividend, CAPE; 1929-2023)
+    - shiller_data_annual.parquet        (S&P price/dividend, CAPE; 1929-present)
 
 Four standalone tables and four standalone charts are produced -- one of
 each per file (`summary_statistics_{slug}.tex`/`.pdf`/`.html`), rather than
@@ -24,10 +24,12 @@ import pandas as pd
 import plotly.graph_objects as go
 from matplotlib import pyplot as plt
 
-from helper_functions import year_over_year_growth
+from helper_functions import log_total_return, year_over_year_growth
+from latex_format import latex_escape
 from plot_style import (
     HIGHLIGHT_COLOR,
     LINE_COLOR,
+    MARKER_COLOR,
     RECESSION_COLOR,
     recession_spans,
     set_paper_style,
@@ -49,9 +51,9 @@ set_paper_style()
 # `decimals` places.
 
 FRED_ANNUAL_SPECS = [
-    ("GDP", "Real GDP", r"\$tn (2009)", 1e-12, 2),
+    ("GDP", "Real GDP", "$tn", 1e-12, 2),
     ("Population", "Population", "millions", 1e-6, 1),
-    ("GDP_per_capita", "Real GDP per capita", r"\$000s (2009)", 1e-3, 1),
+    ("GDP_per_capita", "Real GDP per capita", "$000s", 1e-3, 1),
     ("CPI_inflation", "CPI inflation (Dec/Dec)", "pct.", 100.0, 2),
     ("BAA", "Baa corporate bond yield", "pct.", 1.0, 2),
     ("AAA", "Aaa corporate bond yield", "pct.", 1.0, 2),
@@ -67,7 +69,13 @@ FRED_MONTHLY_SPECS = [
     ("BAA", "Baa corporate bond yield", "pct.", 1.0, 2),
     ("AAA", "Aaa corporate bond yield", "pct.", 1.0, 2),
     ("Treasury_10yr", "10-year Treasury yield", "pct.", 1.0, 2),
-    ("hist_recession_indicator", "Months in NBER recession", "pct. of months", 100.0, 1),
+    (
+        "hist_recession_indicator",
+        "Months in NBER recession",
+        "pct. of months",
+        100.0,
+        1,
+    ),
 ]
 
 GHY_SPECS = [
@@ -76,31 +84,62 @@ GHY_SPECS = [
 ]
 
 SHILLER_SPECS = [
-    ("sp500_price", "S\\&P Composite price index", "index level", 1.0, 2),
-    ("dividend", "S\\&P Composite dividend", r"\$ per share", 1.0, 2),
+    ("sp500_price", "S&P Composite price index", "index level", 1.0, 2),
+    ("dividend", "S&P Composite dividend", "$ per share", 1.0, 2),
     ("pe10", "Cyclically adj. P/E (CAPE)", "ratio", 1.0, 2),
+    ("sp_return", "S&P total return (log)", "pct.", 1.0, 2),
 ]
 
 
 def load_data():
     """Load the four processed data files keyed by a short mnemonic."""
+    shiller = pd.read_parquet(PROCESSED_DATA_DIR / "shiller_data_annual.parquet")
+    shiller["sp_return"] = log_total_return(shiller["sp500_price"], shiller["dividend"])
     return {
-        "fred_annual": pd.read_parquet(PROCESSED_DATA_DIR / "fred_final_series_annual.parquet"),
-        "fred_monthly": pd.read_parquet(PROCESSED_DATA_DIR / "fred_final_series_monthly.parquet"),
+        "fred_annual": pd.read_parquet(
+            PROCESSED_DATA_DIR / "fred_final_series_annual.parquet"
+        ),
+        "fred_monthly": pd.read_parquet(
+            PROCESSED_DATA_DIR / "fred_final_series_monthly.parquet"
+        ),
         "ghy": pd.read_parquet(PROCESSED_DATA_DIR / "greenwood_hanson_hys.parquet"),
-        "shiller": pd.read_parquet(PROCESSED_DATA_DIR / "shiller_data_annual.parquet"),
+        "shiller": shiller,
     }
 
 
-def table_rows(df, specs):
-    """One row per spec: label & units & mean & std & min & Q1 & median & Q3 & max."""
-    lines = []
-    for col, label, units, scale, dec in specs:
+def summary_dataframe(df, specs):
+    """Mean/Std/Min/Q1/Median/Q3/Max for each spec, scaled to display units,
+    as an (unrounded) DataFrame indexed by variable label. Shared by the
+    LaTeX table builder below and by the notebook walkthrough, so both show
+    numbers computed the same way."""
+    records = []
+    for col, label, units, scale, _dec in specs:
         s = df[col].astype(float) * scale
+        records.append(
+            {
+                "Variable": label,
+                "Units": units,
+                "Mean": s.mean(),
+                "Std. Dev.": s.std(),
+                "Min": s.min(),
+                "Q1": s.quantile(0.25),
+                "Median": s.median(),
+                "Q3": s.quantile(0.75),
+                "Max": s.max(),
+            }
+        )
+    return pd.DataFrame.from_records(records).set_index("Variable")
+
+
+def table_rows(df, specs):
+    """One LaTeX row per spec: label & units & mean & std & min & Q1 & median & Q3 & max."""
+    stats = summary_dataframe(df, specs)
+    lines = []
+    for (_col, label, units, _scale, dec), (_, row) in zip(specs, stats.iterrows()):
         lines.append(
-            f"{label} & {units} & {s.mean():,.{dec}f} & {s.std():,.{dec}f} & "
-            f"{s.min():,.{dec}f} & {s.quantile(0.25):,.{dec}f} & {s.median():,.{dec}f} & "
-            f"{s.quantile(0.75):,.{dec}f} & {s.max():,.{dec}f} \\\\"
+            f"{latex_escape(label)} & {latex_escape(units)} & {row['Mean']:,.{dec}f} & "
+            f"{row['Std. Dev.']:,.{dec}f} & {row['Min']:,.{dec}f} & {row['Q1']:,.{dec}f} & "
+            f"{row['Median']:,.{dec}f} & {row['Q3']:,.{dec}f} & {row['Max']:,.{dec}f} \\\\"
         )
     return lines
 
@@ -193,7 +232,15 @@ def build_credit_spreads_figure(fm):
     ax.margins(x=0.01)
 
     ax.legend(fontsize=9, loc="upper right")
-    ax.text(1.0, 1.02, "Percentage points", transform=ax.transAxes, ha="right", va="bottom", fontsize=9.5)
+    ax.text(
+        1.0,
+        1.02,
+        "Percentage points",
+        transform=ax.transAxes,
+        ha="right",
+        va="bottom",
+        fontsize=9.5,
+    )
     style_axes(ax)
     fig.tight_layout()
     return fig
@@ -225,10 +272,21 @@ def build_credit_spreads_interactive(fm):
         )
     )
     for s, e in recession_spans(fm):
-        fig.add_vrect(x0=s, x1=e, fillcolor=RECESSION_COLOR, opacity=1, layer="below", line_width=0)
+        fig.add_vrect(
+            x0=s,
+            x1=e,
+            fillcolor=RECESSION_COLOR,
+            opacity=1,
+            layer="below",
+            line_width=0,
+        )
 
     y_max = int(np.ceil(max(baa.max(), aaa.max())))
-    fig.update_layout(template="simple_white", hovermode="x unified", margin=dict(t=40, r=30, b=40, l=60))
+    fig.update_layout(
+        template="simple_white",
+        hovermode="x unified",
+        margin=dict(t=40, r=30, b=40, l=60),
+    )
     fig.update_yaxes(title_text="Percentage points", range=[0, y_max])
     return fig
 
@@ -242,7 +300,15 @@ def build_gdp_growth_figure(fa):
     ax.axhline(0, color="grey", lw=0.7)
     ax.plot(g.index, g.values, color=LINE_COLOR, lw=1.1)
     ax.margins(x=0.01)
-    ax.text(1.0, 1.02, "Log growth, y/y (pct.)", transform=ax.transAxes, ha="right", va="bottom", fontsize=9.5)
+    ax.text(
+        1.0,
+        1.02,
+        "Log growth, y/y (pct.)",
+        transform=ax.transAxes,
+        ha="right",
+        va="bottom",
+        fontsize=9.5,
+    )
     style_axes(ax)
     fig.tight_layout()
     return fig
@@ -275,13 +341,33 @@ def build_hy_share_figure(ghy):
     fisd = ghy.loc[ghy["source"] == "fisd", "hy_share"] * 100
 
     fig, ax = plt.subplots(figsize=(10, 5))
-    ax.plot(gh2013.index, gh2013.values, color=LINE_COLOR, lw=1.1, label="Greenwood-Hanson (2013)")
+    ax.plot(
+        gh2013.index,
+        gh2013.values,
+        color=LINE_COLOR,
+        lw=1.1,
+        label="Greenwood-Hanson (2013)",
+    )
     if not fisd.empty:
-        ax.plot(fisd.index, fisd.values, color=HIGHLIGHT_COLOR, lw=1.1, label="Mergent FISD splice")
+        ax.plot(
+            fisd.index,
+            fisd.values,
+            color=HIGHLIGHT_COLOR,
+            lw=1.1,
+            label="Mergent FISD splice",
+        )
         ax.axvline(fisd.index.min(), color="grey", lw=0.8, ls="--")
     ax.margins(x=0.01)
     ax.legend(fontsize=9, loc="upper right")
-    ax.text(1.0, 1.02, "Pct. of issuance", transform=ax.transAxes, ha="right", va="bottom", fontsize=9.5)
+    ax.text(
+        1.0,
+        1.02,
+        "Pct. of issuance",
+        transform=ax.transAxes,
+        ha="right",
+        va="bottom",
+        fontsize=9.5,
+    )
     style_axes(ax)
     fig.tight_layout()
     return fig
@@ -313,7 +399,9 @@ def build_hy_share_interactive(ghy):
                 hovertemplate="%{x}: %{y:.1f}%<extra>FISD splice</extra>",
             )
         )
-        fig.add_vline(x=fisd.index.min(), line_color="grey", line_width=0.9, line_dash="dash")
+        fig.add_vline(
+            x=fisd.index.min(), line_color="grey", line_width=0.9, line_dash="dash"
+        )
     fig.update_layout(
         template="simple_white",
         legend=dict(x=0.02, y=0.02, xanchor="left", yanchor="bottom"),
@@ -323,65 +411,103 @@ def build_hy_share_interactive(ghy):
     return fig
 
 
-def build_cape_figure(sh):
-    """Shiller's cyclically adjusted P/E (CAPE), with the series' last
-    observation marked since it ends earlier than the other processed files."""
-    pe = sh["pe10"].dropna()
+CAPE_FORWARD_HORIZON = 10
 
-    fig, ax = plt.subplots(figsize=(10, 5))
-    ax.plot(pe.index, pe.values, color=LINE_COLOR, lw=1.1)
-    ax.axvline(pe.index.max(), color=HIGHLIGHT_COLOR, lw=0.9, ls="--")
-    ax.margins(x=0.03)
-    trans = ax.get_xaxis_transform()
+
+def cape_forward_return(sh, horizon=CAPE_FORWARD_HORIZON):
+    """CAPE at year t paired with the cumulative S&P total log return
+    realized from t to t+`horizon` (sum of `sp_return` over the following
+    `horizon` years, since log returns are additive). Years within
+    `horizon` of the end of the sample have no future window and are
+    dropped."""
+    fwd = sh["sp_return"].rolling(horizon).sum().shift(-horizon)
+    pts = pd.concat([sh["pe10"], fwd], axis=1, keys=["pe10", "fwd_return"])
+    return pts.dropna()
+
+
+def build_cape_figure(sh):
+    """CAPE at year t vs. the cumulative S&P total return realized over the
+    following `CAPE_FORWARD_HORIZON` years -- the textbook case for CAPE as
+    a valuation signal: rich markets (high CAPE) have historically been
+    followed by weaker subsequent returns, and cheap markets by stronger
+    ones, with a fitted line showing the (negative) average relationship."""
+    pts = cape_forward_return(sh)
+    slope, intercept = np.polyfit(pts["pe10"], pts["fwd_return"], 1)
+    x_fit = np.array([pts["pe10"].min(), pts["pe10"].max()])
+
+    fig, ax = plt.subplots(figsize=(7, 6))
+    ax.scatter(pts["pe10"], pts["fwd_return"], color=MARKER_COLOR, s=22, zorder=2)
+    ax.plot(x_fit, slope * x_fit + intercept, color=HIGHLIGHT_COLOR, lw=1.6, zorder=3)
+    ax.set_xlabel("CAPE at year $t$ (ratio)")
+    ax.set_ylabel(
+        f"Cumulative S&P total return, $t$ to $t+{CAPE_FORWARD_HORIZON}$ (pct.)"
+    )
+    corr = pts["pe10"].corr(pts["fwd_return"])
     ax.text(
-        pe.index.max(),
-        0.97,
-        f"last obs.: {pe.index.max().year} ",
-        transform=trans,
-        fontsize=8.5,
-        color=HIGHLIGHT_COLOR,
+        0.98,
+        0.96,
+        f"corr = {corr:.2f}",
+        transform=ax.transAxes,
         ha="right",
         va="top",
+        fontsize=9.5,
+        color=HIGHLIGHT_COLOR,
     )
-    ax.text(1.0, 1.02, "Ratio", transform=ax.transAxes, ha="right", va="bottom", fontsize=9.5)
     style_axes(ax)
     fig.tight_layout()
     return fig
 
 
 def build_cape_interactive(sh):
-    pe = sh["pe10"].dropna()
+    pts = cape_forward_return(sh)
+    slope, intercept = np.polyfit(pts["pe10"], pts["fwd_return"], 1)
+    x_fit = np.array([pts["pe10"].min(), pts["pe10"].max()])
 
     fig = go.Figure()
     fig.add_trace(
         go.Scatter(
-            x=pe.index,
-            y=pe.values,
-            mode="lines",
-            line=dict(color=LINE_COLOR, width=1.3),
+            x=pts["pe10"],
+            y=pts["fwd_return"],
+            mode="markers",
+            marker=dict(color=MARKER_COLOR, size=6),
+            text=[str(y) for y in pts.index.year],
             showlegend=False,
-            hovertemplate="%{x|%Y}: %{y:.2f}<extra></extra>",
+            hovertemplate="CAPE in %{text}: %{x:.2f}<br>fwd. return: %{y:.1f} pct.<extra></extra>",
         )
     )
-    fig.add_vline(
-        x=pe.index.max(),
-        line_color=HIGHLIGHT_COLOR,
-        line_width=0.9,
-        line_dash="dash",
-        annotation_text=f"last obs.: {pe.index.max().year}",
-        annotation_font_color=HIGHLIGHT_COLOR,
-        annotation_font_size=9,
+    fig.add_trace(
+        go.Scatter(
+            x=x_fit,
+            y=slope * x_fit + intercept,
+            mode="lines",
+            line=dict(color=HIGHLIGHT_COLOR, width=2),
+            showlegend=False,
+            hoverinfo="skip",
+        )
     )
     fig.update_layout(template="simple_white", margin=dict(t=40, r=30, b=40, l=60))
-    fig.update_yaxes(title_text="Ratio")
+    fig.update_xaxes(title_text="CAPE at year t (ratio)")
+    fig.update_yaxes(
+        title_text=f"Cumulative S&P total return, t to t+{CAPE_FORWARD_HORIZON} (pct.)"
+    )
     return fig
 
 
 # (slug, static builder, interactive builder, data key) -- one entry per
 # processed file, each producing its own PDF and HTML chart.
 CHART_SPECS = [
-    ("credit_spreads", build_credit_spreads_figure, build_credit_spreads_interactive, "fred_monthly"),
-    ("gdp_growth", build_gdp_growth_figure, build_gdp_growth_interactive, "fred_annual"),
+    (
+        "credit_spreads",
+        build_credit_spreads_figure,
+        build_credit_spreads_interactive,
+        "fred_monthly",
+    ),
+    (
+        "gdp_growth",
+        build_gdp_growth_figure,
+        build_gdp_growth_interactive,
+        "fred_annual",
+    ),
     ("hy_share", build_hy_share_figure, build_hy_share_interactive, "ghy"),
     ("cape", build_cape_figure, build_cape_interactive, "shiller"),
 ]

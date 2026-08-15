@@ -400,9 +400,9 @@ def task_run_notebooks():
         yield {
             "name": notebook,
             "actions": [
+                jupyter_clear_output(notebook_path),
                 jupyter_execute_notebook(notebook_path),
                 jupyter_to_html(notebook_path, OUTPUT_DIR),
-                jupyter_clear_output(notebook_path),
             ],
             "file_dep": [
                 notebook_path,
@@ -447,3 +447,22 @@ def task_build_chartbook_site():
         # ],
         "clean": True,
     }
+
+
+def task_clear_notebooks():
+    """
+    Clear noteook outputs to avoid changes in the code.
+    """
+    for notebook in notebook_tasks.keys():
+        notebook_name = notebook.split(".")[0]
+        notebook_path = Path("./src") / notebook
+        yield {
+            "name": notebook,
+            "actions": [
+                jupyter_clear_output(notebook_path),
+            ],
+            "file_dep": [
+                notebook_path,
+            ],
+            "clean": True,
+        }

@@ -295,7 +295,7 @@ lag_in_data_release = "Variable"
 seasonal_adjustment = "Not Seasonally Adjusted"
 
 [charts.summary_statistics_hy_share]
-name = "Summary Statistics: Greenwood-Hanson High-Yield Share (1926-present)"
+name = "Summary Statistics: Greenwood-Hanson High-Yield Share (1929-present)"
 description = "Annual high-yield issuance share, colored by underlying source series."
 dataframe = "greenwood_hanson_hys_processed_series"
 path = "./_output/summary_statistics_hy_share.html"
@@ -308,13 +308,13 @@ lag_in_data_release = "Variable"
 seasonal_adjustment = "Not Seasonally Adjusted"
 
 [charts.summary_statistics_cape]
-name = "Summary Statistics: Shiller CAPE (1929-2023)"
-description = "Annual cyclically adjusted price-earnings ratio (CAPE / P/E10), with the series' last observation marked."
+name = "Summary Statistics: CAPE vs. Subsequent 10-Year S&P Return (1929-present)"
+description = "Scatter of Shiller CAPE (P/E10) at year t against the cumulative S&P total return realized over the following 10 years, with a fitted line showing the valuation/mean-reversion relationship."
 dataframe = "shiller_processed_annual_series"
 path = "./_output/summary_statistics_cape.html"
-docs = "`pe10` from `shiller_data_annual.parquet`."
-tags = ["Summary Statistics", "CAPE", "Shiller", "Valuation"]
-units = "Ratio"
+docs = "x-axis: `pe10`; y-axis: 10-year-forward sum of `sp_return` (the log total return implied by `sp500_price` and `dividend`), both from `shiller_data_annual.parquet`. Years within 10 years of the end of the sample are dropped for lack of a forward window."
+tags = ["Summary Statistics", "CAPE", "Shiller"]
+units = "Ratio (x); Pct. (y)"
 frequency = "Annual"
 observation_period = "Calendar Year"
 lag_in_data_release = "Variable"
