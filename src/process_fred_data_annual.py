@@ -14,6 +14,7 @@ from settings import config
 
 RAW_DATA_DIR = Path(config("RAW_DATA_DIR"))
 PROCESSED_DATA_DIR = Path(config("PROCESSED_DATA_DIR"))
+DATA_DICTIONARY_DIR = Path(config("DATA_DICTIONARY_DIR"))
 DATA_START_DATE = config("BUFFER_START_DATE")
 REPLICATION_START_DATE = config("REPLICATION_START_DATE")
 END_DATE = config("EXTENSION_END_DATE")
@@ -32,59 +33,54 @@ TARGET_END_YEAR = END_DATE.year - 1
 # `fred_final_series_annual.parquet`.
 column_descriptions = {
     "GDP": (
-        "Annual real GDP, in complete 2009 dollars. Built by "
-        "`final_gdp_series`: annual GDPCA is used as-is for 1929-1947; "
+        "Annual real GDP, in complete 2009 dollars. Annual GDPCA is used as-is for 1929-1947; "
         "from 1948 onward, quarterly GDPC1 (SAAR) is averaged over the "
         "four quarters of each calendar year."
     ),
     "Population": (
-        "Annual population. Built by `final_population_series`: pre-1952 "
+        "Annual population. For pre-1952, the"
         "annual (July 1) POPH observations are cubic-spline-interpolated "
         "to monthly frequency and averaged over each calendar year; from "
         "1952 onward, quarterly B230RC0Q173SBEA is averaged over the four "
         "quarters of each calendar year."
     ),
-    "GDP_per_capita": (
-        "GDP divided by Population for each year, computed by "
-        "`calculate_gdp_per_capita`."
-    ),
+    "GDP_per_capita": ("GDP divided by Population for each year."),
     "CPI_inflation": (
-        "Annual CPI inflation, computed by `final_cpi_series` as the "
-        "December-to-December log-change of the not-seasonally-adjusted "
+        "Annual CPI inflation, computed as the December-to-December "
+        "log-change of the not-seasonally-adjusted "
         "CPIAUCNS."
     ),
     "BAA": (
-        "Annual Moody's Seasoned Baa Corporate Bond Yield, computed by "
-        "`final_baa_series_annual` as the December value of the monthly "
+        "Annual Moody's Seasoned Baa Corporate Bond Yield, computed "
+        "as the December value of the monthly "
         "BAA series."
     ),
     "AAA": (
-        "Annual Moody's Seasoned Aaa Corporate Bond Yield, computed by "
-        "`final_aaa_series` as the December value of the monthly AAA "
+        "Annual Moody's Seasoned Aaa Corporate Bond Yield, computed as "
+        "the December value of the monthly AAA "
         "series."
     ),
     "Treasury_10yr": (
         "Annual 10-year Treasury (long-term government bond) yield, "
-        "computed by `final_10yr_treasury_series_annual` as the December "
-        "value of a monthly series combining GS10, M1333BUSM156NNBR, and "
+        "computed as the December value of a monthly series combining GS10, M1333BUSM156NNBR, and "
         "M1333AUSM156NNBR (in order of preference, most recent first)."
     ),
     "Treasury_3mo": (
-        "Annual 3-month Treasury bill bond-equivalent yield, computed by "
-        "`final_3mo_treasury_series` from the monthly discount rates "
+        "Annual 3-month Treasury bill bond-equivalent yield, computed "
+        "from the monthly discount rates "
         "TB3MS and M1329AUSM193NNBR (TB3MS preferred where both are "
         "available), converted to a bond-equivalent yield and then to "
         "the December value of each calendar year."
     ),
     "BAA_Treasury_spread": (
         "Annual spread between the Baa corporate bond yield and the "
-        "10-year Treasury yield, computed by "
-        "`calculate_baa_treasury_spread` as BAA minus Treasury_10yr."
+        "10-year Treasury yield, computed "
+        "as BAA minus Treasury_10yr."
     ),
     "AAA_Treasury_spread": (
         "Annual spread between the Aaa corporate bond yield and the "
-        "10-year Treasury yield, computed by "
-        "`calculate_aaa_treasury_spread` as AAA minus Treasury_10yr."
+        "10-year Treasury yield, computed "
+        "as AAA minus Treasury_10yr."
     ),
 }
 
@@ -496,7 +492,7 @@ def calculate_aaa_treasury_spread(aaa_series, treasury_series):
     return spread
 
 
-def save_data_readme(df, data_dir=PROCESSED_DATA_DIR):
+def save_data_readme(df, data_dir=DATA_DICTIONARY_DIR):
     """
     Write a Markdown README describing how each column of `df` is
     constructed.
@@ -511,7 +507,7 @@ def save_data_readme(df, data_dir=PROCESSED_DATA_DIR):
     ----------
     df : pandas.DataFrame
         The DataFrame returned by `clean_fred_data_annual`.
-    data_dir : str or Path, default PROCESSED_DATA_DIR
+    data_dir : str or Path, default DATA_DICTIONARY_DIR
         Directory to write `fred_final_series_annual_readme.md` into.
 
     Returns
@@ -524,11 +520,15 @@ def save_data_readme(df, data_dir=PROCESSED_DATA_DIR):
     file_path = filedir / "fred_final_series_annual_readme.md"
 
     lines = [
-        "# FRED Cleaned Series README",
+        "## Overview",
         "",
-        "This file documents the columns found in `fred_final_series_annual.parquet`, "
-        "generated by `process_fred_data_annual.py` from the raw series "
-        "pulled by `pull_fred.py`.",
+        "- **File:** `_data/processed_data/fred_final_series_annual.parquet`",
+        "- **Source:** Derived from `fred_macroeconomic_variables`, "
+        "itself pulled from [FRED](https://fred.stlouisfed.org/)",
+        "- **Generated by:** `process_fred_data_annual.py`",
+        "- **Frequency:** Annual",
+        "- **Index:** `year`",
+        "## Column Dictionary",
         "",
         "| Column | Description |",
         "| --- | --- |",
@@ -598,4 +598,4 @@ if __name__ == "__main__":
     filedir.mkdir(parents=True, exist_ok=True)
     cleaned_df.to_parquet(filedir / "fred_final_series_annual.parquet")
     cleaned_df.to_csv(filedir / "fred_final_series_annual.csv")
-    save_data_readme(cleaned_df, filedir)
+    save_data_readme(cleaned_df, DATA_DICTIONARY_DIR)

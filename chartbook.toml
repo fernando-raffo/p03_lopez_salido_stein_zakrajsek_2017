@@ -1,45 +1,249 @@
-[config]
+[project]
 type = "pipeline"
-chartbook_format_version = "0.0.2"
-
-[site]
-title = "p03_lopez-salido_stein_zakrajsek_2017"
-author = "Your Name"
-copyright = "2025"
-logo_path = ""
-favicon_path = ""
-
-[pipeline]
-id = "P0"
-pipeline_name = "p03_lopez-salido_stein_zakrajsek_2017"
-pipeline_description = "A data science project"
-lead_pipeline_developer = "Your Name"
-contributors = ["Your Name"]
-software_modules_command = "module load anaconda3/3.11.4 TeXLive/2023"
-runs_on_grid_or_windows_or_other = "Windows/Linux/MacOS"
-git_repo_URL = ""
-README_file_path = "./README.md"
-site_dir = "./docs_src/"
+id = "P01"
+name = "Credit-Market Sentiment and the Business Cycle"
+description = """Replication of Tables I-II and Figures I-II from López-Salido, David, Jeremy C. Stein, and Egon Zakrajšek. \
+"Credit-Market Sentiment and the Business Cycle." The Quarterly Journal of Economics 132, no. 3 (2017): 1373–1426. \
+Data is drawn from FRED, WRDS Mergent FISD, Robert Shiller's data website, and Greenwood and Hanson's published \
+high-yield share series. The original analysis is extended by (1) constructing an analogous credit-spread measure using \
+Aaa-Treasury spreads rather than Baa-Treasury spreads, and (2) testing the sentiment measure out of sample over the 2020-2022 \
+period which includes the COVID-19 shock and the 2021-2022 post COVID froth."""
+maintainer = "Fernando Raffo, Bangjie Xu"
+contributors = ["Fernando Raffo", "Bangjie Xu"]
+os_compatibility = ["Windows", "Linux", "MacOS"]
+repo_url = "https://github.com/fernando-raffo/p03_lopez_salido_stein_zakrajsek_2017"
+copyright = "2026"
+logo = "assets/logo.png"
 
 [notebooks]
 
-
-[notebooks.01_example_notebook_interactive]
-notebook_name = "Example Notebook Interactive"
-notebook_description = "Example notebook for demonstrating how to construct a Chartbook notebook."
-notebook_path = "_output/01_example_notebook_interactive.ipynb"
-
-
-[notebooks.02_example_with_dependencies]
-notebook_name = "Example Notebook with Dependencies"
-notebook_description = "Example notebook demonstrating dependencies on data pulls."
-notebook_path = "_output/02_example_with_dependencies.ipynb"
-
-
-
-
 [dataframes]
 
+[dataframes.fred_macroeconomic_variables]
+name = "FRED Macroeconomic Data"
+description = "Raw macroeconomic and financial time series pulled directly from FRED via `pandas_datareader`: corporate bond yields, Treasury yields, CPI, population, and real GDP, used as the primary inputs for the replication's cleaned monthly and annual series."
+sources = ["FRED", "Office of Financial Research"]
+providers = ["FRED", "Office of Financial Research"]
+provider_links = ["https://fred.stlouisfed.org/"]
+tags = ["raw data", "macroeconomic data", "FRED"]
+access_types = ["Public"]
+license = "No"
+contact_required = "No"
+restrictions = "No"
+pull_method = "Web API via Python `pandas_datareader.data.DataReader`"
+path = "./_data/raw_data/fred.parquet"
+date_col = "DATE"
+docs_path = "./_data/data_dictionaries/fred_data_dictionary.md"
+
+[dataframes.shiller_market_variables]
+name = "Robert Shiller's Stock Market Data"
+description = "Robert Shiller's monthly U.S. stock-market data set (`ie_data.xls`): the S&P Composite price, dividends, earnings, CPI, the 10-year Treasury yield, and the cyclically adjusted price-earnings ratio (CAPE / P/E10)."
+sources = ["Rober Shiller's Data Website"]
+providers = ["Robert Shiller"]
+provider_links = ["https://shillerdata.com/"]
+tags = ["raw data", "stock market", "Shiller"]
+access_types = ["Public"]
+license = "No"
+contact_required = "No"
+restrictions = "No"
+pull_method = "HTTP download via Python `requests`"
+path = "./_data/raw_data/shiller_data.parquet"
+docs_path = "./_data/data_dictionaries/shiller_data_dictionary.md"
+
+[dataframes.greenwood_hanson_hys]
+name = "Greenwood-Hanson High-Yield Share Data (Published Historical, 1926-2008)"
+description = "Published Greenwood and Hanson (2013) annual high-yield share series for 1926-2008 (their Table 2), transcribed from printed sources (Hickman 1960; Atkinson 1967; hand-collected Moody's Bond Surveys) for years before Mergent FISD coverage begins."
+sources = ["Greenwood & Hanson (2013), \"Issuer Quality and Corporate Bond Returns,\" Review of Financial Studies 26(6), 1483–1525"]
+providers = ["Greenwood & Hanson", "Review of Financial Studies"]
+provider_links = ["https://academic.oup.com/rfs/article-abstract/26/6/1483/1595232"]
+tags = ["raw data", "HYS", "Greenwood", "Hanson", "High Yield Share"]
+access_types = ["Public"]
+license = "No"
+contact_required = "No"
+restrictions = "Academic use only"
+pull_method = "PDF Download"
+path = "./_data/raw_data/greenwood_hanson_hys_historical.parquet"
+docs_path = "./_data/data_dictionaries/greenwood_hanson_hys_historical_dictionary.md"
+
+[dataframes.mergent_fisd_bond_data]
+name = "Mergent FISD High-Yield Share Data (Raw FISD Reconstruction, 1980s-present)"
+description = "Annual high-yield share reconstructed from Mergent FISD bond-level issuance and ratings data via WRDS, covering U.S. nonfinancial corporate bond issuance from the early 1980s onward."
+sources = ["Mergent FISD"]
+providers = ["WRDS"]
+provider_links = ["https://wrds-www.wharton.upenn.edu/"]
+tags = ["raw data", "HYS", "FISD", "High Yield Share", "WRDS", "Mergent"]
+access_types = ["WRDS Subscription"]
+license = "Yes"
+contact_required = "No"
+restrictions = "No"
+pull_method = "WRDS Python API"
+path = "./_data/raw_data/greenwood_hanson_hys_fisd.parquet"
+docs_path = "./_data/data_dictionaries/greenwood_hanson_hys_fisd_dictionary.md"
+
+[dataframes.fred_processed_monthly_series]
+name = "FRED Processed Monthly Series"
+description = "Cleaned monthly Baa/Aaa-Treasury credit spreads and NBER recession indicator, derived from the raw FRED pull."
+sources = ["FRED", "Office of Financial Research"]
+providers = ["FRED", "Office of Financial Research"]
+provider_links = ["https://fred.stlouisfed.org/"]
+tags = ["processed data", "macroeconomic data", "FRED"]
+access_types = ["Public"]
+license = "No"
+contact_required = "No"
+restrictions = "No"
+pull_method = "Web API via Python `pandas_datareader.data.DataReader`"
+path = "./_data/processed_data/fred_final_series_monthly.parquet"
+docs_path = "./_data/data_dictionaries/fred_final_series_monthly_readme.md"
+
+[dataframes.fred_processed_annual_series]
+name = "FRED Processed Annual Series"
+description = "Cleaned annual GDP, population, GDP per capita, CPI inflation, and Baa/Aaa-Treasury credit spreads, derived from the raw FRED pull."
+sources = ["FRED", "Office of Financial Research"]
+providers = ["FRED", "Office of Financial Research"]
+provider_links = ["https://fred.stlouisfed.org/"]
+tags = ["processed data", "macroeconomic data", "FRED"]
+access_types = ["Public"]
+license = "No"
+contact_required = "No"
+restrictions = "No"
+pull_method = "Web API via Python `pandas_datareader.data.DataReader`"
+path = "./_data/processed_data/fred_final_series_annual.parquet"
+docs_path = "./_data/data_dictionaries/fred_final_series_annual_readme.md"
+
+[dataframes.shiller_processed_annual_series]
+name = "Shiller Annual Stock-Market Data"
+description = "Annual (year-end) collapse of Robert Shiller's monthly stock-market data, with the log cyclically adjusted price-earnings ratio (`ln[P/E10]`) used as a first-step predictor in the replication."
+sources = ["Rober Shiller's Data Website"]
+providers = ["Robert Shiller"]
+provider_links = ["https://shillerdata.com/"]
+tags = ["processed data", "stock market", "Shiller"]
+access_types = ["Public"]
+license = "No"
+contact_required = "No"
+restrictions = "No"
+pull_method = "Derived from `shiller_market_variables` via `process_shiller_annual` in `pull_shiller.py`"
+path = "./_data/processed_data/shiller_data_annual.parquet"
+date_col = "date"
+docs_path = "./_data/data_dictionaries/shiller_data_annual_dictionary.md"
+
+[dataframes.greenwood_hanson_hys_processed_series]
+name = "Greenwood-Hanson High-Yield Share"
+description = "Final continuous annual high-yield share used in the replication, splicing the published Greenwood-Hanson (2013) series (1926-2008) with the Mergent FISD reconstruction (2009 onward)."
+sources = ["Greenwood & Hanson (2013), \"Issuer Quality and Corporate Bond Returns,\" Review of Financial Studies 26(6), 1483–1525", "Review of Financial Studies", "Mergent FISD"]
+providers = ["Greenwood & Hanson", "Review of Financial Studies", "WRDS"]
+provider_links = ["https://academic.oup.com/rfs/article-abstract/26/6/1483/1595232", "https://wrds-www.wharton.upenn.edu/"]
+tags = ["processed data", "HYS", "Greenwood", "Hanson", "High Yield Share"]
+access_types = ["Public", "WRDS Subscription"]
+license = "Yes"
+contact_required = "No"
+restrictions = "Academic use only"
+pull_method = "PDF Download, WRDS Python API"
+path = "./_data/processed_data/greenwood_hanson_hys.parquet"
+docs_path = "./_data/data_dictionaries/greenwood_hanson_hys_dictionary.md"
 
 [charts]
 
+[charts.figure_1_replication]
+name = "Figure 1: Baa-Treasury Credit Spread (1925-2015)"
+description = "Interactive replication of Figure I: the monthly Baa-Treasury credit spread over the 1925-2015 sample, with NBER recessions shaded."
+dataframe = "fred_processed_monthly_series"
+path = "./_output/figure_1_replication.html"
+docs = "Baa (long-term corporate bond) yield minus the 10-year Treasury yield, monthly, 1925-2015. Recession shading uses the historical NBER indicator series."
+tags = ["Credit Spread", "Baa", "Figure 1"]
+units = "Percentage Points"
+data_series_start_date = "1930-01-01"
+frequency = "Monthly"
+observation_period = "Monthly average"
+lag_in_data_release = "Variable"
+seasonal_adjustment = "Not Seasonally Adjusted"
+
+[charts.figure_1_extended]
+name = "Figure 1: Baa-Treasury Credit Spread (1925-2025, extended)"
+description = "Extension of Figure I past the paper's 2015 sample end, through the most recent available FRED data."
+dataframe = "fred_processed_monthly_series"
+path = "./_output/figure_1_extended.html"
+docs = "Same construction as the replication chart, extended through the present, including the 2020 COVID shock and recovery."
+tags = ["Credit Spread", "Baa", "Figure 1", "Extension"]
+units = "Percentage Points"
+frequency = "Monthly"
+observation_period = "Monthly average"
+lag_in_data_release = "Variable"
+seasonal_adjustment = "Not Seasonally Adjusted"
+
+[charts.figure_1_aaa_replication]
+name = "Figure 1 (Aaa variant): Aaa-Treasury Credit Spread (1925-2015)"
+description = "Analogous to Figure I, using the Aaa (instead of Baa) corporate bond spread."
+dataframe = "fred_processed_monthly_series"
+path = "./_output/figure_1_aaa_replication.html"
+docs = "Aaa yield minus the 10-year Treasury yield, monthly, 1925-2015."
+tags = ["Credit Spread", "Aaa", "Figure 1", "Extension"]
+units = "Percentage Points"
+frequency = "Monthly"
+observation_period = "Monthly average"
+lag_in_data_release = "Variable"
+seasonal_adjustment = "Not Seasonally Adjusted"
+
+[charts.figure_1_aaa_extended]
+name = "Figure 1 (Aaa variant): Aaa-Treasury Credit Spread (1925-2025, extended)"
+description = "Aaa-spread extension of Figure I through the most recent available FRED data."
+dataframe = "fred_processed_monthly_series"
+path = "./_output/figure_1_aaa_extended.html"
+docs = "Same construction as the Aaa replication chart, extended through the present."
+tags = ["Credit Spread", "Aaa", "Figure 1", "Extension"]
+units = "Percentage Points"
+frequency = "Monthly"
+observation_period = "Monthly average"
+lag_in_data_release = "Variable"
+seasonal_adjustment = "Not Seasonally Adjusted"
+
+[charts.figure_2_replication]
+name = "Figure 2: Credit-Market Sentiment and GDP Growth (1929-2015)"
+description = "Interactive replication of Figure II: credit-market sentiment at t-2 vs. real GDP-per-capita growth at t, both orthogonalized against Table II column (1)'s other regressor, with the fitted line and influential observations highlighted."
+dataframe = "fred_processed_annual_series"
+path = "./_output/figure_2_replication.html"
+docs = "Combines FRED (GDP, interest rates, inflation), Robert Shiller's stock-market data (P/E10), and the Greenwood-Hanson high-yield share, per Table II column (1)."
+tags = ["Sentiment", "GDP Growth", "Baa", "Figure 2"]
+units = "Percentage Points"
+frequency = "Annual"
+observation_period = "Calendar Year"
+lag_in_data_release = "Variable"
+seasonal_adjustment = "Mixed"
+
+[charts.figure_2_extended]
+name = "Figure 2: Credit-Market Sentiment and GDP Growth (1929-present, extended)"
+description = "Extension of Figure II past the paper's 2015 sample end, through the most recent available data."
+dataframe = "fred_processed_annual_series"
+path = "./_output/figure_2_extended.html"
+docs = "Same construction as the replication chart, extended through the present, including the 2020 COVID shock and recovery."
+tags = ["Sentiment", "GDP Growth", "Baa", "Figure 2", "Extension"]
+units = "Percentage Points"
+frequency = "Annual"
+observation_period = "Calendar Year"
+lag_in_data_release = "Variable"
+seasonal_adjustment = "Mixed"
+
+[charts.figure_2_aaa_replication]
+name = "Figure 2 (Aaa variant): Credit-Market Sentiment and GDP Growth (1929-2015)"
+description = "Analogous to Figure II, using the Aaa (instead of Baa) corporate bond spread as the credit-spread component of sentiment."
+dataframe = "fred_processed_annual_series"
+path = "./_output/figure_2_aaa_replication.html"
+docs = "Same construction as the Figure II replication chart, with the Aaa-Treasury spread feeding the sentiment measure."
+tags = ["Sentiment", "GDP Growth", "Aaa", "Figure 2", "Extension Variant"]
+units = "Percentage Points"
+frequency = "Annual"
+observation_period = "Calendar Year"
+lag_in_data_release = "Variable"
+seasonal_adjustment = "Mixed"
+
+[charts.figure_2_aaa_extended]
+name = "Figure 2 (Aaa variant): Credit-Market Sentiment and GDP Growth (1929-present, extended)"
+description = "Aaa-spread extension of Figure II through the most recent available data."
+dataframe = "fred_processed_annual_series"
+path = "./_output/figure_2_aaa_extended.html"
+docs = "Same construction as the Aaa replication chart, extended through the present."
+tags = ["Sentiment", "GDP Growth", "Aaa", "Figure 2", "Extension Variant"]
+units = "Percentage Points"
+frequency = "Annual"
+observation_period = "Calendar Year"
+lag_in_data_release = "Variable"
+seasonal_adjustment = "Mixed"

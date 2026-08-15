@@ -67,6 +67,10 @@ Naming conventions
   ``_data/processed_data`` directory.
 - ``compute_hy_share`` is the pure aggregation step and is unit-tested with
   synthetic data (it needs no network or credentials).
+- ``save_data_dictionary_historical`` / ``save_data_dictionary_fisd`` /
+  ``save_data_dictionary_combined`` write Markdown data dictionaries
+  documenting the columns of each of the three parquet files to
+  ``DATA_DICTIONARY_DIR``.
 
 Running this file as a script pulls the data and caches it under ``_data``
 (the git-ignored data folder), so no data is ever committed to the repo: the
@@ -98,6 +102,7 @@ def _config_or(var_name, default):
 RAW_DATA_DIR = Path(config("RAW_DATA_DIR"))
 PROCESSED_DATA_DIR = Path(config("PROCESSED_DATA_DIR"))
 MANUAL_DATA_DIR = Path(config("MANUAL_DATA_DIR"))
+DATA_DICTIONARY_DIR = Path(config("DATA_DICTIONARY_DIR"))
 START_DATE = config("REPLICATION_START_DATE")
 END_DATE = config("REPLICATION_END_DATE")
 
@@ -134,6 +139,58 @@ _INVESTMENT_GRADE_SP = {
     "BBB-",
 }
 _INVESTMENT_GRADE = _INVESTMENT_GRADE_MOODYS | _INVESTMENT_GRADE_SP
+
+# Human-readable description of each column, keyed by which parquet file it
+# appears in. Used by the `save_data_dictionary_*` functions below.
+_HISTORICAL_COLUMN_DESCRIPTIONS = {
+    "hy_share": (
+        "Published Greenwood-Hanson (2013) annual high-yield share (fraction "
+        "of nonfinancial corporate bond issuance rated below investment "
+        "grade), from Table 2 of Greenwood and Hanson (2013)."
+    ),
+    "ln_hy_share": "Natural log of `hy_share`.",
+    "source": (
+        "Label identifying the data's provenance; always 'gh2013' for this "
+        "published historical series."
+    ),
+}
+
+_FISD_COLUMN_DESCRIPTIONS = {
+    "hy_issuance": (
+        "Total face amount of nonfinancial U.S. corporate bonds issued in "
+        "the year that are rated below investment grade (high yield), "
+        "reconstructed from Mergent FISD via WRDS."
+    ),
+    "total_issuance": (
+        "Total face amount of all rated nonfinancial U.S. corporate bonds "
+        "issued in the year, reconstructed from Mergent FISD via WRDS."
+    ),
+    "n_issues": (
+        "Number of bond issues underlying the year's `total_issuance`; "
+        "useful for screening out thin early years, e.g. "
+        "`df.loc[df.n_issues >= 25]`."
+    ),
+    "hy_share": "High-yield share for the year, computed as `hy_issuance / total_issuance`.",
+    "ln_hy_share": "Natural log of `hy_share` (NaN when `hy_share` is 0).",
+}
+
+_COMBINED_COLUMN_DESCRIPTIONS = {
+    "hy_share": (
+        "Annual high-yield share, spliced from the "
+        "published Greenwood-Hanson (2013) series through 2008, followed by "
+        "the Mergent FISD reconstruction from 2009 onward."
+    ),
+    "ln_hy_share": (
+        "Natural log of `hy_share`. Used as `ln(HYS)_{t-2}`, a first-step "
+        "predictor of changes in the Baa-Treasury credit spread in "
+        "Lopez-Salido, Stein, and Zakrajsek (2017)."
+    ),
+    "source": (
+        "Label identifying which underlying series each year's value comes "
+        "from: 'gh2013' (published Greenwood-Hanson historical series) or "
+        "'fisd' (Mergent FISD reconstruction)."
+    ),
+}
 
 
 def is_high_yield(rating):
@@ -580,6 +637,90 @@ def load_greenwood_hanson(data_dir=PROCESSED_DATA_DIR):
     return pd.read_parquet(file_path)
 
 
+def _write_markdown_dictionary(file_path, overview_lines, column_descriptions, df):
+    """Shared helper that writes a "## Overview" + "## Column Dictionary"
+    Markdown file, used by the `save_data_dictionary_*` functions below."""
+    lines = [
+        "## Overview",
+        "",
+        *overview_lines,
+        "",
+        "## Column Dictionary",
+        "",
+        "| Column | Description |",
+        "| --- | --- |",
+    ]
+    for column in df.columns:
+        description = column_descriptions.get(column, "Unknown series")
+        lines.append(f"| {column} | {description} |")
+    file_path.write_text("\n".join(lines) + "\n")
+    return file_path
+
+
+def save_data_dictionary_historical(df, data_dir=DATA_DICTIONARY_DIR):
+    """Write a Markdown data dictionary for the published Greenwood-Hanson
+    historical series (``greenwood_hanson_hys_historical.parquet``)."""
+    filedir = Path(data_dir)
+    filedir.mkdir(parents=True, exist_ok=True)
+    overview = [
+        "- **File:** `_data/raw_data/greenwood_hanson_hys_historical.parquet`",
+        "- **Source:** Greenwood, Robin, and Samuel G. Hanson (2013), "
+        '"Issuer Quality and Corporate Bond Returns," *Review of Financial '
+        "Studies* 26(6), 1483-1525, Table 2 (transcribed from print into "
+        "`data_manual/greenwood_hanson_hys_historical.csv`)",
+        "- **Pulled by:** `pull_greenwood_hanson.py`",
+        "- **Frequency:** Annual, 1926-2008",
+        "- **Index:** `year`",
+    ]
+    return _write_markdown_dictionary(
+        filedir / "greenwood_hanson_hys_historical_dictionary.md",
+        overview,
+        _HISTORICAL_COLUMN_DESCRIPTIONS,
+        df,
+    )
+
+
+def save_data_dictionary_fisd(df, data_dir=DATA_DICTIONARY_DIR):
+    """Write a Markdown data dictionary for the Mergent FISD reconstruction
+    of the high-yield share (``greenwood_hanson_hys_fisd.parquet``)."""
+    filedir = Path(data_dir)
+    filedir.mkdir(parents=True, exist_ok=True)
+    overview = [
+        "- **File:** `_data/raw_data/greenwood_hanson_hys_fisd.parquet`",
+        "- **Source:** Mergent FISD (Fixed Income Securities Database), via WRDS",
+        "- **Pulled by:** `pull_greenwood_hanson.py`",
+        "- **Frequency:** Annual, effectively from the early 1980s onward",
+        "- **Index:** `year`",
+    ]
+    return _write_markdown_dictionary(
+        filedir / "greenwood_hanson_hys_fisd_dictionary.md",
+        overview,
+        _FISD_COLUMN_DESCRIPTIONS,
+        df,
+    )
+
+
+def save_data_dictionary_combined(df, data_dir=DATA_DICTIONARY_DIR):
+    """Write a Markdown data dictionary for the final spliced high-yield
+    share used in the replication (``greenwood_hanson_hys.parquet``)."""
+    filedir = Path(data_dir)
+    filedir.mkdir(parents=True, exist_ok=True)
+    overview = [
+        "- **File:** `_data/processed_data/greenwood_hanson_hys.parquet`",
+        "- **Source:** Spliced from `greenwood_hanson_hys` "
+        "(1926-2008) and `mergent_fisd_data` (2009 onward).",
+        "- **Generated by:** `pull_greenwood_hanson.py`",
+        "- **Frequency:** Annual, continuous 1926-present",
+        "- **Index:** `year`",
+    ]
+    return _write_markdown_dictionary(
+        filedir / "greenwood_hanson_hys_dictionary.md",
+        overview,
+        _COMBINED_COLUMN_DESCRIPTIONS,
+        df,
+    )
+
+
 def _demo():
     df = load_greenwood_hanson()
     print(df.tail())
@@ -596,6 +737,7 @@ if __name__ == "__main__":
     historical = pull_greenwood_hanson_historical()
     historical.to_parquet(raw_dir / "greenwood_hanson_hys_historical.parquet")
     historical.to_csv(raw_dir / "greenwood_hanson_hys_historical.csv")
+    save_data_dictionary_historical(historical, DATA_DICTIONARY_DIR)
 
     # Source 1: the FISD reconstruction and the full spliced series require
     # WRDS. If that is unavailable, still leave the historical (1926-2008)
@@ -604,6 +746,7 @@ if __name__ == "__main__":
         fisd = pull_hy_share_from_fisd()
         fisd.to_parquet(raw_dir / "greenwood_hanson_hys_fisd.parquet")
         fisd.to_csv(raw_dir / "greenwood_hanson_hys_fisd.csv")
+        save_data_dictionary_fisd(fisd, DATA_DICTIONARY_DIR)
 
         full = splice_hy_share(fisd=fisd, historical=historical)
     except Exception as exc:  # noqa: BLE001 - want a clear message, keep going
@@ -612,3 +755,4 @@ if __name__ == "__main__":
 
     full.to_parquet(processed_dir / "greenwood_hanson_hys.parquet")
     full.to_csv(processed_dir / "greenwood_hanson_hys.csv")
+    save_data_dictionary_combined(full, DATA_DICTIONARY_DIR)

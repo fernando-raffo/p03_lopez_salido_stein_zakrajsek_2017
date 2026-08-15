@@ -46,6 +46,9 @@ Naming conventions
 - ``load_shiller`` reads the cached copy from the ``_data`` directory.
 - ``process_shiller_annual`` collapses the monthly data to annual frequency and
   adds ``ln_pe10``.
+- ``save_data_dictionary`` / ``save_data_dictionary_annual`` write Markdown
+  data dictionaries documenting the columns of the raw monthly and processed
+  annual parquet files to ``DATA_DICTIONARY_DIR``.
 
 Running this file as a script pulls the data and caches it to ``DATA_DIR``
 (the ``_data`` folder, which is git-ignored, so the data is never committed).
@@ -74,6 +77,7 @@ def _config_or(var_name, default):
 
 RAW_DATA_DIR = Path(config("RAW_DATA_DIR"))
 PROCESSED_DATA_DIR = Path(config("PROCESSED_DATA_DIR"))
+DATA_DICTIONARY_DIR = Path(config("DATA_DICTIONARY_DIR"))
 START_DATE = config("REPLICATION_START_DATE")
 END_DATE = config("REPLICATION_END_DATE")
 
@@ -104,6 +108,42 @@ _COLUMN_MAP = {
     8: "real_dividend",
     10: "real_earnings",
     12: "pe10",
+}
+
+# Human-readable description of each column of `shiller_data.parquet` (the
+# raw monthly pull). Used by `save_data_dictionary`.
+_RAW_COLUMN_DESCRIPTIONS = {
+    "sp500_price": "S&P Composite (S&P 500 predecessor) nominal price index, monthly.",
+    "dividend": "S&P Composite nominal dividend, monthly, as reported by Shiller.",
+    "earnings": "S&P Composite nominal earnings, monthly, as reported by Shiller.",
+    "cpi": (
+        "Consumer Price Index (CPI-U), monthly, as reported in Shiller's "
+        "data set; used to construct the real (inflation-adjusted) series."
+    ),
+    "gs10": "10-year U.S. Treasury (long-term government bond) yield, monthly.",
+    "real_price": "S&P Composite price, deflated to real (CPI-adjusted) terms by Shiller.",
+    "real_dividend": "S&P Composite dividend, deflated to real (CPI-adjusted) terms by Shiller.",
+    "real_earnings": "S&P Composite earnings, deflated to real (CPI-adjusted) terms by Shiller.",
+    "pe10": (
+        "Shiller's cyclically adjusted price-earnings ratio (CAPE / P/E10): "
+        "real price divided by the 10-year moving average of real earnings."
+    ),
+}
+
+# Human-readable description of each column of `shiller_data_annual.parquet`
+# (the processed annual series). Used by `save_data_dictionary_annual`.
+_ANNUAL_COLUMN_DESCRIPTIONS = {
+    "sp500_price": ("S&P Composite nominal price index, year-end (December) value."),
+    "dividend": ("S&P Composite nominal dividend, year-end (December) value."),
+    "pe10": (
+        "Shiller's cyclically adjusted price-earnings ratio (CAPE / P/E10), "
+        "year-end (December) value."
+    ),
+    "ln_pe10": (
+        "Natural log of `pe10`. Used "
+        "as `ln[P/E10]_{t-2}`, the first-step stock-return predictor in "
+        "Lopez-Salido, Stein, and Zakrajsek (2017)."
+    ),
 }
 
 
@@ -242,6 +282,96 @@ def load_shiller_annual(data_dir=PROCESSED_DATA_DIR):
     return pd.read_parquet(file_path)
 
 
+def save_data_dictionary(df, data_dir=DATA_DICTIONARY_DIR):
+    """Write a Markdown data dictionary describing each column of the raw
+    monthly Shiller pull (``shiller_data.parquet``).
+
+    Parameters
+    ----------
+    df : pandas.DataFrame
+        The DataFrame returned by :func:`pull_shiller`.
+    data_dir : str or Path, default DATA_DICTIONARY_DIR
+        Directory to write ``shiller_data_dictionary.md`` into.
+
+    Returns
+    -------
+    Path
+        Path to the written Markdown file.
+    """
+    filedir = Path(data_dir)
+    filedir.mkdir(parents=True, exist_ok=True)
+    file_path = filedir / "shiller_data_dictionary.md"
+
+    lines = [
+        "## Overview",
+        "",
+        "- **File:** `_data/raw_data/shiller_data.parquet`",
+        "- **Source:** [Robert Shiller's data website](https://shillerdata.com/) "
+        "(the `ie_data.xls` workbook, `Data` sheet)",
+        "- **Pulled by:** `pull_shiller.py`",
+        "- **Frequency:** Monthly, from 1871-01 onward",
+        "- **Index:** `date`",
+        "## Column Dictionary",
+        "",
+        "| Column | Description |",
+        "| --- | --- |",
+    ]
+    for column in df.columns:
+        description = _RAW_COLUMN_DESCRIPTIONS.get(column, "Unknown series")
+        lines.append(f"| {column} | {description} |")
+
+    file_path.write_text("\n".join(lines) + "\n")
+    return file_path
+
+
+def save_data_dictionary_annual(df, data_dir=DATA_DICTIONARY_DIR):
+    """Write a Markdown data dictionary describing each column of the
+    processed annual Shiller series (``shiller_data_annual.parquet``).
+
+    Parameters
+    ----------
+    df : pandas.DataFrame
+        The DataFrame returned by :func:`process_shiller_annual`.
+    data_dir : str or Path, default DATA_DICTIONARY_DIR
+        Directory to write ``shiller_data_annual_dictionary.md`` into.
+
+    Returns
+    -------
+    Path
+        Path to the written Markdown file.
+    """
+    filedir = Path(data_dir)
+    filedir.mkdir(parents=True, exist_ok=True)
+    file_path = filedir / "shiller_data_annual_dictionary.md"
+
+    lines = [
+        "## Overview",
+        "",
+        "- **File:** `_data/processed_data/shiller_data_annual.parquet`",
+        "- **Source:** Derived from `shiller_market_variables`, "
+        "itself pulled from "
+        "[Robert Shiller's data website](https://shillerdata.com/)",
+        "- **Generated by:** `pull_shiller.py`",
+        "- **Frequency:** Annual (year-end / December value of each year)",
+        "- **Index:** `date`",
+        "",
+        "This file documents the columns found in `shiller_data_annual.parquet`, "
+        "generated by `process_shiller_annual` from the raw monthly series "
+        "pulled by `pull_shiller.py`.",
+        "",
+        "## Column Dictionary",
+        "",
+        "| Column | Description |",
+        "| --- | --- |",
+    ]
+    for column in df.columns:
+        description = _ANNUAL_COLUMN_DESCRIPTIONS.get(column, "Unknown series")
+        lines.append(f"| {column} | {description} |")
+
+    file_path.write_text("\n".join(lines) + "\n")
+    return file_path
+
+
 def _demo():
     df = load_shiller()
     print(df.tail())
@@ -257,8 +387,10 @@ if __name__ == "__main__":
     filedir.mkdir(parents=True, exist_ok=True)
     df_monthly.to_parquet(filedir / "shiller_data.parquet")
     df_monthly.to_csv(filedir / "shiller_data.csv")
+    save_data_dictionary(df_monthly, DATA_DICTIONARY_DIR)
 
     filedir = Path(PROCESSED_DATA_DIR)
     filedir.mkdir(parents=True, exist_ok=True)
     df_annual.to_parquet(filedir / "shiller_data_annual.parquet")
     df_annual.to_csv(filedir / "shiller_data_annual.csv")
+    save_data_dictionary_annual(df_annual, DATA_DICTIONARY_DIR)

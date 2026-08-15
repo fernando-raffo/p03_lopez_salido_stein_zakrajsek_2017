@@ -8,9 +8,9 @@ as a script will:
 
 1. Download all series in `series_to_pull` between START_DATE and today.
 2. Save the resulting DataFrame to `fred.parquet` in RAW_DATA_DIR.
-3. Write a `fred_data_dictionary.md` file to RAW_DATA_DIR that documents
-   which column in the saved DataFrame corresponds to which FRED series
-   and description.
+3. Write a `fred_data_dictionary.md` file to DATA_DICTIONARY_DIR that
+   documents which column in the saved DataFrame corresponds to which
+   FRED series and description.
 
 Other modules should use `load_fred` to read the cached parquet file
 rather than re-pulling from FRED.
@@ -24,6 +24,7 @@ import pandas_datareader.data as web
 from settings import config
 
 DATA_DIR = Path(config("RAW_DATA_DIR"))
+DATA_DICTIONARY_DIR = Path(config("DATA_DICTIONARY_DIR"))
 START_DATE = config("BUFFER_START_DATE")
 END_DATE = config("EXTENSION_END_DATE")
 
@@ -95,7 +96,7 @@ def load_fred(data_dir=DATA_DIR):
     return df
 
 
-def save_data_dictionary(df, data_dir=DATA_DIR):
+def save_data_dictionary(df, data_dir=DATA_DICTIONARY_DIR):
     """
     Write a Markdown data dictionary describing each column of `df`.
 
@@ -110,7 +111,7 @@ def save_data_dictionary(df, data_dir=DATA_DIR):
     df : pandas.DataFrame
         The DataFrame returned by `pull_fred`, whose columns are FRED
         series IDs.
-    data_dir : str or Path, default DATA_DIR
+    data_dir : str or Path, default DATA_DICTIONARY_DIR
         Directory to write `fred_data_dictionary.md` into.
 
     Returns
@@ -123,10 +124,15 @@ def save_data_dictionary(df, data_dir=DATA_DIR):
     file_path = filedir / "fred_data_dictionary.md"
 
     lines = [
-        "# FRED Data Dictionary",
+        "## Overview",
         "",
-        "This file documents the columns found in `fred.parquet`, generated "
-        "by `pull_fred.py`.",
+        "- **File:** `_data/raw_data/fred.parquet`",
+        "- **Source:** [FRED (Federal Reserve Economic Data)](https://fred.stlouisfed.org/), "
+        "St. Louis Fed",
+        "- **Pulled by:** `pull_fred.py`, via `pandas_datareader.data.DataReader`",
+        "- **Frequency:** Mixed (daily/monthly/quarterly/annual, one column per series)",
+        "- **Index:** `DATE`",
+        "## Column Dictionary",
         "",
         "| Column (FRED Series ID) | Description |",
         "| --- | --- |",
@@ -145,4 +151,4 @@ if __name__ == "__main__":
     filedir.mkdir(parents=True, exist_ok=True)
     df.to_parquet(filedir / "fred.parquet")
     df.to_csv(filedir / "fred.csv")
-    save_data_dictionary(df, filedir)
+    save_data_dictionary(df, DATA_DICTIONARY_DIR)

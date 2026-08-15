@@ -126,3 +126,29 @@ def test_process_shiller_annual_bad_how():
 def test_load_shiller_invalid_dir():
     with pytest.raises(FileNotFoundError):
         pull_shiller.load_shiller(data_dir="invalid_directory")
+
+
+def test_save_data_dictionary_documents_known_and_unknown_columns(tmp_path):
+    df = pd.DataFrame({"pe10": [1.0], "SOME_UNKNOWN_COLUMN": [2.0]})
+
+    file_path = pull_shiller.save_data_dictionary(df, data_dir=tmp_path)
+
+    assert file_path == tmp_path / "shiller_data_dictionary.md"
+    text = file_path.read_text()
+    assert "pe10" in text
+    assert pull_shiller._RAW_COLUMN_DESCRIPTIONS["pe10"] in text
+    assert "SOME_UNKNOWN_COLUMN" in text
+    assert "Unknown series" in text
+
+
+def test_save_data_dictionary_annual_documents_known_and_unknown_columns(tmp_path):
+    df = pd.DataFrame({"ln_pe10": [1.0], "SOME_UNKNOWN_COLUMN": [2.0]})
+
+    file_path = pull_shiller.save_data_dictionary_annual(df, data_dir=tmp_path)
+
+    assert file_path == tmp_path / "shiller_data_annual_dictionary.md"
+    text = file_path.read_text()
+    assert "ln_pe10" in text
+    assert pull_shiller._ANNUAL_COLUMN_DESCRIPTIONS["ln_pe10"] in text
+    assert "SOME_UNKNOWN_COLUMN" in text
+    assert "Unknown series" in text
