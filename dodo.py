@@ -143,7 +143,6 @@ def task_pull_data():
         "file_dep": [
             "./src/settings.py",
             "./src/pull_greenwood_hanson.py",
-            MANUAL_DATA_DIR / "greenwood_hanson_hys_historical.csv",
         ],
         "clean": True,
     }
