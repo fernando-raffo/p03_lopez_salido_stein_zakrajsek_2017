@@ -1,4 +1,4 @@
-name: p03_lopez_salido_stein_zakrajsek_2017
+name: p03_lopez_salido_stein_zakrajsek_2017_env
 channels:
   - conda-forge
   - defaults
@@ -14,11 +14,13 @@ dependencies:
   - numpy==1.26.4
   - openpyxl==3.1.5
   - pandas-datareader==0.10.0
+  - pandas-market-calendars==4.4.1
   - pandas==2.2.3
   - paramiko==3.5.0
   - plotly==5.24.1
   - polars==1.9.0
   - pyarrow
+  - cruft
   - pytest==8.3.3
   - python-decouple==3.8
   - python-dotenv==1.0.1
@@ -33,7 +35,6 @@ dependencies:
   - zstandard==0.23.0
   - linearmodels==6.1
   - black==24.8.0
-  - ruff
 
   # Jupyter dependencies
   - jupyter
@@ -44,4 +45,4 @@ dependencies:
   - pip
   - pip:
       - chartbook[all]
-      - pandas-market-calendars==4.4.1
+      - wrds>=3.2.0

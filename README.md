@@ -1,35 +1,83 @@
-p03_lopez-salido_stein_zakrajsek_2017
+Lopez-Salido, Stein & Zakrajsek (2017) Replication
 =====================================
 
 ## About this project
 
-A data science project
+This project replicates key results from:
+
+> Lopez-Salido, D., Stein, J. C., and Zakrajsek, E. (2017), "Credit-Market Sentiment and the Business Cycle." *The Quarterly Journal of Economics*, 132(3): 1373-1426. https://doi.org/10.1093/qje/qjx014
+
+The paper shows that elevated credit-market sentiment in year *t − 2* (proxied by narrow, aggressively priced credit spreads and a high share of junk-bond issuance) forecasts a subsequent widening of credit spreads and a decline in economic activity in years *t* and *t + 1*, using U.S. data from 1929 to 2015. This repo pulls the underlying data (FRED, Greenwood-Hanson credit-spread and issuance data, and Shiller's stock-market data), reconstructs the paper's credit-market sentiment measure via a two-step forecasting regression, and reproduces select tables and figures from the paper, including:
+
+- **Figure 1** — the Baa-Treasury credit spread over time
+- **Figure 2** — credit-market sentiment and economic growth
+- **Table 1** — forecasting economic growth with credit spreads and stock prices
+- **Table 2** — the two-step regression results linking financial-market sentiment to economic growth
+
+**Extension.** The original paper builds its credit-market sentiment proxy from the spread between Moody's seasoned **Baa**-rated (lowest investment-grade) corporate bond yields and the 10-year Treasury yield. This project extends the replication by rebuilding the same figures and regressions using the spread on Moody's **Aaa**-rated (highest-grade) corporate bonds in place of Baa. The Aaa-based outputs are produced alongside the original Baa-based ones throughout the pipeline.
+
+## Data Sources
+
+| Source | Description |
+|--------|-------------|
+| FRED | Moody's Aaa/Baa seasoned corporate bond yields, 10-year Treasury yield, 3-month T-bill rate, CPI, population, real GDP, and the NBER recession indicator |
+| Robert Shiller's Data Website | Monthly S&P Composite price, dividends, earnings, CPI, the 10-year Treasury rate, and the cyclically adjusted price-earnings ratio (CAPE / P/E10) |
+| Greenwood & Hanson (2013), via Harvard Business School | Published historical annual high-yield share of nonfinancial corporate bond issuance, 1926-2008 |
+| Mergent FISD via WRDS | Bond-level issuance and rating data used to reconstruct the high-yield share from the early 1980s onward, spliced onto the published Greenwood-Hanson series |
 
 ## Quick Start
 
-The quickest way to run code in this repo is to use the following steps.
+### 0. Software & Access Prerequisites
 
-You must have TexLive (or another LaTeX distribution) installed on your computer and available in your path.
-You can do this by downloading and installing it from here ([windows](https://tug.org/texlive/windows.html#install)
-and [mac](https://tug.org/mactex/mactex-download.html) installers).
+1. Conda Package Manager (e.g. [via Anaconda](https://www.anaconda.com/))
+2. [Python 3.12 or above](https://www.python.org/)
+3. [MacTeX](https://tug.org/mactex/mactex-download.html) or [TeX Live](https://tug.org/texlive/)
+4. [WRDS Subscription](https://wrds-www.wharton.upenn.edu/)
 
+### 1. Create & Activate Virtual Environment
 
-First, you must have the `conda` package manager installed (e.g., via Anaconda). However, I recommend using `mamba`, via [miniforge](https://github.com/conda-forge/miniforge) as it is faster and more lightweight than `conda`.
+You can create a conda environment and all dependencies direcly using the command below if you have the conda package manager:
 
-Create and activate the conda environment:
 ```bash
 conda env create -f environment.yml
-conda activate p03_lopez_salido_stein_zakrajsek_2017
+conda activate p03_lopez_salido_stein_zakrajsek_2017_env
 ```
 
-Finally, run the project tasks:
+Alternatively, if we also include a `requirements.txt` file to create an environment with alternative package mangers or a simple Python virtual environment:
+
+```bash
+conda create -n p03_lopez_salido_stein_zakrajsek_2017_env python=3.12
+conda activate p03_lopez_salido_stein_zakrajsek_2017_env
+pip install -r requirements.txt
+```
+
+```bash
+python -m venv .venv
+source .venv/bin/activate 
+pip install -r requirements.txt
+```
+
+### 2. Configure WRDS Credentials
+
+Copy .env.example into a new file called .env in the project:
+
+```bash
+cp .env.example .env
+```
+
+Then edit .env with your WRDS credentials. It should look like:
+
+```bash
+WRDS_USERNAME="your_username"
+```
+
+### 3. Run the Full Pipeline
+
 ```bash
 doit
 ```
-And that's it!
 
-
-### Other commands
+### 4. Other commands
 
 #### Unit Tests and Doc Tests
 
@@ -60,7 +108,7 @@ On Windows (PowerShell):
 Get-Content .env | ForEach-Object { if ($_ -match '^([^=]+)=(.*)$') { [Environment]::SetEnvironmentVariable($matches[1], $matches[2], 'Process') } }
 ```
 
-### Formatting
+## Formatting
 
 This project uses [Ruff](https://docs.astral.sh/ruff/) for linting and formatting Python code.
 
@@ -79,7 +127,7 @@ ruff format . && ruff check --select I --fix . && ruff check --fix .
 - `ruff format` formats code similar to Black
 - `--select I` targets only import sorting rules (isort-compatible)
 
-### General Directory Structure
+## General Directory Structure
 
  - The `assets` folder is used for things like hand-drawn figures or other
    pictures that were not generated from code. These things cannot be easily
@@ -105,7 +153,7 @@ ruff format . && ruff check --select I --fix . && ruff check --fix .
    to each collaborator in the project. You can also use it for private
    credentials, if needed. It should not be tracked in Git.
 
-### Data and Output Storage
+## Data and Output Storage
 
 I'll often use a separate folder for storing data. Any data in the data folder
 can be deleted and recreated by rerunning the PyDoit command (the pulls are in
@@ -129,39 +177,3 @@ loading these environment variables and doing some preprocessing on them.
 The `settings.py` file is the entry point for all other scripts to these
 definitions. That is, all code that references these variables and others are
 loaded by importing `config`.
-
-### Naming Conventions
-
- - **`pull_` vs `load_`**: Files or functions that pull data from an external
- data source are prepended with "pull_", as in "pull_fred.py". Functions that
- load data that has been cached in the "_data" folder are prepended with "load_".
- For example, inside of the `pull_CRSP_Compustat.py` file there is both a
- `pull_compustat` function and a `load_compustat` function. The first pulls from
- the web, whereas the other loads cached data from the "_data" directory.
-
-
-### Dependencies and Virtual Environments
-
-#### Working with `conda` environments
-
-This project uses conda for environment management. The dependencies are stored in `environment.yml`.
-
-To create/update the environment:
-```bash
-conda env create -f environment.yml
-# or to update an existing environment:
-conda env update -f environment.yml
-```
-
-To activate the environment:
-```bash
-conda activate p03_lopez_salido_stein_zakrajsek_2017
-```
-
-To export the current environment:
-```bash
-conda env export > environment.yml
-```
-
-**Tip:** Consider using `mamba` instead of `conda` for faster package resolution. Install via [miniforge](https://github.com/conda-forge/miniforge).
-
