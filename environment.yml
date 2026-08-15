@@ -1,4 +1,4 @@
-name: p03_lopez_salido_stein_zakrajsek_2017
+name: p03_lopez_salido_stein_zakrajsek_2017_env
 channels:
   - conda-forge
   - defaults
@@ -7,7 +7,7 @@ dependencies:
   # Core dependencies
   - doit==0.37.0
   - ipython==9.8.0
-  - matplotlib==3.11.1
+  - matplotlib==3.10.9
   - numpy==2.5.2
   - openpyxl==3.1.5
   - pandas-datareader==0.11.1
