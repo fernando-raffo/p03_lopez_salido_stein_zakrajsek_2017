@@ -427,42 +427,54 @@ def pull_hy_share_from_fisd(wrds_username=WRDS_USERNAME):
 # only in print, they are transcribed once into
 # ``MANUAL_DATA_DIR / "greenwood_hanson_hys_historical.csv"`` (see
 # ``data_manual/data_README.md``) rather than re-derived here.
-_HISTORICAL_MANUAL_FILENAME = "greenwood_hanson_hys_historical.csv"
 
 
-def pull_greenwood_hanson_historical(
-    manual_data_dir=MANUAL_DATA_DIR, filename=_HISTORICAL_MANUAL_FILENAME
-):
-    """Return the published Greenwood-Hanson (2013) high-yield share, 1926-2008.
+# Historical Greenwood-Hanson high-yield share, pulled from its published
+# location per issue #42 (previously hand-transcribed into data_manual). The URL
+# is configurable via GH_HISTORICAL_URL and points at InvestorCreditSentiment.xlsx
+# on the HBS Behavioral Finance & Financial Stability site.
+GH_HISTORICAL_URL_DEFAULT = (
+    "https://www.hbs.edu/behavioral-finance-and-financial-stability/"
+    "Documents/ChartData/LineCharts/InvestorCreditSentiment.xlsx"
+)
 
-    This is the authoritative spliced series from Table 2 of Greenwood and
-    Hanson (2013), transcribed by hand into a CSV in ``MANUAL_DATA_DIR`` since
-    it exists only in print. Use it for the pre-FISD period (before 1983),
-    which cannot be reconstructed from any database, or as a ready-made
-    1926-2008 series.
 
-    Returns
-    -------
-    pandas.DataFrame
-        Indexed by ``year`` with ``hy_share``, ``ln_hy_share`` and a ``source``
-        label ('gh2013').
+def pull_greenwood_hanson_historical(url=None, sheet="Annual Data"):
+    """Download the published Greenwood-Hanson high-yield share (1926-2015).
 
-    Examples
-    --------
-    >>> h = pull_greenwood_hanson_historical()
-    >>> int(h.index.min()), int(h.index.max())
-    (1926, 2008)
-    >>> float(h.loc[1929, "hy_share"])
-    0.262
+    Per issue #42 this is pulled from its published location (the HBS
+    ``InvestorCreditSentiment`` workbook), mirroring ``pull_shiller``, instead of
+    reading a hand-transcribed CSV from ``data_manual``. Reads the ``Annual Data``
+    sheet's ``HYS`` column. Schema is unchanged: indexed by ``year`` with
+    ``hy_share``, ``ln_hy_share`` and ``source`` ('gh2013').
+
+    Note: this is a newer vintage than the paper's Table II, so some values
+    differ slightly from the originally published series.
     """
-    path = Path(manual_data_dir) / filename
-    if not path.exists():
-        raise FileNotFoundError(
-            f"No published Greenwood-Hanson historical series found at {path}. "
-            "It is transcribed from Table 2 of Greenwood and Hanson (2013) and "
-            "checked into the repo; see data_manual/data_README.md."
+    import requests
+    from io import BytesIO
+
+    if url is None:
+        try:
+            url = config("GH_HISTORICAL_URL")
+        except Exception:
+            url = GH_HISTORICAL_URL_DEFAULT
+
+    headers = {"User-Agent": "Mozilla/5.0 (compatible; research script)"}
+    resp = requests.get(url, headers=headers, timeout=60)
+    resp.raise_for_status()
+
+    raw = pd.read_excel(BytesIO(resp.content), sheet_name=sheet)
+    raw.columns = [str(c).strip().lower() for c in raw.columns]
+    val = next((c for c in ("hy_share", "hys", "high yield share")
+                if c in raw.columns), None)
+    if "year" not in raw.columns or val is None:
+        raise ValueError(
+            f"Expected a 'year' and HYS column from {url}; got {list(raw.columns)}"
         )
-    out = pd.read_csv(path).set_index("year").sort_index()
+    out = raw[["year", val]].rename(columns={val: "hy_share"}).dropna()
+    out["year"] = out["year"].astype(int)
+    out = out.set_index("year").sort_index()
     out.index.name = "year"
     out["ln_hy_share"] = np.log(out["hy_share"].where(out["hy_share"] > 0))
     out["source"] = "gh2013"
