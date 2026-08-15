@@ -45,6 +45,13 @@ Every series is pulled programmatically so the results are reproducible:
   \item \textbf{Federal Reserve (FRED).} Moody's seasoned Baa and Aaa corporate
         bond yields, the 10-year Treasury yield, real GDP, and related
         macroeconomic series, forming the credit spreads and output outcomes.
+        Some of these series are only available in a newer vintage than the one
+        used in the original paper, and several require stitching together
+        multiple FRED series to obtain a continuous long history. The paper's
+        appendix does not always specify exactly which underlying series were
+        used, so where the mapping was ambiguous we made a documented judgement
+        call on which series to combine; this is a further source of small
+        differences from the published numbers.
   \item \textbf{Robert Shiller's website.} Long-run stock-market and
         interest-rate data, including the cyclically adjusted price-earnings
         ratio used as the equity-return predictor.
@@ -128,9 +135,13 @@ present preserved the qualitative result.
 high-yield issuance share, which is not a clean FRED pull; sourcing it reliably
 was the chief data bottleneck, resolved by pulling the published workbook
 directly from its URL and splicing it with a Mergent FISD reconstruction via
-WRDS. Matching the paper's inference also required Newey--West standard errors
-with a suitable lag, and differences in sample period and data vintage shift
-point estimates relative to the published tables---expected, and explained by
-the updated data vintage noted above.
+WRDS. Assembling the FRED series was a second source of friction: several series
+had to be stitched together to form a continuous long history, and the paper's
+appendix does not fully pin down which underlying series were used, so some
+choices were our own documented judgement calls. Matching the paper's inference
+also required Newey--West standard errors with a suitable lag, and differences
+in sample period and data vintage shift point estimates relative to the
+published tables---expected, and explained by the updated data vintages and
+series choices noted above.
 
 \end{document}
