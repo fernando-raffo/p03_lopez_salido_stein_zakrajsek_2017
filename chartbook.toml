@@ -17,6 +17,26 @@ logo = "assets/logo.png"
 
 [notebooks]
 
+[notebooks.01_summary_statistics]
+notebook_name = "Data Walkthrough & Summary Statistics"
+description = "Guided tour of the data."
+path = "./src/01_summary_statistics.ipynb"
+
+[notebooks.02_replication]
+notebook_name = "Replication Walkthrough"
+description = "Guided walkthrough of replication of the paper."
+path = "./src/02_replication.ipynb"
+
+[notebooks.03_extension]
+notebook_name = "Extension Walkthrough"
+description = "Guided walkthrough of extension, replicating the paper methodology with the Aaa-Treasury spread."
+path = "./src/03_extension.ipynb"
+
+[notebooks.04_case_study]
+notebook_name = "Case Study"
+description = "Walkthrough of the signal's reaction to the 2020 COVID shock and the post COVID market."
+path = "./src/04_case_study.ipynb"
+
 [dataframes]
 
 [dataframes.fred_macroeconomic_variables]
@@ -38,7 +58,7 @@ docs_path = "./_data/data_dictionaries/fred_data_dictionary.md"
 [dataframes.shiller_market_variables]
 name = "Robert Shiller's Stock Market Data"
 description = "Robert Shiller's monthly U.S. stock-market data set (`ie_data.xls`): the S&P Composite price, dividends, earnings, CPI, the 10-year Treasury yield, and the cyclically adjusted price-earnings ratio (CAPE / P/E10)."
-sources = ["Rober Shiller's Data Website"]
+sources = ["Robert Shiller's Data Website"]
 providers = ["Robert Shiller"]
 provider_links = ["https://shillerdata.com/"]
 tags = ["raw data", "stock market", "Shiller"]
@@ -113,7 +133,7 @@ docs_path = "./_data/data_dictionaries/fred_final_series_annual_readme.md"
 [dataframes.shiller_processed_annual_series]
 name = "Shiller Annual Stock-Market Data"
 description = "Annual (year-end) collapse of Robert Shiller's monthly stock-market data, with the log cyclically adjusted price-earnings ratio (`ln[P/E10]`) used as a first-step predictor in the replication."
-sources = ["Rober Shiller's Data Website"]
+sources = ["Robert Shiller's Data Website"]
 providers = ["Robert Shiller"]
 provider_links = ["https://shillerdata.com/"]
 tags = ["processed data", "stock market", "Shiller"]
@@ -247,3 +267,55 @@ frequency = "Annual"
 observation_period = "Calendar Year"
 lag_in_data_release = "Variable"
 seasonal_adjustment = "Mixed"
+
+[charts.summary_statistics_credit_spreads]
+name = "Summary Statistics: Baa/Aaa-Treasury Credit Spreads (1925-present)"
+description = "Monthly Baa-Treasury and Aaa-Treasury credit spreads, with NBER recessions shaded."
+dataframe = "fred_processed_monthly_series"
+path = "./_output/summary_statistics_credit_spreads.html"
+docs = "Both spread series from `fred_final_series_monthly.parquet`, plotted together. Recession shading uses the historical NBER indicator series."
+tags = ["Summary Statistics", "Credit Spread", "Baa", "Aaa", "FRED"]
+units = "Percentage Points"
+frequency = "Monthly"
+observation_period = "Monthly average"
+lag_in_data_release = "Variable"
+seasonal_adjustment = "Not Seasonally Adjusted"
+
+[charts.summary_statistics_gdp_growth]
+name = "Summary Statistics: Real GDP per Capita Growth (1930-present)"
+description = "Annual year-over-year growth in real GDP per capita."
+dataframe = "fred_processed_annual_series"
+path = "./_output/summary_statistics_gdp_growth.html"
+docs = "Log growth of `GDP_per_capita` from `fred_final_series_annual.parquet`."
+tags = ["Summary Statistics", "GDP Growth", "FRED"]
+units = "Log growth, y/y (pct.)"
+frequency = "Annual"
+observation_period = "Calendar Year"
+lag_in_data_release = "Variable"
+seasonal_adjustment = "Not Seasonally Adjusted"
+
+[charts.summary_statistics_hy_share]
+name = "Summary Statistics: Greenwood-Hanson High-Yield Share (1926-present)"
+description = "Annual high-yield issuance share, colored by underlying source series."
+dataframe = "greenwood_hanson_hys_processed_series"
+path = "./_output/summary_statistics_hy_share.html"
+docs = "`hy_share` from `greenwood_hanson_hys.parquet`, split into the published Greenwood-Hanson (2013) segment and the Mergent FISD reconstruction segment."
+tags = ["Summary Statistics", "HYS", "Greenwood", "Hanson", "High Yield Share"]
+units = "Pct. of Issuance"
+frequency = "Annual"
+observation_period = "Calendar Year"
+lag_in_data_release = "Variable"
+seasonal_adjustment = "Not Seasonally Adjusted"
+
+[charts.summary_statistics_cape]
+name = "Summary Statistics: Shiller CAPE (1929-2023)"
+description = "Annual cyclically adjusted price-earnings ratio (CAPE / P/E10), with the series' last observation marked."
+dataframe = "shiller_processed_annual_series"
+path = "./_output/summary_statistics_cape.html"
+docs = "`pe10` from `shiller_data_annual.parquet`."
+tags = ["Summary Statistics", "CAPE", "Shiller", "Valuation"]
+units = "Ratio"
+frequency = "Annual"
+observation_period = "Calendar Year"
+lag_in_data_release = "Variable"
+seasonal_adjustment = "Not Seasonally Adjusted"
