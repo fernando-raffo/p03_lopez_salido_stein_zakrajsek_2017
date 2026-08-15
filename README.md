@@ -19,7 +19,7 @@ First, you must have the `conda` package manager installed (e.g., via Anaconda).
 Create and activate the conda environment:
 ```bash
 conda env create -f environment.yml
-conda activate p03_lopez_salido_stein_zakrajsek_2017
+conda activate p03_lopez_salido_stein_zakrajsek_2017_env
 ```
 
 Finally, run the project tasks:
