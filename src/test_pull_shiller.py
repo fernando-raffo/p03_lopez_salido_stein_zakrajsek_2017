@@ -114,6 +114,42 @@ def test_process_shiller_annual():
     assert np.isclose(annual_mean["pe10"].iloc[0], np.arange(1.0, 13.0).mean())
 
 
+def test_process_shiller_annual_drops_incomplete_trailing_year_last():
+    # 2000 has all 12 months; 2001 only has data through June.
+    idx = pd.date_range("2000-01-01", periods=18, freq="MS")
+    monthly = pd.DataFrame({"pe10": np.arange(1.0, 19.0)}, index=idx)
+    monthly.index.name = "date"
+
+    annual = pull_shiller.process_shiller_annual(monthly, how="last")
+
+    assert annual.index.year.tolist() == [2000]
+    assert annual["pe10"].tolist() == [12.0]
+
+
+def test_process_shiller_annual_drops_incomplete_trailing_year_mean():
+    # 2000 has all 12 months; 2001 only has data through June.
+    idx = pd.date_range("2000-01-01", periods=18, freq="MS")
+    monthly = pd.DataFrame({"pe10": np.arange(1.0, 19.0)}, index=idx)
+    monthly.index.name = "date"
+
+    annual = pull_shiller.process_shiller_annual(monthly, how="mean")
+
+    assert annual.index.year.tolist() == [2000]
+    assert np.isclose(annual["pe10"].iloc[0], np.arange(1.0, 13.0).mean())
+
+
+def test_process_shiller_annual_drops_year_missing_december_mid_gap():
+    # A year that has 11 months but is missing December specifically (not
+    # just a trailing partial year) must still be dropped for how="last".
+    idx = pd.date_range("2000-01-01", periods=11, freq="MS")  # Jan-Nov 2000
+    monthly = pd.DataFrame({"pe10": np.arange(1.0, 12.0)}, index=idx)
+    monthly.index.name = "date"
+
+    annual = pull_shiller.process_shiller_annual(monthly, how="last")
+
+    assert annual.empty
+
+
 def test_process_shiller_annual_bad_how():
     monthly = pd.DataFrame(
         {"pe10": [1.0, 2.0]},

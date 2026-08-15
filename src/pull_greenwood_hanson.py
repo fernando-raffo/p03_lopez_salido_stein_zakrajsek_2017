@@ -103,8 +103,8 @@ RAW_DATA_DIR = Path(config("RAW_DATA_DIR"))
 PROCESSED_DATA_DIR = Path(config("PROCESSED_DATA_DIR"))
 MANUAL_DATA_DIR = Path(config("MANUAL_DATA_DIR"))
 DATA_DICTIONARY_DIR = Path(config("DATA_DICTIONARY_DIR"))
-START_DATE = config("REPLICATION_START_DATE")
-END_DATE = config("REPLICATION_END_DATE")
+END_DATE = config("EXTENSION_END_DATE")
+PROCESSED_START_DATE = config("REPLICATION_START_DATE")
 
 # Which source to use by default: "fisd" (WRDS Mergent FISD) or "raw"
 # (a manually supplied issuance file in MANUAL_DATA_DIR). Configurable via env
@@ -411,7 +411,7 @@ def _clean_fisd_issues(raw, max_year=None):
       2030), which would otherwise create spurious years.
     """
     if max_year is None:
-        max_year = pd.Timestamp.today().year
+        max_year = END_DATE.year
 
     issues = raw.copy()
     issues["offering_date"] = pd.to_datetime(issues["offering_date"], errors="coerce")
@@ -523,8 +523,9 @@ def pull_greenwood_hanson_historical(url=None, sheet="Annual Data"):
 
     raw = pd.read_excel(BytesIO(resp.content), sheet_name=sheet)
     raw.columns = [str(c).strip().lower() for c in raw.columns]
-    val = next((c for c in ("hy_share", "hys", "high yield share")
-                if c in raw.columns), None)
+    val = next(
+        (c for c in ("hy_share", "hys", "high yield share") if c in raw.columns), None
+    )
     if "year" not in raw.columns or val is None:
         raise ValueError(
             f"Expected a 'year' and HYS column from {url}; got {list(raw.columns)}"
@@ -666,8 +667,8 @@ def save_data_dictionary_historical(df, data_dir=DATA_DICTIONARY_DIR):
         "- **File:** `_data/raw_data/greenwood_hanson_hys_historical.parquet`",
         "- **Source:** Greenwood, Robin, and Samuel G. Hanson (2013), "
         '"Issuer Quality and Corporate Bond Returns," *Review of Financial '
-        "Studies* 26(6), 1483-1525, Table 2 (transcribed from print into "
-        "`data_manual/greenwood_hanson_hys_historical.csv`)",
+        "Studies* 26(6), 1483-1525, Table 2. A new vintage of the published series is pulled from the [HBS](https://www.hbs.edu/behavioral-finance-and-financial-stability/"
+        "Documents/ChartData/LineCharts/InvestorCreditSentiment.xlsx).",
         "- **Pulled by:** `pull_greenwood_hanson.py`",
         "- **Frequency:** Annual, 1926-2008",
         "- **Index:** `year`",
@@ -752,6 +753,10 @@ if __name__ == "__main__":
     except Exception as exc:  # noqa: BLE001 - want a clear message, keep going
         print(f"FISD pull unavailable ({exc}); writing historical series only.")
         full = historical
+
+    # Trim the processed series to the replication sample's start year (1929);
+    # the raw historical/FISD parquet files above are left uncut.
+    full = full.loc[full.index >= PROCESSED_START_DATE.year]
 
     full.to_parquet(processed_dir / "greenwood_hanson_hys.parquet")
     full.to_csv(processed_dir / "greenwood_hanson_hys.csv")

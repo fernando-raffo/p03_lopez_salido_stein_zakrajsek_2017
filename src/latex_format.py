@@ -1,15 +1,39 @@
 """
-Shared LaTeX formatting helpers for the Table I / Table II regression tables,
-built to reproduce the published QJE layout: a two-row header ("Dependent
-variable: ..." spanning the numeric columns, then column numbers), a
-coefficient row followed by a parenthesized-s.e. row for each regressor,
-significance stars on coefficients, and an em-dash for regressors omitted
-from a given column.
+Shared LaTeX formatting helpers.
+
+Covers the Table I / Table II regression tables' layout (a two-row header
+"Dependent variable: ..." spanning the numeric columns, then column numbers;
+a coefficient row followed by a parenthesized-s.e. row for each regressor;
+significance stars; an em-dash for regressors omitted from a given column),
+plus `latex_escape` for any plain-text label/unit that ends up as a table
+cell in a `.tex` file emitted by this repo -- so callers can write specs as
+plain text (e.g. "S&P", "$tn") instead of pre-escaped LaTeX source. Hand-
+authored LaTeX source strings (e.g. row labels like r"$\\Delta s_{t-1}$")
+should NOT be run through `latex_escape` -- it is only for data/labels that
+are plain text.
 """
 
 import numpy as np
 
 STAR_THRESHOLDS = ((0.01, "***"), (0.05, "**"), (0.10, "*"))
+
+_LATEX_SPECIAL_CHARS = {
+    "&": r"\&",
+    "%": r"\%",
+    "$": r"\$",
+    "#": r"\#",
+    "_": r"\_",
+    "{": r"\{",
+    "}": r"\}",
+    "~": r"\textasciitilde{}",
+    "^": r"\textasciicircum{}",
+    "\\": r"\textbackslash{}",
+}
+
+
+def latex_escape(text):
+    """Escape LaTeX special characters in plain text bound for a table cell."""
+    return "".join(_LATEX_SPECIAL_CHARS.get(ch, ch) for ch in str(text))
 
 
 def stars(pvalue):

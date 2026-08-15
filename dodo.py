@@ -143,7 +143,6 @@ def task_pull_data():
         "file_dep": [
             "./src/settings.py",
             "./src/pull_greenwood_hanson.py",
-            MANUAL_DATA_DIR / "greenwood_hanson_hys_historical.csv",
         ],
         "clean": True,
     }
@@ -184,6 +183,38 @@ def task_process_fred_data():
             "./src/settings.py",
             "./src/process_fred_data_monthly.py",
             RAW_DATA_DIR / "fred.parquet",
+        ],
+        "clean": True,
+    }
+
+
+def task_summary_statistics():
+    """Generate summary statistics tables and graphs for the data"""
+    return {
+        "actions": ["python ./src/summary_statistics.py"],
+        "targets": [
+            OUTPUT_DIR / "summary_statistics_credit_spreads.tex",
+            OUTPUT_DIR / "summary_statistics_credit_spreads.pdf",
+            OUTPUT_DIR / "summary_statistics_credit_spreads.html",
+            OUTPUT_DIR / "summary_statistics_gdp_growth.tex",
+            OUTPUT_DIR / "summary_statistics_gdp_growth.pdf",
+            OUTPUT_DIR / "summary_statistics_gdp_growth.html",
+            OUTPUT_DIR / "summary_statistics_hy_share.tex",
+            OUTPUT_DIR / "summary_statistics_hy_share.pdf",
+            OUTPUT_DIR / "summary_statistics_hy_share.html",
+            OUTPUT_DIR / "summary_statistics_cape.tex",
+            OUTPUT_DIR / "summary_statistics_cape.pdf",
+            OUTPUT_DIR / "summary_statistics_cape.html",
+        ],
+        "file_dep": [
+            "./src/settings.py",
+            "./src/summary_statistics.py",
+            "./src/helper_functions.py",
+            "./src/plot_style.py",
+            PROCESSED_DATA_DIR / "fred_final_series_annual.parquet",
+            PROCESSED_DATA_DIR / "fred_final_series_monthly.parquet",
+            PROCESSED_DATA_DIR / "greenwood_hanson_hys.parquet",
+            PROCESSED_DATA_DIR / "shiller_data_annual.parquet",
         ],
         "clean": True,
     }
@@ -303,6 +334,88 @@ def task_generate_interactive_charts():
     }
 
 
+notebook_tasks = {
+    "01_summary_statistics.ipynb": {
+        "path": "./src/01_summary_statistics.ipynb",
+        "file_dep": [
+            OUTPUT_DIR / "summary_statistics_credit_spreads.tex",
+        ],
+        "task_dep": ["summary_statistics"],
+        "targets": [],
+    },
+    "02_replication.ipynb": {
+        "path": "./src/02_replication.ipynb",
+        "file_dep": [
+            OUTPUT_DIR / "table_1_replication.tex",
+        ],
+        "task_dep": [
+            "pull_data",
+            "replicate_table_1",
+            "replicate_table_2",
+            "replicate_figure_1",
+            "replicate_figure_2",
+        ],
+        "targets": [],
+    },
+    "03_extension.ipynb": {
+        "path": "./src/03_extension.ipynb",
+        "file_dep": [
+            OUTPUT_DIR / "table_1_replication.tex",
+        ],
+        "task_dep": [
+            "pull_data",
+            "replicate_table_1",
+            "replicate_table_2",
+            "replicate_figure_1",
+            "replicate_figure_2",
+        ],
+        "targets": [],
+    },
+    "04_case_study.ipynb": {
+        "path": "./src/04_case_study.ipynb",
+        "file_dep": [
+            OUTPUT_DIR / "table_1_replication.tex",
+        ],
+        "task_dep": [
+            "pull_data",
+            "replicate_table_1",
+            "replicate_table_2",
+            "replicate_figure_1",
+            "replicate_figure_2",
+        ],
+        "targets": [],
+    },
+}
+
+
+def task_run_notebooks():
+    """
+    Preps the notebooks for presentation format.
+    Execute notebooks if the script version of it has been changed.
+    """
+    for notebook in notebook_tasks.keys():
+        notebook_name = notebook.split(".")[0]
+        notebook_path = Path("./src") / notebook
+        yield {
+            "name": notebook,
+            "actions": [
+                jupyter_clear_output(notebook_path),
+                jupyter_execute_notebook(notebook_path),
+                jupyter_to_html(notebook_path, OUTPUT_DIR),
+            ],
+            "file_dep": [
+                notebook_path,
+                *notebook_tasks[notebook]["file_dep"],
+            ],
+            "task_dep": notebook_tasks[notebook].get("task_dep", []),
+            "targets": [
+                OUTPUT_DIR / f"{notebook_name}.html",
+                *notebook_tasks[notebook]["targets"],
+            ],
+            "clean": True,
+        }
+
+
 sphinx_targets = [
     "./docs/index.html",
 ]
@@ -310,23 +423,22 @@ sphinx_targets = [
 
 def task_build_chartbook_site():
     """Compile Sphinx Docs"""
-    # notebook_scripts = [
-    #    Path(notebook_tasks[notebook]["path"])
-    #    for notebook in notebook_tasks.keys()
-    # ]
+    notebook_scripts = [
+        Path(notebook_tasks[notebook]["path"]) for notebook in notebook_tasks.keys()
+    ]
     file_dep = [
         "./README.md",
         "./chartbook.toml",
         *glob.glob("./_data/data_dictionaries/*.md"),
         *glob.glob("./_data/raw_data/*.parquet"),
         *glob.glob("./_data/processed_data/*.parquet"),
-        # *notebook_scripts,
+        *notebook_scripts,
     ]
 
     return {
         "actions": [
             "chartbook build -f",
-        ],  # Use docs as build destination
+        ],
         "targets": sphinx_targets,
         "file_dep": file_dep,
         # "task_dep": [
@@ -381,3 +493,20 @@ def task_compile_latex_report():
         "targets": ["./reports/report.pdf"],
         "clean": True,
     }
+def task_clear_notebooks():
+    """
+    Clear noteook outputs to avoid changes in the code.
+    """
+    for notebook in notebook_tasks.keys():
+        notebook_name = notebook.split(".")[0]
+        notebook_path = Path("./src") / notebook
+        yield {
+            "name": notebook,
+            "actions": [
+                jupyter_clear_output(notebook_path),
+            ],
+            "file_dep": [
+                notebook_path,
+            ],
+            "clean": True,
+        }

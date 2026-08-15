@@ -77,23 +77,6 @@ else:
     defaults["OS_TYPE"] = get_os()
 
 
-## Stata executable
-def get_stata_exe():
-    """Get the name of the Stata executable based on the OS type."""
-    if defaults["OS_TYPE"] == "windows":
-        return "StataMP-64.exe"
-    elif defaults["OS_TYPE"] == "nix":
-        return "stata-mp"
-    else:
-        raise ValueError("Unknown OS type")
-
-
-if "STATA_EXE" in cli_vars:
-    defaults["STATA_EXE"] = cli_vars["STATA_EXE"]
-else:
-    defaults["STATA_EXE"] = get_stata_exe()
-
-
 ## Dates
 defaults["BUFFER_START_DATE"] = datetime.strptime("1925-01-01", "%Y-%m-%d")
 defaults["REPLICATION_START_DATE"] = datetime.strptime("1929-01-01", "%Y-%m-%d")

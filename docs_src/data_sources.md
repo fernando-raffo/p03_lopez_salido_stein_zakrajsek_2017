@@ -17,9 +17,11 @@ relevant licensing or access considerations.
 
 ### Robert Shiller's data (`pull_shiller.py`)
 
-- **Pull.** `pull_shiller` downloads `ie_data.xls` (default
-  `http://www.econ.yale.edu/~shiller/data/ie_data.xls`, overridable via the
-  `SHILLER_URL` setting; also mirrored at <https://shillerdata.com/>) and parses
+- **Pull.** `pull_shiller` downloads `ie_data.xls` from
+  <https://shillerdata.com/> (default, overridable via the `SHILLER_URL`
+  setting). Since shillerdata.com serves the workbook from a versioned CDN
+  link that changes whenever Shiller updates the file, the puller scrapes the
+  current link from the landing page rather than hard-coding it, then parses
   the `Data` sheet.
 - **Structure.** The `Data` sheet is one row per month from 1871-01 onward. The
   raw `Date` column encodes October as `YYYY.1`, so the monthly index is rebuilt
