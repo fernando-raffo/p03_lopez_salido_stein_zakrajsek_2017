@@ -467,6 +467,61 @@ def task_clear_notebooks():
         }
 
 
+def task_compile_latex_report():
+    """Compile the LaTeX report (reports/report.tex) into reports/report.pdf.
+
+    Runs pdflatex twice so that cross-references, the table of contents, and
+    hyperref bookmarks resolve on the second pass (the first pass writes the
+    .aux/.out files the second pass reads).
+
+    Depends on every figure and table the report `\\input`s or
+    `\\includegraphics`s, so editing any upstream script rebuilds the PDF.
+    """
+    report_dir = BASE_DIR / "reports"
+
+    figures = [
+        OUTPUT_DIR / f"figure_{n}_{label}.pdf"
+        for n in (1, 2)
+        for label in ("replication", "extended", "aaa_replication", "aaa_extended")
+    ]
+    tables = [
+        OUTPUT_DIR / f"table_{n}_{label}.tex"
+        for n in (1, 2)
+        for label in ("replication", "extended", "aaa_replication", "aaa_extended")
+    ]
+    summary_stats = [
+        OUTPUT_DIR / f"summary_statistics_{name}{ext}"
+        for name in ("credit_spreads", "gdp_growth", "hy_share", "cape")
+        for ext in (".tex", ".pdf")
+    ]
+    case_study = [OUTPUT_DIR / "case_study_covid_oos.pdf"]
+
+    return {
+        "actions": [
+            f"cd {report_dir} && pdflatex -interaction=nonstopmode report.tex",
+            f"cd {report_dir} && pdflatex -interaction=nonstopmode report.tex",
+        ],
+        "targets": [report_dir / "report.pdf"],
+        "file_dep": [
+            report_dir / "report.tex",
+            *figures,
+            *tables,
+            *summary_stats,
+            *case_study,
+        ],
+        "task_dep": [
+            "replicate_figure_1",
+            "replicate_figure_2",
+            "replicate_table_1",
+            "replicate_table_2",
+            "summary_statistics",
+            "run_notebooks",
+        ],
+        "clean": True,
+        "verbosity": 2,
+    }
+
+
 def task_run_tests():
     """Run the pytest suite (unit tests, doctests, and paper-match checks).
 

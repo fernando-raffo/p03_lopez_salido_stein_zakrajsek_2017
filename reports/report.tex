@@ -67,6 +67,43 @@ Every series is pulled programmatically so the results are reproducible:
         reflects the authors' latest revisions.
 \end{itemize}
 
+\section{Summary Statistics of the Underlying Data}
+Before any regression, we document the four processed data files that feed the
+pipeline. Each table reports the distribution of the series in its display
+units; each figure is the corresponding featured chart. These correspond to the
+walkthrough in \texttt{01\_summary\_statistics.ipynb}.
+
+\noindent\textbf{Credit spreads (monthly FRED series).}\par\medskip
+\input{../_output/summary_statistics_credit_spreads.tex}\par\medskip
+\begin{figure}[H]\centering
+  \includegraphics[width=0.85\textwidth]{summary_statistics_credit_spreads.pdf}
+  \caption{Baa-- and Aaa--Treasury credit spreads, NBER recessions shaded.}
+\end{figure}
+
+\noindent\textbf{Real GDP per capita growth (annual FRED series).}\par\medskip
+\input{../_output/summary_statistics_gdp_growth.tex}\par\medskip
+\begin{figure}[H]\centering
+  \includegraphics[width=0.85\textwidth]{summary_statistics_gdp_growth.pdf}
+  \caption{Growth in real GDP per capita, the dependent variable throughout
+  Tables I and II.}
+\end{figure}
+
+\noindent\textbf{High-yield issuance share (Greenwood--Hanson, spliced).}\par\medskip
+\input{../_output/summary_statistics_hy_share.tex}\par\medskip
+\begin{figure}[H]\centering
+  \includegraphics[width=0.85\textwidth]{summary_statistics_hy_share.pdf}
+  \caption{The high-yield share of nonfinancial corporate bond issuance,
+  colored by source to make the 2008/2009 splice visible.}
+\end{figure}
+
+\noindent\textbf{Cyclically adjusted price-earnings ratio (Shiller CAPE).}\par\medskip
+\input{../_output/summary_statistics_cape.tex}\par\medskip
+\begin{figure}[H]\centering
+  \includegraphics[width=0.85\textwidth]{summary_statistics_cape.pdf}
+  \caption{CAPE at year $t$ against the cumulative S\&P total return realized
+  over the following decade.}
+\end{figure}
+
 \section{Replication Sample (1929--2015)}
 \begin{figure}[H]\centering
   \includegraphics[width=0.85\textwidth]{figure_1_replication.pdf}
@@ -121,6 +158,22 @@ Every series is pulled programmatically so the results are reproducible:
 \end{figure}
 \noindent\textbf{Table II, Aaa (extended).}\par\medskip
 \input{../_output/table_2_aaa_extended.tex}
+
+\section{Case Study: The Sentiment Signal Out of Sample, 2020--2022}
+The post-2008 reconstruction of the high-yield issuance share from Mergent FISD
+makes it possible to apply the Table II first stage, estimated on 1929--2015 and
+held fixed, to the COVID cycle. The figure below compares the predicted change
+in the Baa--Treasury spread---using the full two-ingredient sentiment signal and,
+separately, the spread-reversion leg alone---against the realized change. The
+full walkthrough, including the caveats that bound how much weight a three-year
+window can carry, is in \texttt{04\_case\_study.ipynb}.
+
+\begin{figure}[H]\centering
+  \includegraphics[width=0.85\textwidth]{case_study_covid_oos.pdf}
+  \caption{Out-of-sample application of the L\'opez-Salido, Stein \&
+  Zakraj\v{s}ek sentiment first stage to 2020--2022: predicted versus realized
+  change in the credit spread.}
+\end{figure}
 
 \section{Successes and Challenges}
 \textbf{Where it worked.} The long-run credit spread (Figure I) reproduces
