@@ -86,6 +86,8 @@ You can run the unit test, including doctests, with the following command:
 pytest --doctest-modules
 ```
 
+The full `doit` also ends with a `run_tests` task that executes this same suite as its final step, after the data pulls and the Table I / II replications. This means the integration tests that check the replicated coefficients against the published paper run automatically at the end of the pipeline; they skip on their own if the processed data has not been built.
+
 You can build the documentation with:
 ```
 rm ./src/.pytest_cache/README.md
