@@ -465,3 +465,26 @@ def task_clear_notebooks():
             ],
             "clean": True,
         }
+
+
+def task_run_tests():
+    """Run the pytest suite (unit tests, doctests, and paper-match checks).
+
+    Wired as the final pipeline step, following the cookiecutter_chartbook
+    convention of ending `doit` with the tests. It depends on the data pulls
+    and the Table I / II replications so that the integration tests, which
+    compare the replicated coefficients against the published QJE numbers,
+    have their processed-parquet inputs built before they run. The pure unit
+    tests and doctests run regardless; the paper-match tests skip on their own
+    if the data is somehow absent.
+    """
+    return {
+        "actions": ["pytest --doctest-modules src"],
+        "task_dep": [
+            "pull_data",
+            "process_fred_data",
+            "replicate_table_1",
+            "replicate_table_2",
+        ],
+        "verbosity": 2,
+    }
