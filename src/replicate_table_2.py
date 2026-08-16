@@ -19,18 +19,60 @@ where Delta-hat s_t and r-hat_t^SP are the *fitted* values from the two
 auxiliary regressions above; columns (1)-(4) use different subsets of these
 regressors and controls, see `COLUMN_REGRESSORS`.
 
-Estimation-method caveat
--------------------------
-The paper notes both steps "are estimated jointly ... by NLLS," which lets
-the second-step standard errors account for sampling uncertainty in the
-first-step (auxiliary) coefficients. This script instead runs the simpler,
-standard two-step "plug-in" procedure: fit each auxiliary regression by OLS,
-substitute its fitted values into the growth regression, then fit the growth
-regression by OLS. Because the system is block-recursive (the auxiliary
-coefficients solve their own normal equations regardless of the second
-step), the point estimates should match the joint-NLLS estimates; only the
-standard errors differ, since ours do not correct for the extra "generated
-regressor" uncertainty from the first step.
+Estimation method: joint NLLS, footnote 12
+-------------------------------------------
+The paper estimates equations (2)-(4) *jointly* by nonlinear least squares
+(NLLS) "to take into account the generated-regressor nature of the expected
+returns" (p. 1388), with inference based on "a heteroskedasticity- and
+autocorrelation-consistent asymptotic covariance matrix computed according
+to Newey and West (1987), using the automatic lag selection method of Newey
+and West (1994)" (footnote 12).
+
+Because the system is block-recursive -- the auxiliary (first-step)
+equations don't involve the second-step coefficients, so their normal
+equations pin down theta1 (spread) and theta2 (return) on their own -- the
+NLLS *point* estimates coincide with the simple two-step "plug-in" OLS
+procedure: fit each auxiliary regression by OLS, substitute its fitted
+values into the growth regression, and fit that by OLS too. This script
+still does exactly that for the point estimates (`_fit_ols_hac` below).
+
+What plug-in OLS gets wrong is the *second-step standard errors*: treating
+`d_s_hat`/`r_sp_hat` as if they were data, rather than estimates with their
+own sampling variance, understates the second step's coefficient
+uncertainty. `_joint_step2_inference` corrects this by treating the whole
+system as one exactly identified GMM/M-estimation problem, i.e. the
+first-order conditions of joint NLLS:
+
+    g1_t(theta1)              = z1,t-2 * (Delta s_t - theta1'z1,t-2)
+    g2_t(theta2)              = z2,t-2 * (r_t^SP - theta2'z2,t-2)
+    g3_t(theta1, theta2, psi) = w_t     * (Delta y_t - w_t(theta1,theta2)'psi)
+
+stacked into m_t(theta1, theta2, psi) = [g1_t; g2_t; g3_t] (only the blocks
+a given column actually uses), where w_t is that column's second-step
+regressor vector with `d_s_hat`/`r_sp_hat` written as theta1'z1,t-2 /
+theta2'z2,t-2 rather than plugged-in numbers. Solving Sum_t m_t = 0
+reproduces the plug-in OLS estimates exactly (each theta solves its own
+normal equations regardless of psi; psi then solves its own normal
+equations given theta) -- confirming NLLS and plug-in OLS point estimates
+agree -- but the asymptotic covariance of the stacked M-estimator,
+
+    Avar(theta1, theta2, psi) = G^-1 S (G^-1)',
+
+with G = d(Sum_t m_t)/d(params) (a numerically differentiated Jacobian,
+block lower-triangular since g3 depends on theta1/theta2 but not vice versa)
+and S the Newey-West HAC "meat" matrix of m_t (same automatic-lag rule as
+every other regression in this repo), correctly propagates the first-step
+sampling uncertainty into the psi (= second-step coefficient) block. This is
+exactly the classic Murphy and Topel (1985)/generated-regressors correction,
+and it is what "estimated jointly by NLLS" buys over plug-in OLS: the point
+estimates are unchanged, but the reported standard errors are larger and
+match the paper's methodology rather than a two-step approximation to it.
+
+The auxiliary-regression coefficients' own standard errors are *unaffected*
+by this correction (their block of `Avar` collapses back to the plain
+single-equation HAC covariance, since G is block lower-triangular), so
+`_fit_ols_hac`'s HAC standard errors for `aux_spread`/`aux_return` already
+match the joint-NLLS ones and are left as is.
 
 Because `fred_final_series_annual.parquet` is trimmed to start in 1929 (the
 replication start year), `s_{t-2}` is unavailable for 1929-1930, so the
@@ -53,6 +95,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 import statsmodels.api as sm
+from scipy import stats
 
 from helper_functions import log_total_return, to_percent, year_over_year_growth
 from latex_format import coef_se_rows, two_row_header
@@ -72,6 +115,11 @@ COLUMN_REGRESSORS = {
     "col3": ["d_s_hat", "r_sp_hat", "dy_lag1"],
     "col4": ["d_s_hat", "dy_lag1", "d_3mo_lag1", "d_10yr_lag1", "inflation_pct_lag1"],
 }
+
+# Twice-lagged predictors of the two auxiliary (first-step) regressions,
+# equations (2)-(3) of the paper.
+AUX_SPREAD_VARS = ["ln_hys_lag2", "spread_lag2"]
+AUX_RETURN_VARS = ["ln_pe10_lag2"]
 
 # Row order and LaTeX labels for the main (second-step) table.
 _MAIN_ROWS = [
@@ -163,6 +211,120 @@ def _fit_ols_hac(y, X):
     )
 
 
+def _hac_meat(scores, nlags):
+    """Newey-West (1987) HAC "meat" matrix (Bartlett kernel, sum
+    convention) of a T x q score/moment array, i.e. Gamma_0 + sum_{l=1}^L
+    w_l (Gamma_l + Gamma_l'), the same object statsmodels forms internally
+    for `cov_type="HAC"` -- just generalized here to an arbitrary stacked
+    moment vector instead of a single equation's X*resid."""
+    S = scores.T @ scores
+    for lag in range(1, nlags + 1):
+        w = 1.0 - lag / (nlags + 1)
+        gamma = scores[lag:].T @ scores[:-lag]
+        S += w * (gamma + gamma.T)
+    return S
+
+
+def _numeric_jacobian(func, x0, rel_step=1e-6):
+    """Central-difference Jacobian of `func: R^q -> R^q` at `x0`."""
+    q = x0.shape[0]
+    jac = np.empty((q, q))
+    for j in range(q):
+        step = rel_step * max(abs(x0[j]), 1.0)
+        dx = np.zeros(q)
+        dx[j] = step
+        jac[:, j] = (func(x0 + dx) - func(x0 - dx)) / (2 * step)
+    return jac
+
+
+def _joint_step2_inference(window, res_aux_spread, res_aux_return, res_col, regressors):
+    """Generated-regressor-corrected (co)variance of a second-step column's
+    coefficients, per the paper's joint-NLLS system (footnote 12; see the
+    module docstring for the derivation). Point estimates are unaffected --
+    only `res_col`'s standard errors are being redone here -- so this takes
+    the already-fit auxiliary and second-step OLS results and returns
+    `(bse, pvalues)` `pandas.Series` indexed like `res_col.params`.
+    """
+    spread_used = "d_s_hat" in regressors
+    return_used = "r_sp_hat" in regressors
+    other = [r for r in regressors if r not in ("d_s_hat", "r_sp_hat")]
+
+    raw_cols = list(other) + ["dy"]
+    if spread_used:
+        raw_cols += ["d_spread"] + AUX_SPREAD_VARS
+    if return_used:
+        raw_cols += ["sp_return"] + AUX_RETURN_VARS
+    joint = window[raw_cols].dropna()
+    n_obs = len(joint)
+
+    theta1 = res_aux_spread.params.to_numpy() if spread_used else None
+    theta2 = res_aux_return.params.to_numpy() if return_used else None
+    if spread_used:
+        Z1 = sm.add_constant(joint[AUX_SPREAD_VARS], has_constant="add").to_numpy()
+        d_spread = joint["d_spread"].to_numpy()
+    if return_used:
+        Z2 = sm.add_constant(joint[AUX_RETURN_VARS], has_constant="add").to_numpy()
+        sp_return = joint["sp_return"].to_numpy()
+
+    b_names = res_col.params.index.tolist()
+    b_hat = res_col.params.to_numpy()
+    dy = joint["dy"].to_numpy()
+    k1 = theta1.shape[0] if spread_used else 0
+    k2 = theta2.shape[0] if return_used else 0
+    kb = len(b_names)
+
+    def build_Xc(theta1, theta2):
+        cols = []
+        for name in b_names:
+            if name == "d_s_hat":
+                cols.append(Z1 @ theta1)
+            elif name == "r_sp_hat":
+                cols.append(Z2 @ theta2)
+            elif name == "const":
+                cols.append(np.ones(n_obs))
+            else:
+                cols.append(joint[name].to_numpy())
+        return np.column_stack(cols)
+
+    def moments(psi):
+        i = 0
+        parts = []
+        theta1 = psi[i : i + k1] if spread_used else None
+        i += k1
+        theta2 = psi[i : i + k2] if return_used else None
+        i += k2
+        b = psi[i : i + kb]
+        if spread_used:
+            u1 = d_spread - Z1 @ theta1
+            parts.append(Z1 * u1[:, None])
+        if return_used:
+            u2 = sp_return - Z2 @ theta2
+            parts.append(Z2 * u2[:, None])
+        Xc = build_Xc(theta1, theta2)
+        u3 = dy - Xc @ b
+        parts.append(Xc * u3[:, None])
+        return np.hstack(parts)
+
+    psi0 = np.concatenate(
+        [a for a in (theta1, theta2, b_hat) if a is not None]
+    )
+    m0 = moments(psi0)
+    nlags = newey_west_lags(n_obs)
+    S = _hac_meat(m0, nlags)
+    G = _numeric_jacobian(lambda p: moments(p).sum(axis=0), psi0)
+    G_inv = np.linalg.inv(G)
+    avar = G_inv @ S @ G_inv.T
+    avar_b = avar[-kb:, -kb:]
+
+    bse = pd.Series(np.sqrt(np.diag(avar_b)), index=b_names)
+    df_resid = n_obs - kb
+    tvalues = pd.Series(b_hat, index=b_names) / bse
+    pvalues = pd.Series(
+        2 * stats.t.sf(np.abs(tvalues.to_numpy()), df_resid), index=b_names
+    )
+    return bse, pvalues
+
+
 def run_table_2(df, start=REP_START, end=REP_END):
     """
     Estimate Table II over `df.loc[start:end]`: the two auxiliary
@@ -180,17 +342,23 @@ def run_table_2(df, start=REP_START, end=REP_END):
     -------
     dict
         Keys "aux_spread", "aux_return", "col1".."col4", each a fitted
-        `statsmodels` OLS results object.
+        `statsmodels` OLS results object. Each "col*" result additionally
+        carries `.bse_joint`/`.pvalues_joint` attributes -- the second-step
+        standard errors/p-values corrected for generated-regressor sampling
+        uncertainty per the paper's joint-NLLS system (see
+        `_joint_step2_inference`); `latex_format.coef_cell` prefers these
+        over the plug-in `.bse`/`.pvalues` when present. `.params`, `.bse`,
+        `.pvalues`, `.rsquared`, `.nobs`, and all other statsmodels
+        internals (e.g. `.get_influence()`, used by `replicate_figure_2.py`)
+        are untouched plug-in-OLS values.
     """
     window = df.loc[start:end]
 
-    aux_spread_vars = ["ln_hys_lag2", "spread_lag2"]
-    d = window[["d_spread"] + aux_spread_vars].dropna()
-    res_aux_spread = _fit_ols_hac(d["d_spread"], d[aux_spread_vars])
+    d = window[["d_spread"] + AUX_SPREAD_VARS].dropna()
+    res_aux_spread = _fit_ols_hac(d["d_spread"], d[AUX_SPREAD_VARS])
 
-    aux_return_vars = ["ln_pe10_lag2"]
-    d = window[["sp_return"] + aux_return_vars].dropna()
-    res_aux_return = _fit_ols_hac(d["sp_return"], d[aux_return_vars])
+    d = window[["sp_return"] + AUX_RETURN_VARS].dropna()
+    res_aux_return = _fit_ols_hac(d["sp_return"], d[AUX_RETURN_VARS])
 
     reg = window.assign(
         d_s_hat=res_aux_spread.fittedvalues.reindex(window.index),
@@ -200,7 +368,11 @@ def run_table_2(df, start=REP_START, end=REP_END):
     results = {"aux_spread": res_aux_spread, "aux_return": res_aux_return}
     for col, regressors in COLUMN_REGRESSORS.items():
         d = reg[["dy"] + regressors].dropna()
-        results[col] = _fit_ols_hac(d["dy"], d[regressors])
+        res_col = _fit_ols_hac(d["dy"], d[regressors])
+        res_col.bse_joint, res_col.pvalues_joint = _joint_step2_inference(
+            window, res_aux_spread, res_aux_return, res_col, regressors
+        )
+        results[col] = res_col
     return results
 
 

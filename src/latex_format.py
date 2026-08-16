@@ -55,11 +55,18 @@ def coef_cell(res, name, scale=1.0):
     computed from the unscaled p-value); use it to match a paper's own
     display convention for a regressor, e.g. LSZ report their HYS coefficient
     "multiplied by 100" relative to the raw fitted value.
+
+    If `res` carries `.bse_joint`/`.pvalues_joint` attributes (as
+    `replicate_table_2.run_table_2`'s second-step results do, to correct for
+    generated-regressor sampling uncertainty), those are used in place of
+    the plain `.bse`/`.pvalues`.
     """
     if name not in res.params.index:
         return "---", ""
-    coef = f"{res.params[name] * scale:.3f}{stars(res.pvalues[name])}"
-    se = f"({res.bse[name] * scale:.3f})"
+    bse = getattr(res, "bse_joint", res.bse)
+    pvalues = getattr(res, "pvalues_joint", res.pvalues)
+    coef = f"{res.params[name] * scale:.3f}{stars(pvalues[name])}"
+    se = f"({bse[name] * scale:.3f})"
     return coef, se
 
 
