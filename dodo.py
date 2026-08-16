@@ -448,19 +448,6 @@ def task_build_chartbook_site():
     }
 
 
-def task_summary_stats():
-    """Generate the summary-statistics table and figure for the writeup (#32)."""
-    return {
-        "actions": ["python ./src/summary_stats.py"],
-        "file_dep": ["./src/summary_stats.py", "./src/replicate_table_2.py"],
-        "targets": [
-            "./_output/table_summary_stats.tex",
-            "./_output/figure_summary_stats.pdf",
-        ],
-        "clean": True,
-    }
-
-
 def task_compile_latex_report():
     """Compile the LaTeX replication writeup (report.tex) to PDF (#32)."""
     return {
@@ -472,8 +459,6 @@ def task_compile_latex_report():
         "file_dep": [
             "./reports/report.tex",
             "./reports/references.bib",
-            "./_output/table_summary_stats.tex",
-            "./_output/figure_summary_stats.pdf",
             "./_output/table_1_replication.tex",
             "./_output/table_2_replication.tex",
             "./_output/figure_1_replication.pdf",
