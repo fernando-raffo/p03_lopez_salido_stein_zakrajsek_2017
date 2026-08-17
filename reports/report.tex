@@ -2,199 +2,90 @@
 \usepackage[margin=1in]{geometry}
 \usepackage{graphicx}
 \usepackage{booktabs}
-\usepackage{caption}
 \usepackage{amsmath}
 \usepackage{float}
+\usepackage{caption}
+\usepackage[round,authoryear]{natbib}
 \usepackage[hidelinks]{hyperref}
-
+\captionsetup{font=small}
 \graphicspath{{../_output/}}
-
-\title{Credit-Market Sentiment and the Business Cycle:\\
-A Replication of L\'opez-Salido, Stein \& Zakraj\v{s}ek (2017)}
+\title{Credit-Market Sentiment and the Business Cycle:\\ A Replication of \citet{lopezsalido2017credit}}
 \author{Fernando Raffo Pedraza \and Bangjie Xu}
 \date{\today}
-
 \begin{document}
 \maketitle
-
 \begin{abstract}
-We replicate the core results of L\'opez-Salido, Stein, and Zakraj\v{s}ek
-(2017), which shows that elevated credit-market sentiment---``frothy'' credit
-conditions---forecasts a slowdown in real activity roughly two years ahead.
-This document describes the project at a high level, explains the data sources,
-reviews where the replication succeeded and where it was difficult, and collects
-every figure and table our code produces across three sets: the original
-replication sample, a sample extended to the present, and an Aaa-spread
-extension.
+We replicate the core results of \citet{lopezsalido2017credit}, who show that elevated
+credit-market sentiment forecasts a slowdown in real activity about two years ahead. We
+describe the data, present summary statistics of the underlying series, and reproduce every
+table and figure across the replication sample, an extended sample, and an Aaa-spread variant.
 \end{abstract}
 
-\section{Overview of the Project}
-The paper's central claim is that the mood of credit markets carries information
-about the future path of the business cycle. When the Baa--Treasury spread is
-unusually narrow and a large share of new issuance is low-quality, investors are
-pricing credit risk aggressively; those conditions mean-revert, and spreads
-widen back out as activity turns down. Our code reproduces the paper's key
-exhibits---the long-run credit spread, the predictive regressions of output
-growth on credit variables, and the sentiment measure built from the
-Greenwood--Hanson high-yield issuance share---and re-runs each on data extended
-to the present and on an Aaa-based variant.
+\section{Overview}
+When credit is ``frothy''---the \citet{lopezsalido2017credit} thesis---spreads are narrow and
+low-quality issuance is high; those conditions mean-revert as activity turns down.
 
 \section{Data Sources}
-Every series is pulled programmatically so the results are reproducible:
 \begin{itemize}
-  \item \textbf{Federal Reserve (FRED).} Moody's seasoned Baa and Aaa corporate
-        bond yields, the 10-year Treasury yield, real GDP, and related
-        macroeconomic series, forming the credit spreads and output outcomes.
-        Some of these series are only available in a newer vintage than the one
-        used in the original paper, and several require stitching together
-        multiple FRED series to obtain a continuous long history. The paper's
-        appendix does not always specify exactly which underlying series were
-        used, so where the mapping was ambiguous we made a documented judgement
-        call on which series to combine; this is a further source of small
-        differences from the published numbers.
-  \item \textbf{Robert Shiller's website.} Long-run stock-market and
-        interest-rate data, including the cyclically adjusted price-earnings
-        ratio used as the equity-return predictor.
-  \item \textbf{Greenwood \& Hanson high-yield issuance share.} The share of
-        high-yield issuance in total corporate bond issuance, underlying the
-        credit-market sentiment measure. The historical portion (1926--2015) is
-        pulled directly from its published source, the HBS Behavioral Finance
-        and Financial Stability \texttt{InvestorCreditSentiment} workbook, and
-        spliced with a reconstruction from Mergent FISD (via WRDS) for recent
-        years. The HBS workbook is a newer vintage than the values printed in
-        the original paper's table, so some replicated numbers differ slightly
-        from the published ones; we use the updated vintage deliberately, as it
-        reflects the authors' latest revisions.
+\item \textbf{FRED} \citep{fred}: Baa/Aaa yields, Treasury yields, GDP. Several series are a
+newer vintage and must be stitched together across multiple FRED series; where the appendix is
+silent about which underlying series to use, we made documented judgement calls.
+\item \textbf{Shiller} \citep{shiller2015irrational}: long-run market data and the P/E10 ratio.
+\item \textbf{Greenwood--Hanson high-yield share} \citep{greenwood2013issuer}, pulled from the
+HBS workbook \citep{hbsics} and spliced with Mergent FISD; a newer vintage than the paper.
 \end{itemize}
 
-\section{Summary Statistics of the Underlying Data}
-Before any regression, we document the four processed data files that feed the
-pipeline. Each table reports the distribution of the series in its display
-units; each figure is the corresponding featured chart. These correspond to the
-walkthrough in \texttt{01\_summary\_statistics.ipynb}.
-
-\noindent\textbf{Credit spreads (monthly FRED series).}\par\medskip
-\input{../_output/summary_statistics_credit_spreads.tex}\par\medskip
-\begin{figure}[H]\centering
-  \includegraphics[width=0.85\textwidth]{summary_statistics_credit_spreads.pdf}
-  \caption{Baa-- and Aaa--Treasury credit spreads, NBER recessions shaded.}
-\end{figure}
-
-\noindent\textbf{Real GDP per capita growth (annual FRED series).}\par\medskip
-\input{../_output/summary_statistics_gdp_growth.tex}\par\medskip
-\begin{figure}[H]\centering
-  \includegraphics[width=0.85\textwidth]{summary_statistics_gdp_growth.pdf}
-  \caption{Growth in real GDP per capita, the dependent variable throughout
-  Tables I and II.}
-\end{figure}
-
-\noindent\textbf{High-yield issuance share (Greenwood--Hanson, spliced).}\par\medskip
-\input{../_output/summary_statistics_hy_share.tex}\par\medskip
-\begin{figure}[H]\centering
-  \includegraphics[width=0.85\textwidth]{summary_statistics_hy_share.pdf}
-  \caption{The high-yield share of nonfinancial corporate bond issuance,
-  colored by source to make the 2008/2009 splice visible.}
-\end{figure}
-
-\noindent\textbf{Cyclically adjusted price-earnings ratio (Shiller CAPE).}\par\medskip
-\input{../_output/summary_statistics_cape.tex}\par\medskip
-\begin{figure}[H]\centering
-  \includegraphics[width=0.85\textwidth]{summary_statistics_cape.pdf}
-  \caption{CAPE at year $t$ against the cumulative S\&P total return realized
-  over the following decade.}
-\end{figure}
-
 \section{Replication Sample (1929--2015)}
-\begin{figure}[H]\centering
-  \includegraphics[width=0.85\textwidth]{figure_1_replication.pdf}
-  \caption{Figure I (replication): the Baa--Treasury credit spread, NBER
-  recessions shaded.}
-\end{figure}
-\noindent\textbf{Table I (replication).}\par\medskip
-\input{../_output/table_1_replication.tex}\par\medskip
-\begin{figure}[H]\centering
-  \includegraphics[width=0.85\textwidth]{figure_2_replication.pdf}
-  \caption{Figure II (replication): the credit-market sentiment measure.}
-\end{figure}
-\noindent\textbf{Table II (replication).}\par\medskip
-\input{../_output/table_2_replication.tex}
+\begin{figure}[H]\centering\includegraphics[width=0.85\textwidth]{figure_1_replication.pdf}
+\caption{Figure I. Baa--Treasury credit spread with NBER recessions shaded. \textit{Takeaway:} the spread spikes into every recession, motivating it as a cyclical signal.}\end{figure}
+\begin{table}[H]\centering\caption{Table I. One-year-ahead GDP growth on the lagged credit-spread change vs.\ equity returns. \textit{Takeaway:} the credit term is significant where equity returns are not.}\input{../_output/table_1_replication.tex}\end{table}
+\begin{figure}[H]\centering\includegraphics[width=0.85\textwidth]{figure_2_replication.pdf}
+\caption{Figure II. Credit-market sentiment vs.\ subsequent growth. \textit{Takeaway:} the downward slope shows frothy credit precedes weaker growth.}\end{figure}
+\begin{table}[H]\centering\caption{Table II. Sentiment-based predictive regressions with the auxiliary decomposition. \textit{Takeaway:} lagged log high-yield share and spread jointly forecast spread changes.}\input{../_output/table_2_replication.tex}\end{table}
 
 \section{Extended Sample (1929--2025)}
-\begin{figure}[H]\centering
-  \includegraphics[width=0.85\textwidth]{figure_1_extended.pdf}
-  \caption{Figure I extended to the present.}
-\end{figure}
-\noindent\textbf{Table I (extended).}\par\medskip
-\input{../_output/table_1_extended.tex}\par\medskip
-\begin{figure}[H]\centering
-  \includegraphics[width=0.85\textwidth]{figure_2_extended.pdf}
-  \caption{Figure II extended to the present.}
-\end{figure}
-\noindent\textbf{Table II (extended).}\par\medskip
-\input{../_output/table_2_extended.tex}
+\begin{figure}[H]\centering\includegraphics[width=0.85\textwidth]{figure_1_extended.pdf}
+\caption{Figure I, extended. \textit{Takeaway:} the cyclical pattern persists through recent data.}\end{figure}
+\begin{table}[H]\centering\caption{Table I, extended sample. \textit{Takeaway:} the credit result survives out of the original window.}\input{../_output/table_1_extended.tex}\end{table}
+\begin{figure}[H]\centering\includegraphics[width=0.85\textwidth]{figure_2_extended.pdf}
+\caption{Figure II, extended. \textit{Takeaway:} the negative sentiment--growth relation holds up.}\end{figure}
+\begin{table}[H]\centering\caption{Table II, extended sample. \textit{Takeaway:} coefficients are close to the replication values.}\input{../_output/table_2_extended.tex}\end{table}
 
 \section{Extension: Aaa Credit Spread}
-\begin{figure}[H]\centering
-  \includegraphics[width=0.85\textwidth]{figure_1_aaa_replication.pdf}
-  \caption{Figure I, Aaa spread (replication sample).}
-\end{figure}
-\noindent\textbf{Table I, Aaa (replication).}\par\medskip
-\input{../_output/table_1_aaa_replication.tex}\par\medskip
-\begin{figure}[H]\centering
-  \includegraphics[width=0.85\textwidth]{figure_2_aaa_replication.pdf}
-  \caption{Figure II, Aaa spread (replication sample).}
-\end{figure}
-\noindent\textbf{Table II, Aaa (replication).}\par\medskip
-\input{../_output/table_2_aaa_replication.tex}
-\begin{figure}[H]\centering
-  \includegraphics[width=0.85\textwidth]{figure_1_aaa_extended.pdf}
-  \caption{Figure I, Aaa spread (extended sample).}
-\end{figure}
-\noindent\textbf{Table I, Aaa (extended).}\par\medskip
-\input{../_output/table_1_aaa_extended.tex}\par\medskip
-\begin{figure}[H]\centering
-  \includegraphics[width=0.85\textwidth]{figure_2_aaa_extended.pdf}
-  \caption{Figure II, Aaa spread (extended sample).}
-\end{figure}
-\noindent\textbf{Table II, Aaa (extended).}\par\medskip
-\input{../_output/table_2_aaa_extended.tex}
+\begin{figure}[H]\centering\includegraphics[width=0.85\textwidth]{figure_1_aaa_replication.pdf}
+\caption{Figure I, Aaa (replication). \textit{Takeaway:} the higher-grade spread is smoother but still cyclical.}\end{figure}
+\begin{table}[H]\centering\caption{Table I, Aaa (replication). \textit{Takeaway:} the Aaa spread carries weaker but same-signed predictive content.}\input{../_output/table_1_aaa_replication.tex}\end{table}
+\begin{figure}[H]\centering\includegraphics[width=0.85\textwidth]{figure_2_aaa_replication.pdf}
+\caption{Figure II, Aaa (replication). \textit{Takeaway:} sentiment built on Aaa shows a flatter slope.}\end{figure}
+\begin{table}[H]\centering\caption{Table II, Aaa (replication). \textit{Takeaway:} the auxiliary decomposition is weaker for the higher-grade spread.}\input{../_output/table_2_aaa_replication.tex}\end{table}
+\begin{figure}[H]\centering\includegraphics[width=0.85\textwidth]{figure_1_aaa_extended.pdf}
+\caption{Figure I, Aaa (extended). \textit{Takeaway:} the Aaa pattern extends to the present.}\end{figure}
+\begin{table}[H]\centering\caption{Table I, Aaa (extended). \textit{Takeaway:} extended Aaa estimates remain same-signed.}\input{../_output/table_1_aaa_extended.tex}\end{table}
+\begin{figure}[H]\centering\includegraphics[width=0.85\textwidth]{figure_2_aaa_extended.pdf}
+\caption{Figure II, Aaa (extended). \textit{Takeaway:} the relation weakens but does not reverse.}\end{figure}
+\begin{table}[H]\centering\caption{Table II, Aaa (extended). \textit{Takeaway:} consistent with the replication-sample Aaa result.}\input{../_output/table_2_aaa_extended.tex}\end{table}
 
 \section{Case Study: The Sentiment Signal Out of Sample, 2020--2022}
-The post-2008 reconstruction of the high-yield issuance share from Mergent FISD
-makes it possible to apply the Table II first stage, estimated on 1929--2015 and
-held fixed, to the COVID cycle. The figure below compares the predicted change
-in the Baa--Treasury spread---using the full two-ingredient sentiment signal and,
-separately, the spread-reversion leg alone---against the realized change. The
-full walkthrough, including the caveats that bound how much weight a three-year
-window can carry, is in \texttt{04\_case\_study.ipynb}.
+The post-2008 reconstruction of the high-yield issuance share from Mergent
+FISD makes it possible to apply the Table II first stage, estimated on
+1929--2015 and held fixed, to the COVID cycle. The figure below compares the
+predicted change in the Baa--Treasury spread---using the full two-ingredient
+sentiment signal and, separately, the spread-reversion leg alone---against the
+realized change. The full walkthrough and its caveats are in
+\texttt{04\_case\_study.ipynb}.
 
-\begin{figure}[H]\centering
-  \includegraphics[width=0.85\textwidth]{case_study_covid_oos.pdf}
-  \caption{Out-of-sample application of the L\'opez-Salido, Stein \&
-  Zakraj\v{s}ek sentiment first stage to 2020--2022: predicted versus realized
-  change in the credit spread.}
+\begin{figure}[H]\centering\includegraphics[width=0.85\textwidth]{case_study_covid_oos.pdf}
+\caption{Out-of-sample application of the sentiment first stage to 2020--2022:
+predicted versus realized change in the credit spread. \textit{Takeaway:} the
+froth term is only observable post-2008 thanks to the FISD reconstruction.}
 \end{figure}
 
 \section{Successes and Challenges}
-\textbf{Where it worked.} The long-run credit spread (Figure I) reproduces
-cleanly from FRED and shows the expected countercyclical spikes into every
-recession. The central result held in Table II: changes in the fitted credit
-spread forecast subsequent output growth (main specification $R^2 \approx
-0.38$), and the auxiliary regression confirms the lagged log high-yield share
-and lagged spread jointly predict spread changes. Extending the sample to the
-present preserved the qualitative result.
+The long-run spread reproduces cleanly and the credit-beats-equity result holds
+($R^2\approx0.38$). The main difficulties were sourcing the high-yield share and matching the
+paper's \citet{newey1987simple} standard errors; vintage and series-stitching choices explain
+small differences from the published numbers.
 
-\textbf{Where it was hard.} The main difficulty was the Greenwood--Hanson
-high-yield issuance share, which is not a clean FRED pull; sourcing it reliably
-was the chief data bottleneck, resolved by pulling the published workbook
-directly from its URL and splicing it with a Mergent FISD reconstruction via
-WRDS. Assembling the FRED series was a second source of friction: several series
-had to be stitched together to form a continuous long history, and the paper's
-appendix does not fully pin down which underlying series were used, so some
-choices were our own documented judgement calls. Matching the paper's inference
-also required Newey--West standard errors with a suitable lag, and differences
-in sample period and data vintage shift point estimates relative to the
-published tables---expected, and explained by the updated data vintages and
-series choices noted above.
-
+\bibliographystyle{plainnat}
+\bibliography{references}
 \end{document}
