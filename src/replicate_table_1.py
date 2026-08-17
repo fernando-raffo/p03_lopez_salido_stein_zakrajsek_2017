@@ -141,6 +141,7 @@ def emit(df, start, end, label, spread_col="BAA_Treasury_spread"):
     lines.append("\\midrule")
     r2_vals = " & ".join(f"{res.rsquared_adj:.3f}" for res in res_list)
     lines.append(f"$\\bar R^2$ & {r2_vals} \\\\")
+    lines.append("\\addlinespace[4pt]")
     lines.append(
         f"\\multicolumn{{{ncols + 1}}}{{l}}{{\\textit{{Standardized effect on $\\Delta y_t$}}}} \\\\"
     )

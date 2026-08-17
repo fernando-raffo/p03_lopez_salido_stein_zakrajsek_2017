@@ -398,7 +398,7 @@ def _aux_table_lines(results):
     lines = [
         "\\begin{tabular}{lcc}",
         "\\toprule",
-        r"Auxiliary regressions & $\Delta s_t$ & $r_t^{SP}$ \\",
+        r" & $\Delta s_t$ & $r_t^{SP}$ \\",
         "\\midrule",
     ]
     lines.extend(coef_se_rows([res_s, res_r], _AUX_ROWS))
@@ -409,8 +409,23 @@ def _aux_table_lines(results):
     return lines
 
 
+def _panel_header(title):
+    """A bold, centered panel title, on its own line above a `tabular` --
+    used to separate Table II's two sub-tables (they have different column
+    counts, so they can't share one `tabular`) so they read as two clearly
+    labeled panels of one table rather than an unlabeled, oddly-indented
+    second block stacked under the first."""
+    return [r"\begin{center}\textbf{%s}\end{center}" % title, r"\vspace{2pt}"]
+
+
 def emit_table_2(results, start, end, label, spread_col="BAA_Treasury_spread"):
-    lines = _main_table_lines(results) + [""] + _aux_table_lines(results)
+    lines = (
+        _panel_header("Panel A: Second-step (growth) regressions")
+        + _main_table_lines(results)
+        + ["", r"\vspace{12pt}", ""]
+        + _panel_header("Panel B: Auxiliary (first-step) regressions")
+        + _aux_table_lines(results)
+    )
 
     out = OUTPUT_DIR / f"table_2_{label}.tex"
     text = (

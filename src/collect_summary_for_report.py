@@ -12,6 +12,14 @@ except Exception:
     OUTPUT_DIR = Path("_output")
 
 INCLUDE_NAME = "summary_statistics_include.tex"
+SLUG_TITLES = {
+    "cape": "Cyclically-adjusted P/E (CAPE) and forward equity returns",
+    "credit_spreads": "Credit spreads (Baa/Aaa--Treasury)",
+    "gdp_growth": "GDP growth",
+    "hy_share": "High-yield issuance share",
+}
+DEFAULT_FIGURE_WIDTH = r"0.85\textwidth"
+FIGURE_WIDTH_OVERRIDES = {"cape": r"0.65\textwidth"}
 
 
 def _san(s):
@@ -21,6 +29,10 @@ def _san(s):
     return s
 
 
+def _title(slug):
+    return SLUG_TITLES.get(slug, _san(slug).title())
+
+
 def main():
     tex = sorted(
         f for f in OUTPUT_DIR.glob("summary_statistics_*.tex") if f.name != INCLUDE_NAME
@@ -28,21 +40,24 @@ def main():
     pdf = sorted(OUTPUT_DIR.glob("summary_statistics_*.pdf"))
     out = []
     for f in tex:
-        slug = _san(f.stem.replace("summary_statistics_", ""))
+        slug = f.stem.replace("summary_statistics_", "")
         out += [
             r"\begin{table}[H]\centering",
-            r"\caption{Summary statistics: %s.}" % slug,
+            r"\caption{\label{tab:summary-%s}Summary statistics: %s.}"
+            % (slug.replace("_", "-"), _title(slug)),
             r"\resizebox{\textwidth}{!}{%",
             r"\input{../_output/%s}" % f.name,
             r"}",
             r"\end{table}",
         ]
     for f in pdf:
-        slug = _san(f.stem.replace("summary_statistics_", ""))
+        slug = f.stem.replace("summary_statistics_", "")
+        width = FIGURE_WIDTH_OVERRIDES.get(slug, DEFAULT_FIGURE_WIDTH)
         out += [
             r"\begin{figure}[H]\centering",
-            r"\includegraphics[width=0.85\textwidth]{%s}" % f.name,
-            r"\caption{Summary statistics: %s.}" % slug,
+            r"\includegraphics[width=%s]{%s}" % (width, f.name),
+            r"\caption{\label{fig:summary-%s}%s.}"
+            % (slug.replace("_", "-"), _title(slug)),
             r"\end{figure}",
         ]
     if not out:
