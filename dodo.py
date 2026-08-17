@@ -416,38 +416,6 @@ def task_run_notebooks():
         }
 
 
-sphinx_targets = [
-    "./docs/index.html",
-]
-
-
-def task_build_chartbook_site():
-    """Compile Sphinx Docs"""
-    notebook_scripts = [
-        Path(notebook_tasks[notebook]["path"]) for notebook in notebook_tasks
-    ]
-    file_dep = [
-        "./README.md",
-        "./chartbook.toml",
-        *glob.glob("./_data/data_dictionaries/*.md"),
-        *glob.glob("./_data/raw_data/*.parquet"),
-        *glob.glob("./_data/processed_data/*.parquet"),
-        *notebook_scripts,
-    ]
-
-    return {
-        "actions": [
-            "chartbook build -f",
-        ],
-        "targets": sphinx_targets,
-        "file_dep": file_dep,
-        # "task_dep": [
-        #    "run_notebooks",
-        # ],
-        "clean": True,
-    }
-
-
 def task_compile_latex_report():
     """Compile the LaTeX replication writeup (report.tex) to PDF (#32)."""
     return {
@@ -478,6 +446,38 @@ def task_compile_latex_report():
             "./_output/case_study_covid_oos.pdf",
         ],
         "targets": ["./reports/report.pdf"],
+        "clean": True,
+    }
+
+
+sphinx_targets = [
+    "./docs/index.html",
+]
+
+
+def task_build_chartbook_site():
+    """Compile Sphinx Docs"""
+    notebook_scripts = [
+        Path(notebook_tasks[notebook]["path"]) for notebook in notebook_tasks
+    ]
+    file_dep = [
+        "./README.md",
+        "./chartbook.toml",
+        *glob.glob("./_data/data_dictionaries/*.md"),
+        *glob.glob("./_data/raw_data/*.parquet"),
+        *glob.glob("./_data/processed_data/*.parquet"),
+        *notebook_scripts,
+    ]
+
+    return {
+        "actions": [
+            "chartbook build -f",
+        ],
+        "targets": sphinx_targets,
+        "file_dep": file_dep,
+        # "task_dep": [
+        #    "run_notebooks",
+        # ],
         "clean": True,
     }
 
