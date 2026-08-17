@@ -398,7 +398,6 @@ def task_compile_latex_report():
     """Compile the LaTeX replication writeup (report.tex) to a final PDF report"""
     return {
         "actions": [
-            "python ./src/collect_summary_for_report.py",
             "latexmk -pdf -halt-on-error -cd ./reports/report.tex",
             "latexmk -pdf -halt-on-error -c -cd ./reports/report.tex",
         ],
@@ -406,7 +405,6 @@ def task_compile_latex_report():
             "./reports/report.tex",
             "./reports/references.bib",
             "./src/settings.py",
-            "./src/collect_summary_for_report.py",
             OUTPUT_DIR / "summary_statistics_credit_spreads.tex",
             OUTPUT_DIR / "summary_statistics_credit_spreads.pdf",
             OUTPUT_DIR / "summary_statistics_gdp_growth.tex",
