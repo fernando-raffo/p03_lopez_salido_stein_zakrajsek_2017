@@ -448,6 +448,37 @@ def task_build_chartbook_site():
     }
 
 
+def task_compile_latex_report():
+    """Compile the LaTeX replication writeup (report.tex) to PDF (#32)."""
+    return {
+        "actions": [
+            "python ./src/collect_summary_for_report.py",
+            "latexmk -pdf -halt-on-error -cd ./reports/report.tex",
+            "latexmk -pdf -halt-on-error -c -cd ./reports/report.tex",
+        ],
+        "file_dep": [
+            "./reports/report.tex",
+            "./reports/references.bib",
+            "./_output/table_1_replication.tex",
+            "./_output/table_2_replication.tex",
+            "./_output/figure_1_replication.pdf",
+            "./_output/figure_2_replication.pdf",
+            "./_output/table_1_extended.tex",
+            "./_output/table_2_extended.tex",
+            "./_output/figure_1_extended.pdf",
+            "./_output/figure_2_extended.pdf",
+            "./_output/table_1_aaa_replication.tex",
+            "./_output/table_2_aaa_replication.tex",
+            "./_output/figure_1_aaa_replication.pdf",
+            "./_output/figure_2_aaa_replication.pdf",
+            "./_output/table_1_aaa_extended.tex",
+            "./_output/table_2_aaa_extended.tex",
+            "./_output/figure_1_aaa_extended.pdf",
+            "./_output/figure_2_aaa_extended.pdf",
+        ],
+        "targets": ["./reports/report.pdf"],
+        "clean": True,
+    }
 def task_clear_notebooks():
     """
     Clear noteook outputs to avoid changes in the code.
