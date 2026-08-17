@@ -452,7 +452,6 @@ def task_compile_latex_report():
     """Compile the LaTeX replication writeup (report.tex) to PDF (#32)."""
     return {
         "actions": [
-            "python ./src/collect_summary_for_report.py",
             "latexmk -pdf -halt-on-error -cd ./reports/report.tex",
             "latexmk -pdf -halt-on-error -c -cd ./reports/report.tex",
         ],
@@ -475,6 +474,7 @@ def task_compile_latex_report():
             "./_output/table_2_aaa_extended.tex",
             "./_output/figure_1_aaa_extended.pdf",
             "./_output/figure_2_aaa_extended.pdf",
+            "./_output/case_study_covid_oos.pdf",
         ],
         "targets": ["./reports/report.pdf"],
         "clean": True,

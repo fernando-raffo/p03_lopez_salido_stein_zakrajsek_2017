@@ -35,11 +35,6 @@ silent about which underlying series to use, we made documented judgement calls.
 HBS workbook \citep{hbsics} and spliced with Mergent FISD; a newer vintage than the paper.
 \end{itemize}
 
-\section{Summary Statistics}
-The following tables and figures characterize the underlying series before the regression
-results, so the reader can gauge scale, dispersion, and co-movement of the data.
-\input{../_output/summary_statistics_include.tex}
-
 \section{Replication Sample (1929--2015)}
 \begin{figure}[H]\centering\includegraphics[width=0.85\textwidth]{figure_1_replication.pdf}
 \caption{Figure I. Baa--Treasury credit spread with NBER recessions shaded. \textit{Takeaway:} the spread spikes into every recession, motivating it as a cyclical signal.}\end{figure}
@@ -69,6 +64,21 @@ results, so the reader can gauge scale, dispersion, and co-movement of the data.
 \begin{figure}[H]\centering\includegraphics[width=0.85\textwidth]{figure_2_aaa_extended.pdf}
 \caption{Figure II, Aaa (extended). \textit{Takeaway:} the relation weakens but does not reverse.}\end{figure}
 \begin{table}[H]\centering\caption{Table II, Aaa (extended). \textit{Takeaway:} consistent with the replication-sample Aaa result.}\input{../_output/table_2_aaa_extended.tex}\end{table}
+
+\section{Case Study: The Sentiment Signal Out of Sample, 2020--2022}
+The post-2008 reconstruction of the high-yield issuance share from Mergent
+FISD makes it possible to apply the Table II first stage, estimated on
+1929--2015 and held fixed, to the COVID cycle. The figure below compares the
+predicted change in the Baa--Treasury spread---using the full two-ingredient
+sentiment signal and, separately, the spread-reversion leg alone---against the
+realized change. The full walkthrough and its caveats are in
+\texttt{04\_case\_study.ipynb}.
+
+\begin{figure}[H]\centering\includegraphics[width=0.85\textwidth]{case_study_covid_oos.pdf}
+\caption{Out-of-sample application of the sentiment first stage to 2020--2022:
+predicted versus realized change in the credit spread. \textit{Takeaway:} the
+froth term is only observable post-2008 thanks to the FISD reconstruction.}
+\end{figure}
 
 \section{Successes and Challenges}
 The long-run spread reproduces cleanly and the credit-beats-equity result holds
