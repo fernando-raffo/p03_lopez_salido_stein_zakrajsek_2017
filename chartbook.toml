@@ -131,7 +131,7 @@ path = "./_data/processed_data/fred_final_series_annual.parquet"
 docs_path = "./_data/data_dictionaries/fred_final_series_annual_readme.md"
 
 [dataframes.shiller_processed_annual_series]
-name = "Shiller Annual Stock-Market Data"
+name = "Robert Shiller Annual Stock Market Data"
 description = "Annual (year-end) collapse of Robert Shiller's monthly stock-market data, with the log cyclically adjusted price-earnings ratio (`ln[P/E10]`) used as a first-step predictor in the replication."
 sources = ["Robert Shiller's Data Website"]
 providers = ["Robert Shiller"]
@@ -171,10 +171,8 @@ path = "./_output/figure_1_replication.html"
 docs = "Baa (long-term corporate bond) yield minus the 10-year Treasury yield, monthly, 1925-2015. Recession shading uses the historical NBER indicator series."
 tags = ["Credit Spread", "Baa", "Figure 1"]
 units = "Percentage Points"
-data_series_start_date = "1930-01-01"
 frequency = "Monthly"
 observation_period = "Monthly average"
-lag_in_data_release = "Variable"
 seasonal_adjustment = "Not Seasonally Adjusted"
 
 [charts.figure_1_extended]
@@ -187,7 +185,6 @@ tags = ["Credit Spread", "Baa", "Figure 1", "Extension"]
 units = "Percentage Points"
 frequency = "Monthly"
 observation_period = "Monthly average"
-lag_in_data_release = "Variable"
 seasonal_adjustment = "Not Seasonally Adjusted"
 
 [charts.figure_1_aaa_replication]
@@ -200,7 +197,6 @@ tags = ["Credit Spread", "Aaa", "Figure 1", "Extension"]
 units = "Percentage Points"
 frequency = "Monthly"
 observation_period = "Monthly average"
-lag_in_data_release = "Variable"
 seasonal_adjustment = "Not Seasonally Adjusted"
 
 [charts.figure_1_aaa_extended]
@@ -213,7 +209,6 @@ tags = ["Credit Spread", "Aaa", "Figure 1", "Extension"]
 units = "Percentage Points"
 frequency = "Monthly"
 observation_period = "Monthly average"
-lag_in_data_release = "Variable"
 seasonal_adjustment = "Not Seasonally Adjusted"
 
 [charts.figure_2_replication]
@@ -226,7 +221,6 @@ tags = ["Sentiment", "GDP Growth", "Baa", "Figure 2"]
 units = "Percentage Points"
 frequency = "Annual"
 observation_period = "Calendar Year"
-lag_in_data_release = "Variable"
 seasonal_adjustment = "Mixed"
 
 [charts.figure_2_extended]
@@ -239,7 +233,6 @@ tags = ["Sentiment", "GDP Growth", "Baa", "Figure 2", "Extension"]
 units = "Percentage Points"
 frequency = "Annual"
 observation_period = "Calendar Year"
-lag_in_data_release = "Variable"
 seasonal_adjustment = "Mixed"
 
 [charts.figure_2_aaa_replication]
@@ -248,11 +241,10 @@ description = "Analogous to Figure II, using the Aaa (instead of Baa) corporate 
 dataframe = "fred_processed_annual_series"
 path = "./_output/figure_2_aaa_replication.html"
 docs = "Same construction as the Figure II replication chart, with the Aaa-Treasury spread feeding the sentiment measure."
-tags = ["Sentiment", "GDP Growth", "Aaa", "Figure 2", "Extension Variant"]
+tags = ["Sentiment", "GDP Growth", "Aaa", "Figure 2", "Extension"]
 units = "Percentage Points"
 frequency = "Annual"
 observation_period = "Calendar Year"
-lag_in_data_release = "Variable"
 seasonal_adjustment = "Mixed"
 
 [charts.figure_2_aaa_extended]
@@ -261,11 +253,10 @@ description = "Aaa-spread extension of Figure II through the most recent availab
 dataframe = "fred_processed_annual_series"
 path = "./_output/figure_2_aaa_extended.html"
 docs = "Same construction as the Aaa replication chart, extended through the present."
-tags = ["Sentiment", "GDP Growth", "Aaa", "Figure 2", "Extension Variant"]
+tags = ["Sentiment", "GDP Growth", "Aaa", "Figure 2", "Extension"]
 units = "Percentage Points"
 frequency = "Annual"
 observation_period = "Calendar Year"
-lag_in_data_release = "Variable"
 seasonal_adjustment = "Mixed"
 
 [charts.summary_statistics_credit_spreads]
@@ -278,7 +269,6 @@ tags = ["Summary Statistics", "Credit Spread", "Baa", "Aaa", "FRED"]
 units = "Percentage Points"
 frequency = "Monthly"
 observation_period = "Monthly average"
-lag_in_data_release = "Variable"
 seasonal_adjustment = "Not Seasonally Adjusted"
 
 [charts.summary_statistics_gdp_growth]
@@ -291,7 +281,6 @@ tags = ["Summary Statistics", "GDP Growth", "FRED"]
 units = "Log growth, y/y (pct.)"
 frequency = "Annual"
 observation_period = "Calendar Year"
-lag_in_data_release = "Variable"
 seasonal_adjustment = "Not Seasonally Adjusted"
 
 [charts.summary_statistics_hy_share]
@@ -304,7 +293,6 @@ tags = ["Summary Statistics", "HYS", "Greenwood", "Hanson", "High Yield Share"]
 units = "Pct. of Issuance"
 frequency = "Annual"
 observation_period = "Calendar Year"
-lag_in_data_release = "Variable"
 seasonal_adjustment = "Not Seasonally Adjusted"
 
 [charts.summary_statistics_cape]
@@ -317,5 +305,4 @@ tags = ["Summary Statistics", "CAPE", "Shiller"]
 units = "Ratio (x); Pct. (y)"
 frequency = "Annual"
 observation_period = "Calendar Year"
-lag_in_data_release = "Variable"
 seasonal_adjustment = "Not Seasonally Adjusted"
