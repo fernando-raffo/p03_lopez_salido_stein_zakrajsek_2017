@@ -508,8 +508,9 @@ def pull_greenwood_hanson_historical(url=None, sheet="Annual Data"):
     Note: this is a newer vintage than the paper's Table II, so some values
     differ slightly from the originally published series.
     """
-    import requests
     from io import BytesIO
+
+    import requests
 
     if url is None:
         try:

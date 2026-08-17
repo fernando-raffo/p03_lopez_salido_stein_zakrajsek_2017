@@ -305,9 +305,7 @@ def _joint_step2_inference(window, res_aux_spread, res_aux_return, res_col, regr
         parts.append(Xc * u3[:, None])
         return np.hstack(parts)
 
-    psi0 = np.concatenate(
-        [a for a in (theta1, theta2, b_hat) if a is not None]
-    )
+    psi0 = np.concatenate([a for a in (theta1, theta2, b_hat) if a is not None])
     m0 = moments(psi0)
     nlags = newey_west_lags(n_obs)
     S = _hac_meat(m0, nlags)
@@ -417,9 +415,7 @@ def emit_table_2(results, start, end, label, spread_col="BAA_Treasury_spread"):
     out = OUTPUT_DIR / f"table_2_{label}.tex"
     text = (
         f"% Table II replication ({label}): {start}-{end}, "
-        f"credit spread = {spread_col}\n"
-        + "\n".join(lines)
-        + "\n"
+        f"credit spread = {spread_col}\n" + "\n".join(lines) + "\n"
     )
     out.write_text(text)
 
@@ -451,7 +447,9 @@ def pretty_table_2(results, start, end, spread_col="BAA_Treasury_spread"):
     Returns `(main_styler, aux_styler)`.
     """
     main_res = [results[c] for c in ("col1", "col2", "col3", "col4")]
-    main_df = regression_table_df(main_res, _MAIN_ROWS, "Dependent variable: Δy<sub>t</sub>")
+    main_df = regression_table_df(
+        main_res, _MAIN_ROWS, "Dependent variable: Δy<sub>t</sub>"
+    )
     main_footer = [("R²", [f"{res.rsquared:.3f}" for res in main_res])]
     main_caption = (
         f"Table II -- second-step (growth) regressions: "

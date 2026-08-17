@@ -161,8 +161,9 @@ chartbook.plotting.pie(df, names="category", values="amount")
 chartbook.plotting.area(df, x="date", y="value")
 
 # Dual-axis chart
-chartbook.plotting.dual(df, x="date", left_y="gdp", right_y="rate",
-                         left_type="bar", right_type="line")
+chartbook.plotting.dual(
+    df, x="date", left_y="gdp", right_y="rate", left_type="bar", right_type="line"
+)
 
 # Configuration
 chartbook.plotting.configure(nber_recessions=True, default_output_dir="./_output")

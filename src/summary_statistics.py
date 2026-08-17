@@ -166,13 +166,17 @@ TABLE_SPECS = [
         "credit_spreads",
         "fred_monthly",
         FRED_MONTHLY_SPECS,
-        lambda fm: f"FRED Monthly Series, {fm.index.min():%Y:%m}--{fm.index.max():%Y:%m} ($N={len(fm):,}$)",
+        lambda fm: (
+            f"FRED Monthly Series, {fm.index.min():%Y:%m}--{fm.index.max():%Y:%m} ($N={len(fm):,}$)"
+        ),
     ),
     (
         "gdp_growth",
         "fred_annual",
         FRED_ANNUAL_SPECS,
-        lambda fa: f"FRED Annual Series, {int(fa.index.min())}--{int(fa.index.max())} ($N={len(fa)}$)",
+        lambda fa: (
+            f"FRED Annual Series, {int(fa.index.min())}--{int(fa.index.max())} ($N={len(fa)}$)"
+        ),
     ),
     (
         "hy_share",
@@ -187,7 +191,9 @@ TABLE_SPECS = [
         "cape",
         "shiller",
         SHILLER_SPECS,
-        lambda sh: f"Shiller Annual Stock-Market Series, {sh.index.min().year}--{sh.index.max().year} ($N={len(sh)}$)",
+        lambda sh: (
+            f"Shiller Annual Stock-Market Series, {sh.index.min().year}--{sh.index.max().year} ($N={len(sh)}$)"
+        ),
     ),
 ]
 

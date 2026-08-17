@@ -393,7 +393,7 @@ def task_run_notebooks():
     Preps the notebooks for presentation format.
     Execute notebooks if the script version of it has been changed.
     """
-    for notebook in notebook_tasks.keys():
+    for notebook in notebook_tasks:
         notebook_name = notebook.split(".")[0]
         notebook_path = Path("./src") / notebook
         yield {
@@ -424,7 +424,7 @@ sphinx_targets = [
 def task_build_chartbook_site():
     """Compile Sphinx Docs"""
     notebook_scripts = [
-        Path(notebook_tasks[notebook]["path"]) for notebook in notebook_tasks.keys()
+        Path(notebook_tasks[notebook]["path"]) for notebook in notebook_tasks
     ]
     file_dep = [
         "./README.md",

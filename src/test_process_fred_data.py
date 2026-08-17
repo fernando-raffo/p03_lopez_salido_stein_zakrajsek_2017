@@ -5,7 +5,6 @@ import pytest
 import process_fred_data_annual as annual
 import process_fred_data_monthly as monthly
 
-
 # ---------------------------------------------------------------------------
 # process_fred_data_annual
 # ---------------------------------------------------------------------------

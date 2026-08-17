@@ -63,9 +63,7 @@ def get_os():
     os_name = system()
     if os_name == "Windows":
         return "windows"
-    elif os_name == "Darwin":
-        return "nix"
-    elif os_name == "Linux":
+    elif os_name == "Darwin" or os_name == "Linux":
         return "nix"
     else:
         return "unknown"

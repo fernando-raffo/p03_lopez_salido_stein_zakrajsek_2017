@@ -20,7 +20,13 @@ import pandas as pd
 import statsmodels.api as sm
 
 from helper_functions import to_percent, year_over_year_growth
-from latex_format import coef_se_rows, pretty_label, regression_table_df, style_table, two_row_header
+from latex_format import (
+    coef_se_rows,
+    pretty_label,
+    regression_table_df,
+    style_table,
+    two_row_header,
+)
 from settings import config
 
 PROCESSED_DATA_DIR = Path(config("PROCESSED_DATA_DIR"))
@@ -127,7 +133,9 @@ def emit(df, start, end, label, spread_col="BAA_Treasury_spread"):
     ncols = len(specs)
 
     lines = [f"\\begin{{tabular}}{{l{'c' * ncols}}}", "\\toprule"]
-    lines.append(two_row_header(ncols, r"Dependent variable: $\Delta y_t$", "Regressors"))
+    lines.append(
+        two_row_header(ncols, r"Dependent variable: $\Delta y_t$", "Regressors")
+    )
     lines.append("\\midrule")
     lines.extend(coef_se_rows(res_list, MAIN_ROWS))
     lines.append("\\midrule")
@@ -167,7 +175,9 @@ def pretty_table_1(df, start, end, spread_col="BAA_Treasury_spread"):
     window = df.loc[start:end]
     results = [run_regression(df, regs, start, end) for regs in specs.values()]
 
-    main_df = regression_table_df(results, MAIN_ROWS, "Dependent variable: Δy<sub>t</sub>")
+    main_df = regression_table_df(
+        results, MAIN_ROWS, "Dependent variable: Δy<sub>t</sub>"
+    )
     footer = [("Adj. R²", [f"{res.rsquared_adj:.3f}" for res in results])]
     footer.append(("Standardized effect on Δy<sub>t</sub>", [""] * len(results)))
     for var, label in STD_ROWS:

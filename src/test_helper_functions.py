@@ -31,8 +31,12 @@ def test_quarter_over_quarter_growth_matches_log_diff():
     result = hf.quarter_over_quarter_growth(s)
 
     assert np.isnan(result.loc[dates[0]])
-    assert result.loc[dates[1]] == pytest.approx(100.0 * (np.log(105.0) - np.log(100.0)))
-    assert result.loc[dates[2]] == pytest.approx(100.0 * (np.log(103.0) - np.log(105.0)))
+    assert result.loc[dates[1]] == pytest.approx(
+        100.0 * (np.log(105.0) - np.log(100.0))
+    )
+    assert result.loc[dates[2]] == pytest.approx(
+        100.0 * (np.log(103.0) - np.log(105.0))
+    )
 
 
 def test_forward_cumulative_growth_horizon_one_matches_growth():
