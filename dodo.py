@@ -374,7 +374,7 @@ def task_run_notebooks():
     """Execute each project notebook in place and export it to HTML for the ChartBook site"""
     for notebook in notebook_tasks:
         notebook_name = notebook.split(".")[0]
-        notebook_path = Path("./src") / notebook
+        notebook_path = Path(notebook_tasks[notebook]["path"])
         yield {
             "name": notebook,
             "actions": [
