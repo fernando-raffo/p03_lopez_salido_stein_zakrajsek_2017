@@ -11,9 +11,15 @@ plain text (e.g. "S&P", "$tn") instead of pre-escaped LaTeX source. Hand-
 authored LaTeX source strings (e.g. row labels like r"$\\Delta s_{t-1}$")
 should NOT be run through `latex_escape` -- it is only for data/labels that
 are plain text.
+
+Also covers `regression_table_df`/`style_table`, a notebook-facing display
+path for the same tables: a rendered (not raw-LaTeX-source) `pandas` table
+built from the same `coef_cell` formatting the `.tex` output uses, so the
+two can't drift apart -- only the presentation differs.
 """
 
 import numpy as np
+import pandas as pd
 
 STAR_THRESHOLDS = ((0.01, "***"), (0.05, "**"), (0.10, "*"))
 
@@ -99,3 +105,116 @@ def coef_se_rows(results, row_specs):
         lines.append(label + " & " + " & ".join(coefs) + " \\\\")
         lines.append(" & " + " & ".join(ses) + " \\\\")
     return lines
+
+
+# ---------------------------------------------------------------------------
+# Notebook display: a rendered `pandas` table instead of raw LaTeX source.
+# ---------------------------------------------------------------------------
+
+# Plain-HTML rendering of every hand-authored LaTeX row label used by
+# `replicate_table_1.MAIN_ROWS`/`STD_ROWS` and `replicate_table_2._MAIN_ROWS`/
+# `_AUX_ROWS` -- the closed set of regressor labels these tables ever show.
+_PRETTY_LABELS = {
+    r"$\Delta s_{t-1}$": "Δs<sub>t−1</sub>",
+    r"$r_t^{SP}$": "r<sup>SP</sup><sub>t</sub>",
+    r"$\Delta y_{t-1}$": "Δy<sub>t−1</sub>",
+    r"$\Delta i_{t-1}^{(3m)}$": "Δi<sub>t−1</sub><sup>(3m)</sup>",
+    r"$\Delta i_{t-1}^{(10y)}$": "Δi<sub>t−1</sub><sup>(10y)</sup>",
+    r"$\pi_{t-1}$": "π<sub>t−1</sub>",
+    r"$\Delta \hat s_t$": "Δŝ<sub>t</sub>",
+    r"$\hat r_t^{SP}$": "r̂<sup>SP</sup><sub>t</sub>",
+    r"$\ln \mathrm{HYS}_{t-2}$": "ln HYS<sub>t−2</sub>",
+    r"$s_{t-2}$": "s<sub>t−2</sub>",
+    r"$\ln[P/E10]_{t-2}$": "ln[P/E10]<sub>t−2</sub>",
+}
+
+
+def pretty_label(label):
+    """Plain-HTML rendering of a hand-authored LaTeX row label (e.g.
+    r"$\\Delta s_{t-1}$" -> "Δs<sub>t−1</sub>"), for notebook display.
+    Falls back to the raw label, unchanged, for anything not in the lookup.
+    """
+    return _PRETTY_LABELS.get(label, label)
+
+
+def regression_table_df(results, row_specs, dep_var_label):
+    """A coefficient/s.e. table matching `coef_se_rows`'s LaTeX rows, as a
+    plain `DataFrame` for notebook display -- every `row_specs` entry
+    present in any column (not a hand-picked subset), via the same
+    `coef_cell` formatting the `.tex` output uses.
+
+    `dep_var_label`: a single string for one "Dependent variable: ..."
+    header spanning every column (mirrors `two_row_header`), or a sequence
+    of one label per result when each column has its own dependent
+    variable (Table II's auxiliary regressions).
+    """
+    if isinstance(dep_var_label, str):
+        columns = pd.MultiIndex.from_arrays(
+            [[dep_var_label] * len(results), [f"({i})" for i in range(1, len(results) + 1)]]
+        )
+    else:
+        columns = pd.Index(list(dep_var_label))
+
+    rows, index = [], []
+    for spec in row_specs:
+        var, label, *rest = spec
+        scale = rest[0] if rest else 1.0
+        coefs, ses = zip(*(coef_cell(res, var, scale) for res in results))
+        if all(c == "---" for c in coefs):
+            continue
+        rows.append(list(coefs))
+        index.append(pretty_label(label))
+        rows.append(list(ses))
+        index.append("")
+    return pd.DataFrame(rows, index=index, columns=columns)
+
+
+def style_table(df, footer=None, caption=None):
+    """A booktabs-ish styled `Styler` for `regression_table_df`'s output,
+    ready for `display()` in a notebook.
+
+    `footer`: an ordered list of `(label, values)` rows appended below a
+    rule (e.g. an R^2 row, or a standardized-effect block).
+    """
+    if footer:
+        foot_df = pd.DataFrame(
+            [values for _, values in footer],
+            index=[label for label, _ in footer],
+            columns=df.columns,
+        )
+        full = pd.concat([df, foot_df])
+        rule_row = len(df)
+    else:
+        full = df
+        rule_row = None
+
+    table_styles = [
+        {
+            "selector": "caption",
+            "props": "caption-side: top; text-align: left; "
+            "font-weight: 600; padding-bottom: 6px;",
+        },
+        {"selector": "th, td", "props": "padding: 3px 14px; text-align: center;"},
+        {"selector": "th.row_heading", "props": "text-align: left; font-weight: normal;"},
+        {"selector": "thead tr:first-child th", "props": "border-top: 1.5px solid #333;"},
+        {"selector": "thead tr:last-child th", "props": "border-bottom: 1px solid #333;"},
+        {
+            "selector": "tbody tr:last-child td, tbody tr:last-child th",
+            "props": "border-bottom: 1.5px solid #333;",
+        },
+    ]
+    if rule_row is not None:
+        table_styles.append(
+            {
+                "selector": (
+                    f"tbody tr:nth-child({rule_row + 1}) td, "
+                    f"tbody tr:nth-child({rule_row + 1}) th"
+                ),
+                "props": "border-top: 1px solid #999;",
+            }
+        )
+
+    styler = full.style
+    if caption:
+        styler = styler.set_caption(caption)
+    return styler.set_table_styles(table_styles, overwrite=False)

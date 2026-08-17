@@ -93,3 +93,45 @@ def test_coef_se_rows_applies_scale():
     rows = lf.coef_se_rows([r], [("a", "A", 0.01)])
     assert rows[0] == "A & 1.000 \\\\"
     assert rows[1] == " & (0.100) \\\\"
+
+
+# --------------------------------------------------------------------------- #
+# Notebook display helpers
+# --------------------------------------------------------------------------- #
+def test_pretty_label_known_and_unknown():
+    assert lf.pretty_label(r"$\Delta s_{t-1}$") == "Δs<sub>t−1</sub>"
+    assert lf.pretty_label("not a known label") == "not a known label"
+
+
+def test_regression_table_df_shared_dependent_variable_header():
+    r1 = _fake_res({"a": 1.0}, {"a": 0.1}, {"a": 0.2})
+    r2 = _fake_res({"a": 2.0}, {"a": 0.2}, {"a": 0.2})
+    df = lf.regression_table_df([r1, r2], [("a", "A")], "Dep. var: y")
+    assert list(df.columns) == [("Dep. var: y", "(1)"), ("Dep. var: y", "(2)")]
+    assert list(df.index) == ["A", ""]
+    assert df.iloc[0].tolist() == ["1.000", "2.000"]
+    assert df.iloc[1].tolist() == ["(0.100)", "(0.200)"]
+
+
+def test_regression_table_df_per_column_dependent_variables():
+    r1 = _fake_res({"a": 1.0}, {"a": 0.1}, {"a": 0.2})
+    r2 = _fake_res({"b": 2.0}, {"b": 0.2}, {"b": 0.2})
+    df = lf.regression_table_df([r1, r2], [("a", "A"), ("b", "B")], ["y1", "y2"])
+    assert list(df.columns) == ["y1", "y2"]
+    # Both rows are kept: each is present in at least one column.
+    assert list(df.index) == ["A", "", "B", ""]
+
+
+def test_regression_table_df_drops_rows_absent_everywhere():
+    r1 = _fake_res({"a": 1.0}, {"a": 0.1}, {"a": 0.2})
+    df = lf.regression_table_df([r1], [("a", "A"), ("missing", "M")], "y")
+    assert "M" not in df.index
+
+
+def test_style_table_appends_footer_rows():
+    r1 = _fake_res({"a": 1.0}, {"a": 0.1}, {"a": 0.2})
+    df = lf.regression_table_df([r1], [("a", "A")], "y")
+    styled = lf.style_table(df, footer=[("R2", ["0.500"])], caption="A table")
+    full = styled.data
+    assert list(full.index) == ["A", "", "R2"]
+    assert full.iloc[2].tolist() == ["0.500"]

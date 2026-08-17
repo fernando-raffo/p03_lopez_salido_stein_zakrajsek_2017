@@ -98,7 +98,7 @@ import statsmodels.api as sm
 from scipy import stats
 
 from helper_functions import log_total_return, to_percent, year_over_year_growth
-from latex_format import coef_se_rows, two_row_header
+from latex_format import coef_se_rows, regression_table_df, style_table, two_row_header
 from settings import config
 
 PROCESSED_DATA_DIR = Path(config("PROCESSED_DATA_DIR"))
@@ -439,6 +439,38 @@ def emit_table_2(results, start, end, label, spread_col="BAA_Treasury_spread"):
         f"ln_pe10_lag2={aux_r.params['ln_pe10_lag2']:.3f}"
     )
     print(f"  -> {out.name}")
+
+
+def pretty_table_2(results, start, end, spread_col="BAA_Treasury_spread"):
+    """The same two tables `emit_table_2` writes to `_output/table_2_*.tex`
+    (the second-step growth regressions, then the auxiliary regressions),
+    as styled `DataFrame`s for direct notebook display via `display(...)`
+    -- every row and column, not a hand-picked subset, built with the same
+    `coef_cell` formatting the `.tex` output uses.
+
+    Returns `(main_styler, aux_styler)`.
+    """
+    main_res = [results[c] for c in ("col1", "col2", "col3", "col4")]
+    main_df = regression_table_df(main_res, _MAIN_ROWS, "Dependent variable: Δy<sub>t</sub>")
+    main_footer = [("R²", [f"{res.rsquared:.3f}" for res in main_res])]
+    main_caption = (
+        f"Table II -- second-step (growth) regressions: "
+        f"{start}-{end}, credit spread = {spread_col}"
+    )
+    main_styler = style_table(main_df, footer=main_footer, caption=main_caption)
+
+    aux_res = [results["aux_spread"], results["aux_return"]]
+    aux_df = regression_table_df(
+        aux_res, _AUX_ROWS, ["Δs<sub>t</sub>", "r<sup>SP</sup><sub>t</sub>"]
+    )
+    aux_footer = [("R²", [f"{res.rsquared:.3f}" for res in aux_res])]
+    aux_caption = (
+        f"Table II -- auxiliary (first-step) regressions: "
+        f"{start}-{end}, credit spread = {spread_col}"
+    )
+    aux_styler = style_table(aux_df, footer=aux_footer, caption=aux_caption)
+
+    return main_styler, aux_styler
 
 
 # (label tag, spread column) pairs. The Baa tag is empty so its filenames
