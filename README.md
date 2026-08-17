@@ -7,7 +7,7 @@ This project replicates key results from:
 
 > Lopez-Salido, D., Stein, J. C., and Zakrajsek, E. (2017), "Credit-Market Sentiment and the Business Cycle." *The Quarterly Journal of Economics*, 132(3): 1373-1426. https://doi.org/10.1093/qje/qjx014
 
-The paper shows that elevated credit-market sentiment in year *t − 2* (proxied by narrow, aggressively priced credit spreads and a high share of junk-bond issuance) forecasts a subsequent widening of credit spreads and a decline in economic activity in years *t* and *t + 1*, using U.S. data from 1929 to 2015. This repo pulls the underlying data (FRED, Greenwood-Hanson credit-spread and issuance data, and Shiller's stock-market data), reconstructs the paper's credit-market sentiment measure via a two-step forecasting regression, and reproduces select tables and figures from the paper, including:
+The paper shows that elevated credit-market sentiment in year *t - 2* (proxied by narrow, aggressively priced credit spreads and a high share of junk-bond issuance) forecasts a subsequent widening of credit spreads and a decline in economic activity in years *t* and *t + 1*, using U.S. data from 1929 to 2015. This repo pulls the underlying data (FRED, Greenwood-Hanson credit-spread and issuance data, and Shiller's stock-market data), reconstructs the paper's credit-market sentiment measure via a two-step forecasting regression, and reproduces select tables and figures from the paper, including:
 
 - **Figure 1**: the Baa-Treasury credit spread over time
 - **Figure 2**: credit-market sentiment and economic growth
