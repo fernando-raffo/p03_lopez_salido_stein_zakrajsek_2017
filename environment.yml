@@ -21,6 +21,7 @@ dependencies:
   - polars==1.9.0
   - pyarrow
   - cruft
+  - ruff
   - pytest==8.3.3
   - python-decouple==3.8
   - python-dotenv==1.0.1

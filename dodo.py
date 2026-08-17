@@ -479,23 +479,6 @@ def task_compile_latex_report():
         "targets": ["./reports/report.pdf"],
         "clean": True,
     }
-def task_clear_notebooks():
-    """
-    Clear noteook outputs to avoid changes in the code.
-    """
-    for notebook in notebook_tasks.keys():
-        notebook_name = notebook.split(".")[0]
-        notebook_path = Path("./src") / notebook
-        yield {
-            "name": notebook,
-            "actions": [
-                jupyter_clear_output(notebook_path),
-            ],
-            "file_dep": [
-                notebook_path,
-            ],
-            "clean": True,
-        }
 
 
 def task_run_tests():

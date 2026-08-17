@@ -20,7 +20,7 @@ import pandas as pd
 import statsmodels.api as sm
 
 from helper_functions import to_percent, year_over_year_growth
-from latex_format import coef_se_rows, two_row_header
+from latex_format import coef_se_rows, pretty_label, regression_table_df, style_table, two_row_header
 from settings import config
 
 PROCESSED_DATA_DIR = Path(config("PROCESSED_DATA_DIR"))
@@ -100,9 +100,12 @@ def standardized_effect(res, window, regressors, var):
     return f"{effect:.3f}"
 
 
-def emit(df, start, end, label, spread_col="BAA_Treasury_spread"):
+def _column_specs():
+    """Regressors for each of Table I's three columns, keyed by its column
+    label -- shared by `emit` (LaTeX) and `pretty_table_1` (notebook
+    display) so the two can't drift apart."""
     base = ["gdp_pc_growth"]
-    specs = {
+    return {
         "(1)": ["d_credit_spread"] + base,
         "(2)": ["sp_return"] + base,
         "(3)": [
@@ -114,6 +117,10 @@ def emit(df, start, end, label, spread_col="BAA_Treasury_spread"):
         ]
         + base,
     }
+
+
+def emit(df, start, end, label, spread_col="BAA_Treasury_spread"):
+    specs = _column_specs()
     window = df.loc[start:end]
     results = {col: run_regression(df, regs, start, end) for col, regs in specs.items()}
     res_list = list(results.values())
@@ -148,6 +155,34 @@ def emit(df, start, end, label, spread_col="BAA_Treasury_spread"):
         f"col3 d_s={r3.params['d_credit_spread']:.3f}/r_sp={r3.params['sp_return']:.3f} "
         f"-> {path.name}"
     )
+
+
+def pretty_table_1(df, start, end, spread_col="BAA_Treasury_spread"):
+    """The same table `emit` writes to `_output/table_1_*.tex`, as a styled
+    `DataFrame` for direct notebook display via `display(...)` -- every row
+    and column, not a hand-picked subset, built with the same `coef_cell`
+    formatting the `.tex` output uses.
+    """
+    specs = _column_specs()
+    window = df.loc[start:end]
+    results = [run_regression(df, regs, start, end) for regs in specs.values()]
+
+    main_df = regression_table_df(results, MAIN_ROWS, "Dependent variable: Δy<sub>t</sub>")
+    footer = [("Adj. R²", [f"{res.rsquared_adj:.3f}" for res in results])]
+    footer.append(("Standardized effect on Δy<sub>t</sub>", [""] * len(results)))
+    for var, label in STD_ROWS:
+        footer.append(
+            (
+                pretty_label(label),
+                [
+                    standardized_effect(res, window, regs, var)
+                    for res, regs in zip(results, specs.values())
+                ],
+            )
+        )
+
+    caption = f"Table I -- {start}-{end}, credit spread = {spread_col}"
+    return style_table(main_df, footer=footer, caption=caption)
 
 
 # (label tag, spread column) pairs. The Baa tag is empty so its filenames

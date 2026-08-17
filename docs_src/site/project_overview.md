@@ -2,7 +2,7 @@
 
 ## p03_lopez-salido_stein_zakrajsek_2017
 
-A data science project
+{{ cookiecutter.project_description }}
 
 | Section | Description |
 |---------|-------------|
@@ -18,12 +18,3 @@ project_overview/goals
 project_overview/data_sources
 project_overview/methodology
 ```
-
-## To-Do
-
-- [ ] Define project goals and success criteria
-- [ ] Set up data pipeline and validate outputs
-- [ ] Explore and document datasets
-- [ ] Build initial charts and notebooks
-- [ ] Write up findings
-- [x] Initialize project from template
