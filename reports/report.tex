@@ -32,7 +32,8 @@ newer vintage and must be stitched together across multiple FRED series; where t
 silent about which underlying series to use, we made documented judgement calls.
 \item \textbf{Shiller} \citep{shiller2015irrational}: long-run market data and the P/E10 ratio.
 \item \textbf{Greenwood--Hanson high-yield share} \citep{greenwood2013issuer}, pulled from the
-HBS workbook \citep{hbsics} and spliced with Mergent FISD; a newer vintage than the paper.
+HBS workbook \citep{hbsics} and spliced with Mergent FISD \citep{mergentfisd}, accessed via
+WRDS; a newer vintage than the paper.
 \end{itemize}
 
 \section{Summary Statistics}
@@ -76,7 +77,7 @@ whatever the summary-statistics notebook produces.
 
 \section{Case Study: The Sentiment Signal Out of Sample, 2020--2022}
 The post-2008 reconstruction of the high-yield issuance share from Mergent
-FISD makes it possible to apply the Table II first stage, estimated on
+FISD \citep{mergentfisd} makes it possible to apply the Table II first stage, estimated on
 1929--2015 and held fixed, to the COVID cycle. The figure below compares the
 predicted change in the Baa--Treasury spread---using the full two-ingredient
 sentiment signal and, separately, the spread-reversion leg alone---against the
