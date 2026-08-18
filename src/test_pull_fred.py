@@ -1,3 +1,6 @@
+"""Unit tests for `pull_fred`, the FRED data-pulling module. `DataReader`
+itself is monkeypatched, so these need no network access."""
+
 import pandas as pd
 import pytest
 

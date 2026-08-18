@@ -11,7 +11,6 @@ directories.
 import sys
 from datetime import datetime
 from pathlib import Path
-from platform import system
 
 from decouple import config as _config
 
@@ -58,25 +57,6 @@ else:
     defaults["BASE_DIR"] = Path(__file__).absolute().parent.parent
 
 
-# OS type
-def get_os():
-    os_name = system()
-    if os_name == "Windows":
-        return "windows"
-    elif os_name == "Darwin":
-        return "nix"
-    elif os_name == "Linux":
-        return "nix"
-    else:
-        return "unknown"
-
-
-if "OS_TYPE" in cli_vars:
-    defaults["OS_TYPE"] = cli_vars["OS_TYPE"]
-else:
-    defaults["OS_TYPE"] = get_os()
-
-
 ## Dates
 defaults["BUFFER_START_DATE"] = datetime.strptime("1925-01-01", "%Y-%m-%d")
 defaults["REPLICATION_START_DATE"] = datetime.strptime("1929-01-01", "%Y-%m-%d")
@@ -117,7 +97,6 @@ def config(
     var_name,
     default=None,
     cast=None,
-    settings_py_defaults=defaults,
     cli_vars=cli_vars,
     convert_dir_vars_to_abs_path=True,
 ):
@@ -137,6 +116,8 @@ def config(
         # Apply cast if provided
         if cast is not None:
             value = cast(value)
+        elif "DATE" in var_name:
+            value = datetime.strptime(value, "%Y-%m-%d")
         if "DIR" in var_name and convert_dir_vars_to_abs_path:
             value = if_relative_make_abs(Path(value))
         return value
@@ -149,6 +130,8 @@ def config(
         # Found in environment
         if cast is not None:
             env_value = cast(env_value)
+        elif "DATE" in var_name:
+            env_value = datetime.strptime(env_value, "%Y-%m-%d")
         if "DIR" in var_name and convert_dir_vars_to_abs_path:
             env_value = if_relative_make_abs(Path(env_value))
         return env_value

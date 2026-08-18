@@ -1,11 +1,13 @@
+"""Unit tests for `pull_greenwood_hanson`, the Greenwood-Hanson high-yield
+share module. These exercise the pure `is_high_yield`/`compute_hy_share`
+aggregation logic, the FISD-cleaning filters, and the data-dictionary
+writers -- none of which need WRDS access or network calls."""
+
 import numpy as np
 import pandas as pd
 import pytest
 
 import pull_greenwood_hanson as gh
-from settings import config
-
-DATA_DIR = config("DATA_DIR")
 
 
 def test_is_high_yield():
@@ -122,9 +124,7 @@ def test_load_greenwood_hanson_invalid_dir():
 
 
 def test_save_data_dictionary_historical(tmp_path):
-    df = pd.DataFrame(
-        {"hy_share": [0.2], "SOME_UNKNOWN_COLUMN": [1.0]}, index=[1990]
-    )
+    df = pd.DataFrame({"hy_share": [0.2], "SOME_UNKNOWN_COLUMN": [1.0]}, index=[1990])
 
     file_path = gh.save_data_dictionary_historical(df, data_dir=tmp_path)
 
@@ -137,9 +137,7 @@ def test_save_data_dictionary_historical(tmp_path):
 
 
 def test_save_data_dictionary_fisd(tmp_path):
-    df = pd.DataFrame(
-        {"n_issues": [10], "SOME_UNKNOWN_COLUMN": [1.0]}, index=[2010]
-    )
+    df = pd.DataFrame({"n_issues": [10], "SOME_UNKNOWN_COLUMN": [1.0]}, index=[2010])
 
     file_path = gh.save_data_dictionary_fisd(df, data_dir=tmp_path)
 
@@ -152,9 +150,7 @@ def test_save_data_dictionary_fisd(tmp_path):
 
 
 def test_save_data_dictionary_combined(tmp_path):
-    df = pd.DataFrame(
-        {"source": ["fisd"], "SOME_UNKNOWN_COLUMN": [1.0]}, index=[2010]
-    )
+    df = pd.DataFrame({"source": ["fisd"], "SOME_UNKNOWN_COLUMN": [1.0]}, index=[2010])
 
     file_path = gh.save_data_dictionary_combined(df, data_dir=tmp_path)
 

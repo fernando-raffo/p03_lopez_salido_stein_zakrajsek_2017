@@ -38,7 +38,9 @@ EXT_END = config("EXTENSION_END_DATE")
 set_paper_style()
 
 
-def plot_figure_1(df, start=BUFFER_START, end=REP_END, spread_col="BAA_Treasury_spread"):
+def plot_figure_1(
+    df, start=BUFFER_START, end=REP_END, spread_col="BAA_Treasury_spread"
+):
     """
     Build the Figure I line plot (credit spread, with NBER recessions
     shaded) over `df.loc[start:end]`.

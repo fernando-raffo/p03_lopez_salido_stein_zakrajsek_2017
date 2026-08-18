@@ -12,9 +12,11 @@ The paper shows that elevated credit-market sentiment in year *t - 2* (proxied b
 - **Figure 1**: the Baa-Treasury credit spread over time
 - **Figure 2**: credit-market sentiment and economic growth
 - **Table 1**: forecasting economic growth with credit spreads and stock prices
-- **Table 2**:   the two-step regression results linking financial-market sentiment to economic growth
+- **Table 2**: the two-step regression results linking financial-market sentiment to economic growth
 
 **Extension.** The original paper builds its credit-market sentiment proxy from the spread between Moody's seasoned **Baa**-rated (lowest investment-grade) corporate bond yields and the 10-year Treasury yield. This project extends the replication by rebuilding the same figures and regressions using the spread on Moody's **Aaa**-rated (highest-grade) corporate bonds in place of Baa. The Aaa-based outputs are produced alongside the original Baa-based ones throughout the pipeline.
+
+**Case study.** A second extension applies the paper's Table II first-step sentiment regression - estimated and held fixed on 1929-2015 data - out of sample to the 2020-2022 COVID cycle, comparing its predicted change in the Baa-Treasury credit spread against the realized change.
 
 ## Data Sources
 
@@ -86,14 +88,12 @@ You can run the unit test, including doctests, with the following command:
 pytest --doctest-modules
 ```
 
-The full `doit` also ends with a `run_tests` task that executes this same suite as its final step, after the data pulls and the Table I / II replications. This means the integration tests that check the replicated coefficients against the published paper run automatically at the end of the pipeline; they skip on their own if the processed data has not been built.
+The full `doit` also ends with a `run_pytest` task that executes this same suite as its final step, after the data pulls and the Table I / II replications. This means the integration tests that check the replicated coefficients against the published paper run automatically at the end of the pipeline; they skip on their own if the processed data has not been built.
 
-You can build the documentation with:
+You can build the documentation site (also run automatically by `doit`) with:
 ```
-rm ./src/.pytest_cache/README.md
-jupyter-book build -W ./
+chartbook build -f
 ```
-Use `del` instead of rm on Windows
 
 
 #### Setting Environment Variables
@@ -157,10 +157,11 @@ p03_lopez_salido_stein_zakrajsek_2017/
 
  - We are using the `doit` Python module as a task runner. It works like `make` and
    the associated `Makefile`s. To rerun the code, install `doit`
-   (https://pydoit.org/) and execute the command `doit` from the `src`
-   directory. Note that doit is very flexible and can be used to run code
-   commands from the command prompt, thus making it suitable for projects that
-   use scripts written in multiple different programming languages.
+   (https://pydoit.org/) and execute the command `doit` from the project's
+   root directory (where `dodo.py` lives). Note that doit is very flexible and
+   can be used to run code commands from the command prompt, thus making it
+   suitable for projects that use scripts written in multiple different
+   programming languages.
 
  - We are using the `.env` file as a container for absolute paths that are private
    to each collaborator in the project. You can also use it for private
@@ -172,7 +173,7 @@ We'll often use a separate folder for storing data. Any data in the data folder
 can be deleted and recreated by rerunning the PyDoit command (the pulls are in
 the dodo.py file). Any data that cannot be automatically recreated should be
 stored in the "data_manual" folder. Because of the risk of manually-created data
-getting changed or lost, we keep it under version control if I can.
+getting changed or lost, we keep it under version control where we can.
 Thus, data in the "_data" folder is excluded from Git (see the .gitignore file),
 while the "data_manual" folder is tracked by Git.
 

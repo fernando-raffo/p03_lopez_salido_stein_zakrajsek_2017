@@ -130,8 +130,10 @@ These helpers generate shell commands for the notebook pipeline:
 def jupyter_execute_notebook(notebook_path):
     return f"jupyter nbconvert --execute --to notebook --ClearMetadataPreprocessor.enabled=True --inplace {notebook_path}"
 
+
 def jupyter_to_html(notebook_path, output_dir=OUTPUT_DIR):
     return f"jupyter nbconvert --to html --output-dir={output_dir} {notebook_path}"
+
 
 def mv(from_path, to_path):
     from_path = Path(from_path)
@@ -150,14 +152,22 @@ notebook_tasks = {
         "path": "./src/01_data_sources_overview.ipynb.py",
         "file_dep": [
             DATA_DIR / "ravenpack_djpr.parquet",
-            DATA_DIR / "gdelt_sp500_headlines" / "year=2025" / "month=01" / "data.parquet",
+            DATA_DIR
+            / "gdelt_sp500_headlines"
+            / "year=2025"
+            / "month=01"
+            / "data.parquet",
         ],
         "targets": [],
     },
     "02_gdelt_sp500_filtering.ipynb.py": {
         "path": "./src/02_gdelt_sp500_filtering.ipynb.py",
         "file_dep": [
-            DATA_DIR / "gdelt_sp500_headlines" / "year=2025" / "month=01" / "data.parquet",
+            DATA_DIR
+            / "gdelt_sp500_headlines"
+            / "year=2025"
+            / "month=01"
+            / "data.parquet",
             DATA_DIR / "sp500_names_lookup.parquet",
         ],
         "targets": [],

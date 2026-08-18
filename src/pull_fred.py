@@ -49,7 +49,7 @@ series_to_pull = {
 }
 
 
-def pull_fred(start_date=START_DATE, end_date=END_DATE, ffill=False):
+def pull_fred(start_date=START_DATE, end_date=END_DATE):
     """
     Download all series listed in `series_to_pull` from FRED.
 
@@ -59,10 +59,6 @@ def pull_fred(start_date=START_DATE, end_date=END_DATE, ffill=False):
         First date of the requested date range.
     end_date : str or datetime, default END_DATE
         Last date of the requested date range.
-    ffill : bool, default False
-        Unused placeholder for forward-filling lower-frequency series
-        (e.g. quarterly/annual) up to the daily/monthly index. Kept as a
-        parameter for callers that may want to opt into this behavior.
 
     Returns
     -------

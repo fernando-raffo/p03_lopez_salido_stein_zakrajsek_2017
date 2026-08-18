@@ -14,7 +14,13 @@ import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
 
-from plot_style import HIGHLIGHT_COLOR, LINE_COLOR, MARKER_COLOR, RECESSION_COLOR, recession_spans
+from plot_style import (
+    HIGHLIGHT_COLOR,
+    LINE_COLOR,
+    MARKER_COLOR,
+    RECESSION_COLOR,
+    recession_spans,
+)
 
 # XLIM/YLIM are Figure II's published axis range (p. 1392), reused here so
 # both renderings share the same fixed scale.
@@ -59,7 +65,14 @@ def make_figure_1_chart(df, start, end, spread_col, spread_label):
         )
     )
     for s, e in recession_spans(window):
-        fig.add_vrect(x0=s, x1=e, fillcolor=RECESSION_COLOR, opacity=1, layer="below", line_width=0)
+        fig.add_vrect(
+            x0=s,
+            x1=e,
+            fillcolor=RECESSION_COLOR,
+            opacity=1,
+            layer="below",
+            line_width=0,
+        )
 
     y_max = int(np.ceil(spread.max()))
     fig.update_layout(
@@ -73,7 +86,7 @@ def make_figure_1_chart(df, start, end, spread_col, spread_label):
     return fig
 
 
-def make_figure_2_chart(df, start, end, spread_label):
+def make_figure_2_chart(df, start, end):
     """Build an interactive scatter chart of credit-market sentiment at
     t-2 vs. GDP-per-capita growth at t, with the fitted line and
     influential observations highlighted, mirroring
@@ -133,8 +146,12 @@ def make_figure_2_chart(df, start, end, spread_label):
         legend=dict(x=0.02, y=0.02, xanchor="left", yanchor="bottom"),
         margin=dict(t=60, r=30, b=60, l=60),
     )
-    fig.update_xaxes(title_text="Credit-market sentiment at t-2 (pps.)", range=list(XLIM))
-    fig.update_yaxes(title_text="Growth in real GDP per capita at t (pct.)", range=list(YLIM))
+    fig.update_xaxes(
+        title_text="Credit-market sentiment at t-2 (pps.)", range=list(XLIM)
+    )
+    fig.update_yaxes(
+        title_text="Growth in real GDP per capita at t (pct.)", range=list(YLIM)
+    )
     return fig
 
 
@@ -162,11 +179,11 @@ def main():
         (REP_START, REP_END, "replication"),
         (REP_START, EXT_END, "extended"),
     ]
-    for spread_tag, spread_col, spread_label in SPREAD_VARIANTS:
+    for spread_tag, spread_col, _spread_label in SPREAD_VARIANTS:
         panel = build_panel(spread_col=spread_col)
         for start, end, window_tag in fig2_windows:
             label = "_".join(p for p in (spread_tag, window_tag) if p)
-            fig = make_figure_2_chart(panel, start, end, spread_label)
+            fig = make_figure_2_chart(panel, start, end)
             _write_html(fig, f"figure_2_{label}")
 
 

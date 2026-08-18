@@ -19,8 +19,14 @@ import numpy as np
 import pandas as pd
 import statsmodels.api as sm
 
-from helper_functions import to_percent, year_over_year_growth
-from latex_format import coef_se_rows, pretty_label, regression_table_df, style_table, two_row_header
+from helper_functions import log_total_return, to_percent, year_over_year_growth
+from latex_format import (
+    coef_se_rows,
+    pretty_label,
+    regression_table_df,
+    style_table,
+    two_row_header,
+)
 from settings import config
 
 PROCESSED_DATA_DIR = Path(config("PROCESSED_DATA_DIR"))
@@ -36,6 +42,7 @@ DIV_COL = "dividend"
 
 
 def newey_west_lags(n_obs):
+    """Newey-West (1994) automatic bandwidth rule of thumb."""
     return max(int(np.floor(4 * (n_obs / 100.0) ** (2 / 9))), 1)
 
 
@@ -49,11 +56,18 @@ def load_sp_return():
             f"Expected '{PRICE_COL}' and '{DIV_COL}' in {SHILLER_FILE.name}. "
             f"Available: {sh.columns.tolist()}"
         )
-    P, D = sh[PRICE_COL].astype(float), sh[DIV_COL].astype(float)
-    return (100.0 * np.log((P + D) / P.shift(1))).rename("sp_return")
+    return log_total_return(sh[PRICE_COL], sh[DIV_COL]).rename("sp_return")
 
 
 def build_panel(spread_col="BAA_Treasury_spread"):
+    """Assemble the annual panel of series needed for Table I.
+
+    Parameters
+    ----------
+    spread_col : str, default "BAA_Treasury_spread"
+        Column of `fred_final_series_annual.parquet` to use as the credit
+        spread, e.g. "BAA_Treasury_spread" or "AAA_Treasury_spread".
+    """
     df = pd.read_parquet(PROCESSED_DATA_DIR / "fred_final_series_annual.parquet")
     df["gdp_pc_growth"] = year_over_year_growth(df["GDP_per_capita"])
     df["d_credit_spread"] = df[spread_col].diff()
@@ -66,6 +80,8 @@ def build_panel(spread_col="BAA_Treasury_spread"):
 
 
 def run_regression(df, regressors, start, end):
+    """OLS of `dy_next` on `regressors` over `df.loc[start:end]`, with
+    Newey-West (HAC) standard errors."""
     d = df.loc[start:end, ["dy_next"] + regressors].dropna()
     return sm.OLS(d["dy_next"], sm.add_constant(d[regressors])).fit(
         cov_type="HAC", cov_kwds={"maxlags": newey_west_lags(len(d))}
@@ -127,12 +143,15 @@ def emit(df, start, end, label, spread_col="BAA_Treasury_spread"):
     ncols = len(specs)
 
     lines = [f"\\begin{{tabular}}{{l{'c' * ncols}}}", "\\toprule"]
-    lines.append(two_row_header(ncols, r"Dependent variable: $\Delta y_t$", "Regressors"))
+    lines.append(
+        two_row_header(ncols, r"Dependent variable: $\Delta y_t$", "Regressors")
+    )
     lines.append("\\midrule")
     lines.extend(coef_se_rows(res_list, MAIN_ROWS))
     lines.append("\\midrule")
     r2_vals = " & ".join(f"{res.rsquared_adj:.3f}" for res in res_list)
     lines.append(f"$\\bar R^2$ & {r2_vals} \\\\")
+    lines.append("\\addlinespace[4pt]")
     lines.append(
         f"\\multicolumn{{{ncols + 1}}}{{l}}{{\\textit{{Standardized effect on $\\Delta y_t$}}}} \\\\"
     )
@@ -167,7 +186,9 @@ def pretty_table_1(df, start, end, spread_col="BAA_Treasury_spread"):
     window = df.loc[start:end]
     results = [run_regression(df, regs, start, end) for regs in specs.values()]
 
-    main_df = regression_table_df(results, MAIN_ROWS, "Dependent variable: Δy<sub>t</sub>")
+    main_df = regression_table_df(
+        results, MAIN_ROWS, "Dependent variable: Δy<sub>t</sub>"
+    )
     footer = [("Adj. R²", [f"{res.rsquared_adj:.3f}" for res in results])]
     footer.append(("Standardized effect on Δy<sub>t</sub>", [""] * len(results)))
     for var, label in STD_ROWS:

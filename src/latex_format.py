@@ -150,7 +150,10 @@ def regression_table_df(results, row_specs, dep_var_label):
     """
     if isinstance(dep_var_label, str):
         columns = pd.MultiIndex.from_arrays(
-            [[dep_var_label] * len(results), [f"({i})" for i in range(1, len(results) + 1)]]
+            [
+                [dep_var_label] * len(results),
+                [f"({i})" for i in range(1, len(results) + 1)],
+            ]
         )
     else:
         columns = pd.Index(list(dep_var_label))
@@ -195,9 +198,18 @@ def style_table(df, footer=None, caption=None):
             "font-weight: 600; padding-bottom: 6px;",
         },
         {"selector": "th, td", "props": "padding: 3px 14px; text-align: center;"},
-        {"selector": "th.row_heading", "props": "text-align: left; font-weight: normal;"},
-        {"selector": "thead tr:first-child th", "props": "border-top: 1.5px solid #333;"},
-        {"selector": "thead tr:last-child th", "props": "border-bottom: 1px solid #333;"},
+        {
+            "selector": "th.row_heading",
+            "props": "text-align: left; font-weight: normal;",
+        },
+        {
+            "selector": "thead tr:first-child th",
+            "props": "border-top: 1.5px solid #333;",
+        },
+        {
+            "selector": "thead tr:last-child th",
+            "props": "border-bottom: 1px solid #333;",
+        },
         {
             "selector": "tbody tr:last-child td, tbody tr:last-child th",
             "props": "border-bottom: 1.5px solid #333;",

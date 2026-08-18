@@ -1,3 +1,8 @@
+"""Unit tests for `pull_shiller`, the Shiller stock-market data module.
+Builds a small in-memory workbook mimicking `ie_data.xls`'s layout (including
+its October date-encoding quirk) so the parser can be tested without hitting
+the network."""
+
 from io import BytesIO
 
 import numpy as np
@@ -5,9 +10,6 @@ import pandas as pd
 import pytest
 
 import pull_shiller
-from settings import config
-
-DATA_DIR = config("DATA_DIR")
 
 
 def _make_fake_shiller_workbook(n_months=27):

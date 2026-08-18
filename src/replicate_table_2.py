@@ -305,9 +305,7 @@ def _joint_step2_inference(window, res_aux_spread, res_aux_return, res_col, regr
         parts.append(Xc * u3[:, None])
         return np.hstack(parts)
 
-    psi0 = np.concatenate(
-        [a for a in (theta1, theta2, b_hat) if a is not None]
-    )
+    psi0 = np.concatenate([a for a in (theta1, theta2, b_hat) if a is not None])
     m0 = moments(psi0)
     nlags = newey_west_lags(n_obs)
     S = _hac_meat(m0, nlags)
@@ -400,7 +398,7 @@ def _aux_table_lines(results):
     lines = [
         "\\begin{tabular}{lcc}",
         "\\toprule",
-        r"Auxiliary regressions & $\Delta s_t$ & $r_t^{SP}$ \\",
+        r" & $\Delta s_t$ & $r_t^{SP}$ \\",
         "\\midrule",
     ]
     lines.extend(coef_se_rows([res_s, res_r], _AUX_ROWS))
@@ -411,15 +409,28 @@ def _aux_table_lines(results):
     return lines
 
 
+def _panel_header(title):
+    """A bold, centered panel title, on its own line above a `tabular` --
+    used to separate Table II's two sub-tables (they have different column
+    counts, so they can't share one `tabular`) so they read as two clearly
+    labeled panels of one table rather than an unlabeled, oddly-indented
+    second block stacked under the first."""
+    return [r"\begin{center}\textbf{%s}\end{center}" % title, r"\vspace{2pt}"]
+
+
 def emit_table_2(results, start, end, label, spread_col="BAA_Treasury_spread"):
-    lines = _main_table_lines(results) + [""] + _aux_table_lines(results)
+    lines = (
+        _panel_header("Panel A: Second-step (growth) regressions")
+        + _main_table_lines(results)
+        + ["", r"\vspace{12pt}", ""]
+        + _panel_header("Panel B: Auxiliary (first-step) regressions")
+        + _aux_table_lines(results)
+    )
 
     out = OUTPUT_DIR / f"table_2_{label}.tex"
     text = (
         f"% Table II replication ({label}): {start}-{end}, "
-        f"credit spread = {spread_col}\n"
-        + "\n".join(lines)
-        + "\n"
+        f"credit spread = {spread_col}\n" + "\n".join(lines) + "\n"
     )
     out.write_text(text)
 
@@ -451,7 +462,9 @@ def pretty_table_2(results, start, end, spread_col="BAA_Treasury_spread"):
     Returns `(main_styler, aux_styler)`.
     """
     main_res = [results[c] for c in ("col1", "col2", "col3", "col4")]
-    main_df = regression_table_df(main_res, _MAIN_ROWS, "Dependent variable: Δy<sub>t</sub>")
+    main_df = regression_table_df(
+        main_res, _MAIN_ROWS, "Dependent variable: Δy<sub>t</sub>"
+    )
     main_footer = [("R²", [f"{res.rsquared:.3f}" for res in main_res])]
     main_caption = (
         f"Table II -- second-step (growth) regressions: "

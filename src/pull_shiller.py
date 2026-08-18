@@ -435,11 +435,6 @@ def save_data_dictionary_annual(df, data_dir=DATA_DICTIONARY_DIR):
     return file_path
 
 
-def _demo():
-    df = load_shiller()
-    print(df.tail())
-
-
 if __name__ == "__main__":
     df_monthly = pull_shiller(SHILLER_URL, START_DATE, END_DATE)
     df_annual = process_shiller_annual(df_monthly, how="last")
