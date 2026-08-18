@@ -1,3 +1,8 @@
+"""Unit tests for `pull_greenwood_hanson`, the Greenwood-Hanson high-yield
+share module. These exercise the pure `is_high_yield`/`compute_hy_share`
+aggregation logic, the FISD-cleaning filters, and the data-dictionary
+writers -- none of which need WRDS access or network calls."""
+
 import numpy as np
 import pandas as pd
 import pytest

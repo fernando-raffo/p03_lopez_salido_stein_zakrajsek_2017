@@ -30,10 +30,12 @@ environ["PYDEVD_DISABLE_FILE_VALIDATION"] = "1"
 
 # Helper functions for automatic execution of Jupyter notebooks
 def jupyter_execute_notebook(notebook_path):
+    """Execute a notebook in place, clearing its metadata."""
     return f"jupyter nbconvert --execute --to notebook --ClearMetadataPreprocessor.enabled=True --inplace {notebook_path}"
 
 
 def jupyter_to_html(notebook_path, output_dir=OUTPUT_DIR):
+    """Export a notebook to HTML in `output_dir`."""
     return f"jupyter nbconvert --to html --output-dir={output_dir} {notebook_path}"
 
 

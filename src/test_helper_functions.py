@@ -1,3 +1,6 @@
+"""Unit tests for `helper_functions`, the growth-rate and return
+transformation helpers shared by the Table I/II regression scripts."""
+
 import numpy as np
 import pandas as pd
 import pytest

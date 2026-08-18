@@ -42,6 +42,7 @@ DIV_COL = "dividend"
 
 
 def newey_west_lags(n_obs):
+    """Newey-West (1994) automatic bandwidth rule of thumb."""
     return max(int(np.floor(4 * (n_obs / 100.0) ** (2 / 9))), 1)
 
 
@@ -60,6 +61,14 @@ def load_sp_return():
 
 
 def build_panel(spread_col="BAA_Treasury_spread"):
+    """Assemble the annual panel of series needed for Table I.
+
+    Parameters
+    ----------
+    spread_col : str, default "BAA_Treasury_spread"
+        Column of `fred_final_series_annual.parquet` to use as the credit
+        spread, e.g. "BAA_Treasury_spread" or "AAA_Treasury_spread".
+    """
     df = pd.read_parquet(PROCESSED_DATA_DIR / "fred_final_series_annual.parquet")
     df["gdp_pc_growth"] = year_over_year_growth(df["GDP_per_capita"])
     df["d_credit_spread"] = df[spread_col].diff()
@@ -72,6 +81,8 @@ def build_panel(spread_col="BAA_Treasury_spread"):
 
 
 def run_regression(df, regressors, start, end):
+    """OLS of `dy_next` on `regressors` over `df.loc[start:end]`, with
+    Newey-West (HAC) standard errors."""
     d = df.loc[start:end, ["dy_next"] + regressors].dropna()
     return sm.OLS(d["dy_next"], sm.add_constant(d[regressors])).fit(
         cov_type="HAC", cov_kwds={"maxlags": newey_west_lags(len(d))}
