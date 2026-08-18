@@ -497,7 +497,7 @@ def task_run_pytest():
         import subprocess
 
         result = subprocess.run(
-            ["pytest", f"--junitxml={test_output}"],
+            ["pytest", "--doctest-modules", f"--junitxml={test_output}"],
         )
         if result.returncode != 0:
             Path(test_output).unlink(missing_ok=True)

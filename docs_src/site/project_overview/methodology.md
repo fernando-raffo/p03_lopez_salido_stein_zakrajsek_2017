@@ -72,7 +72,8 @@ period of market froth.
     FISD reconstruction's rating/denominator conventions differ subtly from
     the original Greenwood-Hanson methodology.
   - A WRDS subscription is required to reconstruct the post-2008 high-yield
-    share from primary data; a `source="raw"` (see [Data Sources](data_sources.md)).
+    share from primary data; without one, `source="historical"` falls back to
+    the published series through 2008 (see [Data Sources](data_sources.md)).
   - The integration tests (`test_replicate_table_1.py`,
     `test_replicate_table_2.py`) check the replicated coefficients against
     the published values with tolerances wide enough to accept this repo's

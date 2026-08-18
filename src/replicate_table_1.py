@@ -19,7 +19,7 @@ import numpy as np
 import pandas as pd
 import statsmodels.api as sm
 
-from helper_functions import to_percent, year_over_year_growth
+from helper_functions import log_total_return, to_percent, year_over_year_growth
 from latex_format import (
     coef_se_rows,
     pretty_label,
@@ -56,8 +56,7 @@ def load_sp_return():
             f"Expected '{PRICE_COL}' and '{DIV_COL}' in {SHILLER_FILE.name}. "
             f"Available: {sh.columns.tolist()}"
         )
-    P, D = sh[PRICE_COL].astype(float), sh[DIV_COL].astype(float)
-    return (100.0 * np.log((P + D) / P.shift(1))).rename("sp_return")
+    return log_total_return(sh[PRICE_COL], sh[DIV_COL]).rename("sp_return")
 
 
 def build_panel(spread_col="BAA_Treasury_spread"):

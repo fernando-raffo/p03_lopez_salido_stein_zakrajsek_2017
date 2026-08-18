@@ -444,7 +444,8 @@ def pull_hy_share_from_fisd(wrds_username=WRDS_USERNAME):
         raise ImportError(
             "The 'wrds' package is required to pull the high-yield share from "
             "Mergent FISD. Install it (`pip install wrds`) and set WRDS_USERNAME "
-            "in your .env file, or use source='raw' with a manual issuance file."
+            "in your .env file, or use source='historical' to fall back to the "
+            "published Greenwood-Hanson series (1926-2008, no WRDS needed)."
         ) from exc
 
     db = wrds.Connection(wrds_username=wrds_username or None)
@@ -491,7 +492,7 @@ GH_HISTORICAL_URL_DEFAULT = (
 
 
 def pull_greenwood_hanson_historical(url=None, sheet="Annual Data"):
-    """Download the published Greenwood-Hanson high-yield share (1926-2015).
+    """Download the published Greenwood-Hanson high-yield share (1926-2008).
 
     Pulled from its published location (the HBS ``InvestorCreditSentiment``
     workbook), mirroring ``pull_shiller``. Reads the ``Annual Data`` sheet's
@@ -566,14 +567,20 @@ def splice_hy_share(fisd=None, first_fisd_year=2009, historical=None):
     Examples
     --------
     >>> import pandas as pd, numpy as np
+    >>> historical = pd.DataFrame(
+    ...     {"hy_share": [0.20, 0.25]},
+    ...     index=pd.Index([2007, 2008], name="year"),
+    ... )
+    >>> historical["ln_hy_share"] = np.log(historical["hy_share"])
+    >>> historical["source"] = "gh2013"
     >>> fisd = pd.DataFrame(
     ...     {"hy_share": [0.30, 0.35]},
     ...     index=pd.Index([2009, 2010], name="year"),
     ... )
     >>> fisd["ln_hy_share"] = np.log(fisd["hy_share"])
-    >>> full = splice_hy_share(fisd=fisd)
+    >>> full = splice_hy_share(fisd=fisd, historical=historical)
     >>> int(full.index.min()), int(full.index.max())
-    (1926, 2010)
+    (2007, 2010)
     >>> full.loc[2008, "source"], full.loc[2009, "source"]
     ('gh2013', 'fisd')
     """
