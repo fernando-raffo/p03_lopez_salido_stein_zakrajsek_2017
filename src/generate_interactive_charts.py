@@ -86,7 +86,7 @@ def make_figure_1_chart(df, start, end, spread_col, spread_label):
     return fig
 
 
-def make_figure_2_chart(df, start, end, spread_label):
+def make_figure_2_chart(df, start, end):
     """Build an interactive scatter chart of credit-market sentiment at
     t-2 vs. GDP-per-capita growth at t, with the fitted line and
     influential observations highlighted, mirroring
@@ -179,11 +179,11 @@ def main():
         (REP_START, REP_END, "replication"),
         (REP_START, EXT_END, "extended"),
     ]
-    for spread_tag, spread_col, spread_label in SPREAD_VARIANTS:
+    for spread_tag, spread_col, _spread_label in SPREAD_VARIANTS:
         panel = build_panel(spread_col=spread_col)
         for start, end, window_tag in fig2_windows:
             label = "_".join(p for p in (spread_tag, window_tag) if p)
-            fig = make_figure_2_chart(panel, start, end, spread_label)
+            fig = make_figure_2_chart(panel, start, end)
             _write_html(fig, f"figure_2_{label}")
 
 

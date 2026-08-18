@@ -86,14 +86,12 @@ You can run the unit test, including doctests, with the following command:
 pytest --doctest-modules
 ```
 
-The full `doit` also ends with a `run_tests` task that executes this same suite as its final step, after the data pulls and the Table I / II replications. This means the integration tests that check the replicated coefficients against the published paper run automatically at the end of the pipeline; they skip on their own if the processed data has not been built.
+The full `doit` also ends with a `run_pytest` task that executes this same suite as its final step, after the data pulls and the Table I / II replications. This means the integration tests that check the replicated coefficients against the published paper run automatically at the end of the pipeline; they skip on their own if the processed data has not been built.
 
-You can build the documentation with:
+You can build the documentation site (also run automatically by `doit`) with:
 ```
-rm ./src/.pytest_cache/README.md
-jupyter-book build -W ./
+chartbook build -f
 ```
-Use `del` instead of rm on Windows
 
 
 #### Setting Environment Variables
@@ -157,10 +155,11 @@ p03_lopez_salido_stein_zakrajsek_2017/
 
  - We are using the `doit` Python module as a task runner. It works like `make` and
    the associated `Makefile`s. To rerun the code, install `doit`
-   (https://pydoit.org/) and execute the command `doit` from the `src`
-   directory. Note that doit is very flexible and can be used to run code
-   commands from the command prompt, thus making it suitable for projects that
-   use scripts written in multiple different programming languages.
+   (https://pydoit.org/) and execute the command `doit` from the project's
+   root directory (where `dodo.py` lives). Note that doit is very flexible and
+   can be used to run code commands from the command prompt, thus making it
+   suitable for projects that use scripts written in multiple different
+   programming languages.
 
  - We are using the `.env` file as a container for absolute paths that are private
    to each collaborator in the project. You can also use it for private

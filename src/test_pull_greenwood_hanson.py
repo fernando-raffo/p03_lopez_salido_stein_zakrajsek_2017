@@ -8,9 +8,6 @@ import pandas as pd
 import pytest
 
 import pull_greenwood_hanson as gh
-from settings import config
-
-DATA_DIR = config("DATA_DIR")
 
 
 def test_is_high_yield():

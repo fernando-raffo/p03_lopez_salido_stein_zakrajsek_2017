@@ -15,10 +15,7 @@ There is no free public CSV/API for the HYS. It is *constructed* from
 bond-level issuance data. The authoritative source is **Mergent FISD** (Fixed
 Income Securities Database), accessed through **WRDS** (the project's
 ``.env.example`` already anticipates a ``WRDS_USERNAME``). This module builds
-the series from FISD; it also supports processing a raw issuance file (e.g. an
-export of the Greenwood-Hanson replication data, or SIFMA investment-grade /
-high-yield issuance totals) placed in ``MANUAL_DATA_DIR`` for anyone without
-WRDS access.
+the series from FISD.
 
 Construction logic (following Greenwood and Hanson 2013)
 --------------------------------------------------------
@@ -61,8 +58,7 @@ full 1929-2015 sample. ``source="historical"`` returns just the published
 Naming conventions
 ------------------
 - ``pull_greenwood_hanson`` obtains the data from an external source (FISD via
-  WRDS, a raw manual file, or the published-historical manual file) and
-  returns an annual DataFrame.
+  WRDS, or the published-historical series) and returns an annual DataFrame.
 - ``load_greenwood_hanson`` reads the cached, combined copy from the
   ``_data/processed_data`` directory.
 - ``compute_hy_share`` is the pure aggregation step and is unit-tested with
@@ -101,14 +97,13 @@ def _config_or(var_name, default):
 
 RAW_DATA_DIR = Path(config("RAW_DATA_DIR"))
 PROCESSED_DATA_DIR = Path(config("PROCESSED_DATA_DIR"))
-MANUAL_DATA_DIR = Path(config("MANUAL_DATA_DIR"))
 DATA_DICTIONARY_DIR = Path(config("DATA_DICTIONARY_DIR"))
 END_DATE = config("EXTENSION_END_DATE")
 PROCESSED_START_DATE = config("REPLICATION_START_DATE")
 
-# Which source to use by default: "fisd" (WRDS Mergent FISD) or "raw"
-# (a manually supplied issuance file in MANUAL_DATA_DIR). Configurable via env
-# var GH_HYS_SOURCE or --GH_HYS_SOURCE.
+# Which source to use by default: "spliced", "fisd" (WRDS Mergent FISD), or
+# "historical" (no WRDS needed). Configurable via env var GH_HYS_SOURCE or
+# --GH_HYS_SOURCE.
 GH_HYS_SOURCE = _config_or("GH_HYS_SOURCE", "spliced")
 WRDS_USERNAME = _config_or("WRDS_USERNAME", "")
 
@@ -480,16 +475,15 @@ def pull_hy_share_from_fisd(wrds_username=WRDS_USERNAME):
 # because they are the canonical series the target paper (Lopez-Salido, Stein,
 # and Zakrajsek 2017) relies on for years before FISD coverage begins, and they
 # exist only in print. Values are the dollar fraction of nonfinancial corporate
-# bond issuance rated high yield by Moody's (Ba1/BB+ or lower). Since they exist
-# only in print, they are transcribed once into
-# ``MANUAL_DATA_DIR / "greenwood_hanson_hys_historical.csv"`` (see
-# ``data_manual/data_README.md``) rather than re-derived here.
+# bond issuance rated high yield by Moody's (Ba1/BB+ or lower). They are pulled
+# from their published location (see `pull_greenwood_hanson_historical` below)
+# rather than re-derived here.
 
 
 # Historical Greenwood-Hanson high-yield share, pulled from its published
-# location per issue #42 (previously hand-transcribed into data_manual). The URL
-# is configurable via GH_HISTORICAL_URL and points at InvestorCreditSentiment.xlsx
-# on the HBS Behavioral Finance & Financial Stability site.
+# location. The URL is configurable via GH_HISTORICAL_URL and points at
+# InvestorCreditSentiment.xlsx on the HBS Behavioral Finance & Financial
+# Stability site.
 GH_HISTORICAL_URL_DEFAULT = (
     "https://www.hbs.edu/behavioral-finance-and-financial-stability/"
     "Documents/ChartData/LineCharts/InvestorCreditSentiment.xlsx"
@@ -605,12 +599,11 @@ def pull_greenwood_hanson(source=GH_HYS_SOURCE, first_fisd_year=2009, **kwargs):
 
     Parameters
     ----------
-    source : {"spliced", "fisd", "raw", "historical"}
+    source : {"spliced", "fisd", "historical"}
         ``"spliced"`` (recommended for the full sample) returns the published
         1926-2008 series spliced with the local FISD reconstruction for later
         years, covering 1929 onward as the paper requires;
         ``"fisd"`` reconstructs the series from Mergent FISD via WRDS (1983+);
-        ``"raw"`` builds it from a manual issuance file in ``MANUAL_DATA_DIR``;
         ``"historical"`` returns only the published 1926-2008 series (no WRDS
         needed).
     first_fisd_year : int
@@ -626,7 +619,7 @@ def pull_greenwood_hanson(source=GH_HYS_SOURCE, first_fisd_year=2009, **kwargs):
         return splice_hy_share(fisd=fisd, first_fisd_year=first_fisd_year)
     if source == "fisd":
         return pull_hy_share_from_fisd(**kwargs)
-    raise ValueError("`source` must be 'spliced', 'fisd', 'raw', or 'historical'.")
+    raise ValueError("`source` must be 'spliced', 'fisd', or 'historical'.")
 
 
 def load_greenwood_hanson(data_dir=PROCESSED_DATA_DIR):
@@ -721,11 +714,6 @@ def save_data_dictionary_combined(df, data_dir=DATA_DICTIONARY_DIR):
         _COMBINED_COLUMN_DESCRIPTIONS,
         df,
     )
-
-
-def _demo():
-    df = load_greenwood_hanson()
-    print(df.tail())
 
 
 if __name__ == "__main__":

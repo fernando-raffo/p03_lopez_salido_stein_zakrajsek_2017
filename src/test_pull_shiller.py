@@ -10,9 +10,6 @@ import pandas as pd
 import pytest
 
 import pull_shiller
-from settings import config
-
-DATA_DIR = config("DATA_DIR")
 
 
 def _make_fake_shiller_workbook(n_months=27):

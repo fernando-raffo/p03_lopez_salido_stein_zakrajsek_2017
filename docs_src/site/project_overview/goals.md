@@ -28,7 +28,7 @@
 - The replicated Table I and Table II coefficients fall within the
   tolerances checked by the automated integration tests
   (`test_replicate_table_1.py`, `test_replicate_table_2.py`), which compare
-  them against the published QJE values as part of `doit`'s `run_tests` step.
+  them against the published QJE values as part of `doit`'s `run_pytest` step.
 - Every replication figure and table has a corresponding Aaa-spread variant
   and an extended-sample (through the most recent available data) variant.
 - The COVID case study (`04_case_study.ipynb`) shows whether the sentiment
