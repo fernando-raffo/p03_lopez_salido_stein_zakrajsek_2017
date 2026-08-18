@@ -493,11 +493,10 @@ GH_HISTORICAL_URL_DEFAULT = (
 def pull_greenwood_hanson_historical(url=None, sheet="Annual Data"):
     """Download the published Greenwood-Hanson high-yield share (1926-2015).
 
-    Per issue #42 this is pulled from its published location (the HBS
-    ``InvestorCreditSentiment`` workbook), mirroring ``pull_shiller``, instead of
-    reading a hand-transcribed CSV from ``data_manual``. Reads the ``Annual Data``
-    sheet's ``HYS`` column. Schema is unchanged: indexed by ``year`` with
-    ``hy_share``, ``ln_hy_share`` and ``source`` ('gh2013').
+    Pulled from its published location (the HBS ``InvestorCreditSentiment``
+    workbook), mirroring ``pull_shiller``. Reads the ``Annual Data`` sheet's
+    ``HYS`` column and returns a frame indexed by ``year`` with ``hy_share``,
+    ``ln_hy_share`` and ``source`` ('gh2013').
 
     Note: this is a newer vintage than the paper's Table II, so some values
     differ slightly from the originally published series.
