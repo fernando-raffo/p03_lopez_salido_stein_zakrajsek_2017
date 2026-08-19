@@ -26,6 +26,7 @@ OUTPUT_DIR = config("OUTPUT_DIR")
 
 # Helpers for handling Jupyter Notebook tasks
 environ["PYDEVD_DISABLE_FILE_VALIDATION"] = "1"
+environ["PYTHONUTF8"] = "1"
 
 
 # Helper functions for automatic execution of Jupyter notebooks

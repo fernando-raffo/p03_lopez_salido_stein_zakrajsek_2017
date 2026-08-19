@@ -13,7 +13,7 @@
 - Extend the replication along two axes: (1) an analogous credit-market
   sentiment measure built from the Aaa-Treasury spread instead of the
   Baa-Treasury spread, produced in parallel through every stage of the
-  pipeline, and (2) a case study applying the pre-2008-fit sentiment signal
+  pipeline, and (2) a case study applying the 1929-2015-fit sentiment signal
   out of sample to the 2020-2022 COVID shock and its aftermath.
 - Package the whole project as a reproducible, one-command ChartBook
   pipeline (`doit`) that pulls data, runs the replication, renders guided
