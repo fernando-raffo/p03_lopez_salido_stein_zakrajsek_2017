@@ -1,4 +1,5 @@
-"""Data walkthrough: summary statistics and one chart per processed data
+"""
+Data walkthrough: summary statistics and one chart per processed data
 file that feeds the whole LSZ (2017) replication pipeline:
 
     - fred_final_series_annual.parquet   (GDP, prices, yields; 1929-present)

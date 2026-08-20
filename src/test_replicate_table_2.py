@@ -1,4 +1,5 @@
-"""Tests for `replicate_table_2`.
+"""
+Tests for `replicate_table_2`.
 
 The Table II first stage is the "sentiment engine": two auxiliary regressions
 whose fitted values drive the second-step growth regressions. The
@@ -18,7 +19,7 @@ Published QJE Table II, full sample 1929-2015, transcribed from the paper
     pi_{t-1}    --               --                --                0.104 (.163)
     R^2         0.379            0.332             0.386             0.391
 
-...and the auxiliary (first-step) panel:
+and the auxiliary (first-step) panel:
     ln HYS_{t-2}  0.095*** (.024)   R^2 = 0.100   (Delta s_t equation)
     s_{t-2}      -0.248*** (.042)
     ln[P/E10]_{t-2} -0.134*** (.036)  R^2 = 0.086  (r_t^SP equation)

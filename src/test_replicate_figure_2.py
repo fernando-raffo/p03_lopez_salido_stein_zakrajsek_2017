@@ -1,4 +1,5 @@
-"""Tests for `replicate_figure_2`.
+"""
+Tests for `replicate_figure_2`.
 
 Figure II plots credit-market sentiment at t-2 against real GDP-per-capita
 growth at t (both orthogonalized against Table II column (1)'s other

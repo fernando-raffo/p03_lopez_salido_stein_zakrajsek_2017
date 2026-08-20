@@ -1,4 +1,5 @@
-"""Generate interactive (Plotly/HTML) versions of Figures I and II for the
+"""
+Generate interactive (Plotly/HTML) versions of Figures I and II for the
 ChartBook site, to sit alongside the static PDF versions produced by
 `replicate_figure_1.py` and `replicate_figure_2.py`.
 

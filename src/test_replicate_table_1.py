@@ -1,4 +1,5 @@
-"""Tests for `replicate_table_1`.
+"""
+Tests for `replicate_table_1`.
 
 Two kinds of test live here:
 

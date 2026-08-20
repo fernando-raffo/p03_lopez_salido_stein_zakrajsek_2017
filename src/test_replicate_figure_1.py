@@ -1,4 +1,5 @@
-"""Tests for `replicate_figure_1`.
+"""
+Tests for `replicate_figure_1`.
 
 Figure I itself is a single time series (the Baa-Treasury credit spread)
 with NBER recessions shaded, so there is no regression coefficient to check

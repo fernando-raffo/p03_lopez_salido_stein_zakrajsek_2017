@@ -1,4 +1,5 @@
-"""Unit tests for `plot_style`, the shared styling/recession-shading helper
+"""
+Unit tests for `plot_style`, the shared styling/recession-shading helper
 used by both `replicate_figure_1.py` and `replicate_figure_2.py`.
 
 `recession_spans` is a pure function (no plotting, no data files) and feeds
