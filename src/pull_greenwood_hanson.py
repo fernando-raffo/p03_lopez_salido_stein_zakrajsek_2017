@@ -1,78 +1,52 @@
-"""Pull, read, load, and process the Greenwood-Hanson high-yield share (HYS).
+"""
+Pull, read, load, and process the Greenwood-Hanson high-yield share (HYS).
 
 The *high-yield share* (``HYS``) is the fraction of gross nonfinancial
 corporate bond issuance in a given year that is rated below investment grade
 ("high yield" / "junk"). Greenwood and Hanson (2013, *Review of Financial
 Studies*) show it forecasts corporate-bond returns; Lopez-Salido, Stein, and
-Zakrajsek (2017) use ``ln(HYS)_{t-2}`` as a first-step predictor of future
-changes in the Baa-Treasury credit spread (see the auxiliary regressions in
-Tables II and V, where "HYS_t = fraction of debt that is rated as high yield
-(Greenwood and Hanson 2013)").
+Zakrajsek (2017) use ``ln(HYS)_{t-2}`` as a first-step predictor of changes
+in the Baa-Treasury credit spread (the auxiliary regressions in Tables II
+and V).
 
-Where the data comes from
--------------------------
-There is no free public CSV/API for the HYS. It is *constructed* from
-bond-level issuance data. The authoritative source is **Mergent FISD** (Fixed
-Income Securities Database), accessed through **WRDS** (the project's
-``.env.example`` already anticipates a ``WRDS_USERNAME``). This module builds
-the series from FISD.
+There is no free public CSV/API for the HYS -- it is *constructed* from
+bond-level issuance data. This module reconstructs it from **Mergent FISD**
+(Fixed Income Securities Database), accessed through **WRDS** (the project's
+``.env.example`` anticipates a ``WRDS_USERNAME``): restrict to U.S.
+nonfinancial corporate issues (dropping financials, convertibles, non-USD,
+asset-backed, and government/agency debt), assign each issue a rating at
+issuance from its first Moody's rating, and compute
+``HYS = (high-yield issuance) / (total issuance)`` per year. Issues with no
+Moody's rating are excluded from the denominator entirely, following
+Greenwood and Hanson (2013); the ``n_issues`` column flags thin early years
+for screening (e.g. ``df.loc[df.n_issues >= 25]``).
 
-Construction logic (following Greenwood and Hanson 2013)
---------------------------------------------------------
-1. Start from gross corporate bond issues (offering amount and offering date).
-2. Restrict to U.S. nonfinancial corporate issues (drop financials, SIC
-   6000-6999), excluding convertibles, non-USD, asset-backed, and government /
-   agency debt.
-3. Assign each issue a rating at issuance and flag it high yield if it is below
-   investment grade (below Baa3 / BBB-).
-4. For each year, ``HYS = (high-yield issuance) / (total issuance)``.
-
-Known limitations of the FISD reconstruction
---------------------------------------------
-1. **Coverage.** FISD's usable issuance history effectively begins in the early
-   1980s. Stray offering dates reach back to 1902, but those years contain a
-   handful of issues and produce degenerate shares of exactly 0 or 1. The
-   ``n_issues`` column is provided so these thin years can be screened out
-   (e.g. ``df.loc[df.n_issues >= 25]``). This series therefore cannot cover the
-   1929 start of the sample in Lopez-Salido, Stein, and Zakrajsek (2017); their
-   pre-1980s high-yield share comes from other historical sources.
-2. **Moody's-rated denominator.** Following Greenwood and Hanson (2013), an
-   issue's grade is taken from its first Moody's rating (``rating_type = 'MR'``)
-   and issues with no Moody's rating are excluded entirely. Issues rated only by
-   S&P or Fitch therefore drop out of the denominator, which can bias the
-   computed share upward relative to a definition that accepts any agency
-   rating. Worth checking before the series is used in the first-step
-   regression.
-
-Reaching 1929: the published historical series
-----------------------------------------------
-Because FISD cannot reach the 1929 start of the sample, this module also ships
-the published Greenwood-Hanson (2013) high-yield share for 1926-2008 (their
-Table 2), whose pre-1983 values come from printed NBER studies (Hickman 1960;
-Atkinson 1967) and hand-collected Moody's Bond Surveys. ``source="spliced"``
-(the default) returns those published values through 2008 and appends the local
-FISD reconstruction for later years, giving a continuous series that covers the
-full 1929-2015 sample. ``source="historical"`` returns just the published
-1926-2008 series and needs no WRDS access.
+FISD's usable coverage effectively begins in the early 1980s, so it cannot
+reach the 1929 start of the LSZ sample on its own. To cover the full sample,
+this module also ships the published Greenwood-Hanson (2013) high-yield
+share for 1926-2008 (their Table 2, sourced from Hickman 1960, Atkinson
+1967, and hand-collected Moody's Bond Surveys pre-1983). ``source="spliced"``
+(the default) returns those published values through 2008 and appends the
+local FISD reconstruction for later years, giving a continuous series
+covering the full 1929-2015 sample; ``source="historical"`` returns just the
+published 1926-2008 series and needs no WRDS access.
 
 Naming conventions
 ------------------
-- ``pull_greenwood_hanson`` obtains the data from an external source (FISD via
-  WRDS, or the published-historical series) and returns an annual DataFrame.
+- ``pull_greenwood_hanson`` obtains the data (FISD via WRDS, or the
+  published-historical series) and returns an annual DataFrame.
 - ``load_greenwood_hanson`` reads the cached, combined copy from the
   ``_data/processed_data`` directory.
 - ``compute_hy_share`` is the pure aggregation step and is unit-tested with
   synthetic data (it needs no network or credentials).
 - ``save_data_dictionary_historical`` / ``save_data_dictionary_fisd`` /
   ``save_data_dictionary_combined`` write Markdown data dictionaries
-  documenting the columns of each of the three parquet files to
-  ``DATA_DICTIONARY_DIR``.
+  documenting the columns of each of the three parquet files.
 
 Running this file as a script pulls the data and caches it under ``_data``
-(the git-ignored data folder), so no data is ever committed to the repo: the
-historical (source 3) and FISD (source 1) series are each cached to
-``RAW_DATA_DIR``, and the final spliced annual series used downstream is
-cached to ``PROCESSED_DATA_DIR``.
+(git-ignored, so nothing is ever committed): the historical and FISD series
+go to ``RAW_DATA_DIR``, and the final spliced annual series to
+``PROCESSED_DATA_DIR``.
 """
 
 import warnings

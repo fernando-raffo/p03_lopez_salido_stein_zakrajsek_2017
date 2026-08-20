@@ -1,4 +1,5 @@
-"""Unit tests for `latex_format`, the shared LaTeX table helpers.
+"""
+Unit tests for `latex_format`, the shared LaTeX table helpers.
 
 These use lightweight fake results (a namespace with `params`, `bse`,
 `pvalues` Series) so they need no statsmodels fit and no data.

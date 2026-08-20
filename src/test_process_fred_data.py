@@ -1,6 +1,8 @@
-"""Unit tests for `process_fred_data_annual` and `process_fred_data_monthly`,
+"""
+Unit tests for `process_fred_data_annual` and `process_fred_data_monthly`,
 the modules that clean the raw FRED pull into the annual and monthly series
-used throughout the replication."""
+used throughout the replication.
+"""
 
 import numpy as np
 import pandas as pd

@@ -499,8 +499,8 @@ def save_data_readme(df, data_dir=DATA_DICTIONARY_DIR):
     For every column in `df` that has a known description (i.e. is a key
     in `column_descriptions`), record how it is derived from the raw FRED
     series. This makes it easy to understand what each column of
-    `fred_final_series.parquet` represents without reading this module's
-    source code.
+    `fred_final_series_annual.parquet` represents without reading this
+    module's source code.
 
     Parameters
     ----------

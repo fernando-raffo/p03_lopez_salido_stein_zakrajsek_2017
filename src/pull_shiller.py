@@ -1,54 +1,28 @@
-"""Pull, read, load, and process Robert Shiller's stock-market data set.
+"""
+Pull, read, load, and process Robert Shiller's stock-market data set.
 
-This module downloads the monthly U.S. stock-market data set that Robert
-Shiller distributes alongside *Irrational Exuberance* (the file historically
-named ``ie_data.xls``). The data set runs from January 1871 to the present and
-contains the S&P Composite price, dividends, earnings, the CPI, the 10-year
-Treasury (long) interest rate, and Shiller's cyclically adjusted
-price-earnings ratio, the CAPE (a.k.a. ``P/E10`` or ``PE10``).
+Downloads the monthly U.S. stock-market data set Robert Shiller distributes
+alongside *Irrational Exuberance* (the file historically named
+``ie_data.xls``), covering January 1871 to the present: S&P Composite price,
+dividends, earnings, the CPI, the 10-year Treasury (long) rate, and Shiller's
+cyclically adjusted price-earnings ratio (CAPE, a.k.a. ``P/E10``). Lopez-
+Salido, Stein, and Zakrajsek (2017) use ``ln[P/E10]_{t-2}`` as the first-step
+predictor of stock-market returns in Tables I and II.
 
-Why we need it
---------------
-Lopez-Salido, Stein, and Zakrajsek (2017) use the log of the cyclically
-adjusted price-earnings ratio, ``ln[P/E10]_{t-2}``, as the first-step predictor
-of stock-market returns (Shiller 2000). See Table I and Table II of the paper.
-
-Data structure
---------------
-The workbook has a sheet named ``"Data"``. After a few header rows, each row is
-one calendar month, in consecutive order starting 1871-01. The columns of
-interest (by position, left to right) are:
-
-    0. Date            -- encoded as ``YYYY.MM`` (note: October shows as
-                          ``YYYY.1`` in the raw file, which is why we rebuild
-                          the monthly index from row order instead of parsing
-                          this column).
-    1. P               -- S&P Composite price
-    2. D               -- Dividend
-    3. E               -- Earnings
-    4. CPI             -- Consumer Price Index
-    5. Date Fraction
-    6. Long Rate (GS10)-- 10-year Treasury yield
-    7. Real Price
-    8. Real Dividend
-    9. Real Total Return Price
-    10. Real Earnings
-    11. Real TR Scaled Earnings
-    12. CAPE           -- cyclically adjusted P/E (P/E10)
-
-Newer vintages append additional columns (TR CAPE, Excess CAPE Yield, etc.),
-so we select the columns we need by position rather than assuming a fixed
-width.
+The workbook's ``"Data"`` sheet has one row per calendar month starting
+1871-01; columns are selected by position (see ``_COLUMN_MAP``) rather than
+name, since newer vintages append extra columns (TR CAPE, Excess CAPE Yield,
+etc.). The raw ``Date`` column encodes October as ``YYYY.1`` (ambiguous with
+January's truncated ``YYYY.10``), so the monthly index is rebuilt from row
+order instead of parsed from that column.
 
 Naming conventions
 ------------------
 - ``pull_shiller`` downloads from the web and returns a monthly DataFrame.
 - ``load_shiller`` reads the cached copy from the ``_data`` directory.
-- ``process_shiller_annual`` collapses the monthly data to annual frequency and
-  adds ``ln_pe10``.
+- ``process_shiller_annual`` collapses to annual frequency and adds ``ln_pe10``.
 - ``save_data_dictionary`` / ``save_data_dictionary_annual`` write Markdown
-  data dictionaries documenting the columns of the raw monthly and processed
-  annual parquet files to ``DATA_DICTIONARY_DIR``.
+  data dictionaries for the raw monthly and processed annual parquet files.
 
 Running this file as a script pulls the data and caches it to ``DATA_DIR``
 (the ``_data`` folder, which is git-ignored, so the data is never committed).

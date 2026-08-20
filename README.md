@@ -45,7 +45,7 @@ conda env create -f environment.yml
 conda activate p03_lopez_salido_stein_zakrajsek_2017_env
 ```
 
-Alternatively, if we also include a `requirements.txt` file to create an environment with alternative package mangers or a simple Python virtual environment:
+Alternatively, we also include a `requirements.txt` file to create an environment with alternative package mangers or a simple Python virtual environment:
 
 ```bash
 conda create -n p03_lopez_salido_stein_zakrajsek_2017_env python=3.12

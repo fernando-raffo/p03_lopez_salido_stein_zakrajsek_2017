@@ -1,4 +1,5 @@
-"""Shared matplotlib styling for the replicated figures.
+"""
+Shared matplotlib styling for the replicated figures.
 
 Both `replicate_figure_1.py` and `replicate_figure_2.py` render their plots
 through this module so that our version of each figure matches the plain,

@@ -23,56 +23,34 @@ Estimation method: joint NLLS, footnote 12
 -------------------------------------------
 The paper estimates equations (2)-(4) *jointly* by nonlinear least squares
 (NLLS) "to take into account the generated-regressor nature of the expected
-returns" (p. 1388), with inference based on "a heteroskedasticity- and
-autocorrelation-consistent asymptotic covariance matrix computed according
-to Newey and West (1987), using the automatic lag selection method of Newey
-and West (1994)" (footnote 12).
-
-Because the system is block-recursive -- the auxiliary (first-step)
-equations don't involve the second-step coefficients, so their normal
-equations pin down theta1 (spread) and theta2 (return) on their own -- the
-NLLS *point* estimates coincide with the simple two-step "plug-in" OLS
-procedure: fit each auxiliary regression by OLS, substitute its fitted
-values into the growth regression, and fit that by OLS too. This script
-still does exactly that for the point estimates (`_fit_ols_hac` below).
+returns" (p. 1388), with Newey-West (1987/1994) HAC standard errors
+(footnote 12). Because the system is block-recursive -- the auxiliary
+(first-step) equations don't involve the second-step coefficients -- the
+NLLS *point* estimates coincide exactly with the simple two-step "plug-in"
+OLS procedure this script fits (`_fit_ols_hac`): fit each auxiliary
+regression by OLS, substitute its fitted values into the growth regression,
+and fit that by OLS too.
 
 What plug-in OLS gets wrong is the *second-step standard errors*: treating
 `d_s_hat`/`r_sp_hat` as if they were data, rather than estimates with their
 own sampling variance, understates the second step's coefficient
-uncertainty. `_joint_step2_inference` corrects this by treating the whole
-system as one exactly identified GMM/M-estimation problem, i.e. the
-first-order conditions of joint NLLS:
-
-    g1_t(theta1)              = z1,t-2 * (Delta s_t - theta1'z1,t-2)
-    g2_t(theta2)              = z2,t-2 * (r_t^SP - theta2'z2,t-2)
-    g3_t(theta1, theta2, psi) = w_t     * (Delta y_t - w_t(theta1,theta2)'psi)
-
-stacked into m_t(theta1, theta2, psi) = [g1_t; g2_t; g3_t] (only the blocks
-a given column actually uses), where w_t is that column's second-step
-regressor vector with `d_s_hat`/`r_sp_hat` written as theta1'z1,t-2 /
-theta2'z2,t-2 rather than plugged-in numbers. Solving Sum_t m_t = 0
-reproduces the plug-in OLS estimates exactly (each theta solves its own
-normal equations regardless of psi; psi then solves its own normal
-equations given theta) -- confirming NLLS and plug-in OLS point estimates
-agree -- but the asymptotic covariance of the stacked M-estimator,
-
-    Avar(theta1, theta2, psi) = G^-1 S (G^-1)',
-
-with G = d(Sum_t m_t)/d(params) (a numerically differentiated Jacobian,
-block lower-triangular since g3 depends on theta1/theta2 but not vice versa)
-and S the Newey-West HAC "meat" matrix of m_t (same automatic-lag rule as
-every other regression in this repo), correctly propagates the first-step
-sampling uncertainty into the psi (= second-step coefficient) block. This is
-exactly the classic Murphy and Topel (1985)/generated-regressors correction,
-and it is what "estimated jointly by NLLS" buys over plug-in OLS: the point
-estimates are unchanged, but the reported standard errors are larger and
-match the paper's methodology rather than a two-step approximation to it.
-
-The auxiliary-regression coefficients' own standard errors are *unaffected*
-by this correction (their block of `Avar` collapses back to the plain
-single-equation HAC covariance, since G is block lower-triangular), so
-`_fit_ols_hac`'s HAC standard errors for `aux_spread`/`aux_return` already
-match the joint-NLLS ones and are left as is.
+uncertainty. `_joint_step2_inference` corrects this with the classic Murphy
+and Topel (1985) generated-regressors adjustment: stack the first-order
+conditions of all three equations into one exactly identified GMM/
+M-estimation problem and compute its sandwich covariance
+`Avar = G^-1 S (G^-1)'`, where `G` is the Jacobian of the stacked moment
+conditions (numerically differentiated; block lower-triangular since the
+second-step equation depends on the auxiliary parameters but not vice versa)
+and `S` is their Newey-West HAC "meat" matrix. Solving the stacked
+first-order conditions reproduces the plug-in OLS point estimates exactly,
+confirming NLLS and plug-in OLS agree on point estimates -- but `Avar`
+correctly propagates the first-step sampling uncertainty into the
+second-step coefficient block, which plug-in OLS's naive covariance does
+not. The auxiliary regressions' own standard errors are unaffected by this
+correction (their block of `Avar` collapses back to the plain
+single-equation HAC covariance), so `_fit_ols_hac`'s HAC standard errors for
+`aux_spread`/`aux_return` already match the joint-NLLS ones and are left as
+is.
 
 Because `fred_final_series_annual.parquet` is trimmed to start in 1929 (the
 replication start year), `s_{t-2}` is unavailable for 1929-1930, so the

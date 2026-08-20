@@ -1,4 +1,5 @@
-"""Replicate Figure I of Lopez-Salido, Stein & Zakrajsek (2017):
+"""
+Replicate Figure I of Lopez-Salido, Stein & Zakrajsek (2017):
 the Baa-Treasury credit spread over the 1925-2015 replication sample.
 
 Reads the cleaned monthly FRED series produced by process_fred_data_monthly.py
