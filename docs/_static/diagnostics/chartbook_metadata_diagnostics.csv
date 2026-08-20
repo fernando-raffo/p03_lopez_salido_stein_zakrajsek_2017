@@ -1,0 +1,22 @@
+Name,Metadata Complete,Object Type,Identifier,Pipeline,Missing Fields,Page Link
+Credit-Market Sentiment and the Business Cycle,False,pipeline,P01,P01,build,../index.html
+FRED Macroeconomic Data,True,dataframe,fred_macroeconomic_variables,P01,,./dataframes/P01/fred_macroeconomic_variables.html
+Robert Shiller's Stock Market Data,True,dataframe,shiller_market_variables,P01,,./dataframes/P01/shiller_market_variables.html
+"Greenwood-Hanson High-Yield Share Data (Published Historical, 1926-2008)",True,dataframe,greenwood_hanson_hys,P01,,./dataframes/P01/greenwood_hanson_hys.html
+"Mergent FISD High-Yield Share Data (Raw FISD Reconstruction, 1980s-present)",True,dataframe,mergent_fisd_bond_data,P01,,./dataframes/P01/mergent_fisd_bond_data.html
+FRED Processed Monthly Series,True,dataframe,fred_processed_monthly_series,P01,,./dataframes/P01/fred_processed_monthly_series.html
+FRED Processed Annual Series,True,dataframe,fred_processed_annual_series,P01,,./dataframes/P01/fred_processed_annual_series.html
+Robert Shiller Annual Stock Market Data,True,dataframe,shiller_processed_annual_series,P01,,./dataframes/P01/shiller_processed_annual_series.html
+Greenwood-Hanson High-Yield Share,True,dataframe,greenwood_hanson_hys_processed_series,P01,,./dataframes/P01/greenwood_hanson_hys_processed_series.html
+Figure 1: Baa-Treasury Credit Spread (1925-2015),False,chart,figure_1_replication,P01,"release_lag, release_timing",./charts/P01.figure_1_replication.html
+"Figure 1: Baa-Treasury Credit Spread (1925-2025, extended)",False,chart,figure_1_extended,P01,"release_lag, release_timing",./charts/P01.figure_1_extended.html
+Figure 1 (Aaa variant): Aaa-Treasury Credit Spread (1925-2015),False,chart,figure_1_aaa_replication,P01,"release_lag, release_timing",./charts/P01.figure_1_aaa_replication.html
+"Figure 1 (Aaa variant): Aaa-Treasury Credit Spread (1925-2025, extended)",False,chart,figure_1_aaa_extended,P01,"release_lag, release_timing",./charts/P01.figure_1_aaa_extended.html
+Figure 2: Credit-Market Sentiment and GDP Growth (1929-2015),False,chart,figure_2_replication,P01,"release_lag, release_timing",./charts/P01.figure_2_replication.html
+"Figure 2: Credit-Market Sentiment and GDP Growth (1929-present, extended)",False,chart,figure_2_extended,P01,"release_lag, release_timing",./charts/P01.figure_2_extended.html
+Figure 2 (Aaa variant): Credit-Market Sentiment and GDP Growth (1929-2015),False,chart,figure_2_aaa_replication,P01,"release_lag, release_timing",./charts/P01.figure_2_aaa_replication.html
+"Figure 2 (Aaa variant): Credit-Market Sentiment and GDP Growth (1929-present, extended)",False,chart,figure_2_aaa_extended,P01,"release_lag, release_timing",./charts/P01.figure_2_aaa_extended.html
+Summary Statistics: Baa/Aaa-Treasury Credit Spreads (1925-present),False,chart,summary_statistics_credit_spreads,P01,"release_lag, release_timing",./charts/P01.summary_statistics_credit_spreads.html
+Summary Statistics: Real GDP per Capita Growth (1930-present),False,chart,summary_statistics_gdp_growth,P01,"release_lag, release_timing",./charts/P01.summary_statistics_gdp_growth.html
+Summary Statistics: Greenwood-Hanson High-Yield Share (1929-present),False,chart,summary_statistics_hy_share,P01,"release_lag, release_timing",./charts/P01.summary_statistics_hy_share.html
+Summary Statistics: CAPE vs. Subsequent 10-Year S&P Return (1929-present),False,chart,summary_statistics_cape,P01,"release_lag, release_timing",./charts/P01.summary_statistics_cape.html

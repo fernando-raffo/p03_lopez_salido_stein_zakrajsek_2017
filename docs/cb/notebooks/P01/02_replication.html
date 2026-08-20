@@ -1,0 +1,2495 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Lopez-Salido, Stein &amp; Zakrajšek (2017): Replication Walkthrough &#8212; Credit-Market Sentiment and the Business Cycle</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=90905a2f556bf617f1a9" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=90905a2f556bf617f1a9" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/sphinx-book-theme.css?v=4418a689" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=206a6f58" />
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+  
+  <!-- So that users can add custom icons -->
+  <script defer src="../../../_static/scripts/fontawesome.js?digest=90905a2f556bf617f1a9"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=90905a2f556bf617f1a9" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=90905a2f556bf617f1a9" />
+
+    <script src="../../../_static/documentation_options.js?v=b9472d72"></script>
+    <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../../_static/scripts/sphinx-book-theme.js?v=fab101a9"></script>
+    <script src="../../../_static/design-tabs.js?v=f930bc37"></script>
+    <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'cb/notebooks/P01/02_replication';</script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <link rel="icon" href="../../../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="Lopez-Salido, Stein &amp; Zakrajšek (2017): Aaa-Spread Extension" href="03_extension.html" />
+    <link rel="prev" title="Data Walkthrough &amp; Summary Statistics" href="01_summary_statistics.html" /> 
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="" />
+  
+    
+    <script src="../../../_static/searchtools.js"></script>
+    <script src="../../../_static/language_data.js"></script>
+    <script src="../../../searchindex.js"></script>
+     
+  </head>
+  <body data-default-mode="">
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+  
+  
+  
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search this book..."
+         aria-label="Search this book..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../../_static/logo.png" class="logo__image only-light" alt="Credit-Market Sentiment and the Business Cycle - Home"/>
+    <img src="../../../_static/logo.png" class="logo__image only-dark pst-js-only" alt="Credit-Market Sentiment and the Business Cycle - Home"/>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        
+        <ul class="nav bd-sidenav bd-sidenav__home-link">
+            <li class="toctree-l1">
+                <a class="reference internal" href="../../../index.html">
+                    Credit-Market Sentiment and the Business Cycle
+                </a>
+            </li>
+        </ul>
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Project Notes</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../project_overview.html">Project Overview</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../project_overview/goals.html">Goals</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../project_overview/data_sources.html">Data Sources</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../project_overview/methodology.html">Methodology</a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Notebooks 📖</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="01_summary_statistics.html">Data Walkthrough &amp; Summary Statistics</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Lopez-Salido, Stein &amp; Zakrajšek (2017): Replication Walkthrough</a></li>
+<li class="toctree-l1"><a class="reference internal" href="03_extension.html">Lopez-Salido, Stein &amp; Zakrajšek (2017): Aaa-Spread Extension</a></li>
+<li class="toctree-l1"><a class="reference internal" href="04_case_study.html">Case Study: Does the Lopez-Salido, Stein &amp; Zakrajsek (2017) Sentiment Signal Speak to the 2020-2022 Cycle?</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Pipeline Charts 📈</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../charts.html">Chart List</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Pipeline Dataframes 📊</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../dataframes/P01/fred_macroeconomic_variables.html">Dataframe: <code class="docutils literal notranslate"><span class="pre">P01:fred_macroeconomic_variables</span></code> - FRED Macroeconomic Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../dataframes/P01/fred_processed_annual_series.html">Dataframe: <code class="docutils literal notranslate"><span class="pre">P01:fred_processed_annual_series</span></code> - FRED Processed Annual Series</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../dataframes/P01/fred_processed_monthly_series.html">Dataframe: <code class="docutils literal notranslate"><span class="pre">P01:fred_processed_monthly_series</span></code> - FRED Processed Monthly Series</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../dataframes/P01/greenwood_hanson_hys.html">Dataframe: <code class="docutils literal notranslate"><span class="pre">P01:greenwood_hanson_hys</span></code> - Greenwood-Hanson High-Yield Share Data (Published Historical, 1926-2008)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../dataframes/P01/greenwood_hanson_hys_processed_series.html">Dataframe: <code class="docutils literal notranslate"><span class="pre">P01:greenwood_hanson_hys_processed_series</span></code> - Greenwood-Hanson High-Yield Share</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../dataframes/P01/mergent_fisd_bond_data.html">Dataframe: <code class="docutils literal notranslate"><span class="pre">P01:mergent_fisd_bond_data</span></code> - Mergent FISD High-Yield Share Data (Raw FISD Reconstruction, 1980s-present)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../dataframes/P01/shiller_market_variables.html">Dataframe: <code class="docutils literal notranslate"><span class="pre">P01:shiller_market_variables</span></code> - Robert Shiller’s Stock Market Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../dataframes/P01/shiller_processed_annual_series.html">Dataframe: <code class="docutils literal notranslate"><span class="pre">P01:shiller_processed_annual_series</span></code> - Robert Shiller Annual Stock Market Data</a></li>
+</ul>
+
+    </div>
+</nav></div>
+        <div class="sidebar-primary-item">
+<div class="ablog-sidebar-item ablog__categories">
+  <h3>
+    <a href="../../charts/index/category.html">Categories</a>
+  </h3>
+  <ul>
+     
+    <li>
+      <a href="../../charts/index/category/aaa.html">Aaa (5)</a>
+    </li>
+      
+    <li>
+      <a href="../../charts/index/category/baa.html">Baa (5)</a>
+    </li>
+      
+    <li>
+      <a href="../../charts/index/category/cape.html">Cape (1)</a>
+    </li>
+      
+    <li>
+      <a href="../../charts/index/category/credit-spread.html">Credit Spread (5)</a>
+    </li>
+      
+    <li>
+      <a href="../../charts/index/category/extension.html">Extension (6)</a>
+    </li>
+      
+    <li>
+      <a href="../../charts/index/category/figure-1.html">Figure 1 (4)</a>
+    </li>
+      
+    <li>
+      <a href="../../charts/index/category/figure-2.html">Figure 2 (4)</a>
+    </li>
+      
+    <li>
+      <a href="../../charts/index/category/fred.html">Fred (2)</a>
+    </li>
+      
+    <li>
+      <a href="../../charts/index/category/gdp-growth.html">Gdp Growth (5)</a>
+    </li>
+      
+    <li>
+      <a href="../../charts/index/category/greenwood.html">Greenwood (1)</a>
+    </li>
+      
+    <li>
+      <a href="../../charts/index/category/hanson.html">Hanson (1)</a>
+    </li>
+      
+    <li>
+      <a href="../../charts/index/category/high-yield-share.html">High Yield Share (1)</a>
+    </li>
+      
+    <li>
+      <a href="../../charts/index/category/hys.html">Hys (1)</a>
+    </li>
+      
+    <li>
+      <a href="../../charts/index/category/sentiment.html">Sentiment (4)</a>
+    </li>
+      
+    <li>
+      <a href="../../charts/index/category/shiller.html">Shiller (1)</a>
+    </li>
+      
+    <li>
+      <a href="../../charts/index/category/summary-statistics.html">Summary Statistics (4)</a>
+    </li>
+     
+  </ul>
+</div>
+</div>
+        <div class="sidebar-primary-item">
+<div class="ablog-sidebar-item ablog__tagcloud">
+  <link
+    rel="stylesheet"
+    href="../../../_static/ablog/tagcloud.css"
+    type="text/css"
+  />
+  <h3><a href="../../charts/index/tag.html">Tags</a></h3>
+  <ul class="ablog-cloud">
+     
+    <li class="ablog-cloud ablog-cloud-1">
+      <a href="../../charts/index/tag/14831525.html">1483–1525</a>
+    </li>
+      
+    <li class="ablog-cloud ablog-cloud-5">
+      <a href="../../charts/index/tag/fred.html">FRED</a>
+    </li>
+      
+    <li class="ablog-cloud ablog-cloud-1">
+      <a href="../../charts/index/tag/greenwood-hanson-2013.html">Greenwood & Hanson (2013)</a>
+    </li>
+      
+    <li class="ablog-cloud ablog-cloud-1">
+      <a href="../../charts/index/tag/issuer-quality-and-corporate-bond-returns.html">Issuer Quality and Corporate Bond Returns</a>
+    </li>
+      
+    <li class="ablog-cloud ablog-cloud-1">
+      <a href="../../charts/index/tag/mergent-fisd.html">Mergent FISD</a>
+    </li>
+      
+    <li class="ablog-cloud ablog-cloud-5">
+      <a href="../../charts/index/tag/office-of-financial-research.html">Office of Financial Research</a>
+    </li>
+      
+    <li class="ablog-cloud ablog-cloud-1">
+      <a href="../../charts/index/tag/review-of-financial-studies.html">Review of Financial Studies</a>
+    </li>
+      
+    <li class="ablog-cloud ablog-cloud-1">
+      <a href="../../charts/index/tag/review-of-financial-studies-266.html">Review of Financial Studies 26(6)</a>
+    </li>
+      
+    <li class="ablog-cloud ablog-cloud-1">
+      <a href="../../charts/index/tag/robert-shillers-data-website.html">Robert Shiller's Data Website</a>
+    </li>
+     
+  </ul>
+</div>
+</div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="../../../_sources/cb/notebooks/P01/02_replication.ipynb" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.ipynb</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button pst-navbar-icon"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div>
+
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+<button class="sidebar-toggle secondary-toggle btn btn-sm pst-navbar-icon" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>Lopez-Salido, Stein & Zakrajšek (2017): Replication Walkthrough</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#introduction">Introduction</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#setup">Setup</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#figure-i-the-baa-treasury-credit-spread">Figure I: The Baa-Treasury Credit Spread</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#extended-window">Extended Window</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#table-i-credit-spreads-vs-stock-returns-as-growth-predictors">Table I: Credit Spreads vs. Stock Returns as Growth Predictors</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#definitions">Definitions</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#regressions">Regressions</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#replication-vs-published-vs-extended">Replication vs. Published vs. Extended</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#table-ii-the-two-step-credit-sentiment-regression">Table II: The Two-Step Credit-Sentiment Regression</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id1">Definitions</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">Regressions</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id3">Replication vs. Published vs. Extended</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#figure-ii-credit-market-sentiment-and-growth">Figure II: Credit-Market Sentiment and Growth</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id4">Extended Window</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#summary">Summary</a></li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                   <section class="tex2jax_ignore mathjax_ignore" id="lopez-salido-stein-zakrajsek-2017-replication-walkthrough">
+<h1>Lopez-Salido, Stein &amp; Zakrajšek (2017): Replication Walkthrough<a class="headerlink" href="#lopez-salido-stein-zakrajsek-2017-replication-walkthrough" title="Link to this heading">#</a></h1>
+<section id="introduction">
+<h2>Introduction<a class="headerlink" href="#introduction" title="Link to this heading">#</a></h2>
+<p>Lopez-Salido, Stein, and Zakrajšek (2017, hereafter LSZ) ask whether the
+<em>mood</em> of the corporate-bond market — not just its level of leverage — helps
+forecast the business cycle. Their measure of “credit-market sentiment” is a
+two-year-ahead forecast of the change in the Baa-Treasury credit spread,
+built from two lagged valuation signals: how narrow the spread already is,
+and how large a share of new bond issuance is junk-rated. When that forecast
+says spreads are unusually likely to narrow further (sentiment is
+elevated and credit is being priced aggressively), real GDP growth over the
+following two years is significantly weaker than average. The mechanism the
+paper has in mind is mean reversion: frothy pricing does not last, and when
+it unwinds, the resulting widening of spreads coincides with a slowdown in activity.</p>
+<p>This notebook walks through the part of our codebase that reproduces the
+paper’s headline exhibits on annual and monthly U.S. data: <strong>Figure I</strong> (the
+raw credit spread), <strong>Table I</strong> (a simple one-step forecasting regression),
+<strong>Table II</strong> (the paper’s two-step sentiment regression), and <strong>Figure II</strong>
+(a scatter-plot visualization of Table II’s column (1)). We show the code
+that builds each exhibit, run it live, and compare our numbers against the
+values printed in the published article.</p>
+<p>Throughout, every exhibit is produced twice:</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Window</p></th>
+<th class="head"><p>Sample</p></th>
+<th class="head"><p>What it answers</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><strong>Replication</strong></p></td>
+<td><p>1929–2015</p></td>
+<td><p>Does our code reproduce the paper’s own numbers?</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Extended</strong></p></td>
+<td><p>1929–2025</p></td>
+<td><p>Does the relationship the paper documents still hold once we push the same construction through the most recent available data?</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The code below follows the methodology described in Sections III.A–III.D of
+the paper (pp. 1383–1393). We quote from it accordingly as we go. Each script in the repo is a <code class="docutils literal notranslate"><span class="pre">doit</span></code> task (e.g. <code class="docutils literal notranslate"><span class="pre">doit</span> <span class="pre">replicate_table_1</span></code>) and each emits
+both windows below for the paper’s Baa-Treasury spread.</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Exhibit</p></th>
+<th class="head"><p>Paper section / page</p></th>
+<th class="head"><p>Script</p></th>
+<th class="head"><p>Output</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Figure I</p></td>
+<td><p>III.A, p. 1384</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">replicate_figure_1.py</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">figure_1_*.pdf</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>Table I</p></td>
+<td><p>III.B, p. 1386</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">replicate_table_1.py</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">table_1_*.tex</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>Table II</p></td>
+<td><p>III.C, p. 1389</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">replicate_table_2.py</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">table_2_*.tex</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>Figure II</p></td>
+<td><p>III.D, p. 1392</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">replicate_figure_2.py</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">figure_2_*.pdf</span></code></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="setup">
+<h2>Setup<a class="headerlink" href="#setup" title="Link to this heading">#</a></h2>
+<p>We import the four <code class="docutils literal notranslate"><span class="pre">replicate_*</span></code> modules directly — these are the same
+modules the <code class="docutils literal notranslate"><span class="pre">doit</span></code> pipeline calls, so running their functions here is
+exactly what happens when <code class="docutils literal notranslate"><span class="pre">doit</span> <span class="pre">replicate_*</span></code> runs, just with
+the intermediate objects exposed for inspection.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">IPython.display</span><span class="w"> </span><span class="kn">import</span> <span class="n">Markdown</span><span class="p">,</span> <span class="n">display</span>
+
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">Path</span><span class="o">.</span><span class="n">cwd</span><span class="p">()</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="s2">"src"</span><span class="p">))</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">replicate_figure_1</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">f1</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">replicate_figure_2</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">f2</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">replicate_table_1</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">t1</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">replicate_table_2</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">t2</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">settings</span><span class="w"> </span><span class="kn">import</span> <span class="n">config</span>
+
+<span class="n">PROCESSED_DATA_DIR</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">config</span><span class="p">(</span><span class="s2">"PROCESSED_DATA_DIR"</span><span class="p">))</span>
+<span class="n">OUTPUT_DIR</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">config</span><span class="p">(</span><span class="s2">"OUTPUT_DIR"</span><span class="p">))</span>
+
+<span class="n">REP_START</span><span class="p">,</span> <span class="n">REP_END</span><span class="p">,</span> <span class="n">EXT_END</span> <span class="o">=</span> <span class="n">t1</span><span class="o">.</span><span class="n">REP_START</span><span class="p">,</span> <span class="n">t1</span><span class="o">.</span><span class="n">REP_END</span><span class="p">,</span> <span class="n">t1</span><span class="o">.</span><span class="n">EXT_END</span>
+<span class="nb">print</span><span class="p">(</span>
+    <span class="sa">f</span><span class="s2">"Replication window: </span><span class="si">{</span><span class="n">REP_START</span><span class="si">}</span><span class="s2">-</span><span class="si">{</span><span class="n">REP_END</span><span class="si">}</span><span class="s2"> </span><span class="se">\n</span><span class="s2">Extended window: </span><span class="si">{</span><span class="n">REP_START</span><span class="si">}</span><span class="s2">-</span><span class="si">{</span><span class="n">EXT_END</span><span class="si">}</span><span class="s2">"</span>
+<span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">show_tex</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""The raw LaTeX `emit`/`emit_table_2` write to `_output/` -- exactly</span>
+<span class="sd">    what feeds `reports/report.tex` -- as a syntax-highlighted, collapsed-</span>
+<span class="sd">    by-default code block, so it's available without competing with the</span>
+<span class="sd">    rendered table displayed above it."""</span>
+    <span class="n">display</span><span class="p">(</span>
+        <span class="n">Markdown</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">"&lt;details&gt;&lt;summary&gt;Raw LaTeX written to &lt;code&gt;</span><span class="si">{</span><span class="n">path</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&lt;/code&gt;&lt;/summary&gt;</span><span class="se">\n\n</span><span class="s2">"</span>
+            <span class="sa">f</span><span class="s2">"```latex</span><span class="se">\n</span><span class="si">{</span><span class="n">path</span><span class="o">.</span><span class="n">read_text</span><span class="p">()</span><span class="si">}</span><span class="se">\n</span><span class="s2">```</span><span class="se">\n</span><span class="s2">&lt;/details&gt;"</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Replication window: 1929-2015 
+Extended window: 1929-2025
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="figure-i-the-baa-treasury-credit-spread">
+<h2>Figure I: The Baa-Treasury Credit Spread<a class="headerlink" href="#figure-i-the-baa-treasury-credit-spread" title="Link to this heading">#</a></h2>
+<p>Figure I is the paper’s opening exhibit and the raw material behind
+everything else: the spread between Moody’s seasoned Baa-rated industrial
+bond yield and the 10-year Treasury yield, 1925–2015. The paper’s own
+description (p. 1383) can be seen below:</p>
+<blockquote>
+<div><p>“Clearly evident in the figure is the countercyclical nature of credit
+spreads, with spreads generally widening noticeably in advance of and
+during economic downturns.”</p>
+</div></blockquote>
+<p><code class="docutils literal notranslate"><span class="pre">replicate_figure_1.plot_figure_1</span></code> reads the monthly FRED panel and shades NBER
+recessions using the <code class="docutils literal notranslate"><span class="pre">hist_recession_indicator</span></code> column built in
+<code class="docutils literal notranslate"><span class="pre">process_fred_data_monthly.py</span></code>.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">monthly</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_parquet</span><span class="p">(</span><span class="n">PROCESSED_DATA_DIR</span> <span class="o">/</span> <span class="s2">"fred_final_series_monthly.parquet"</span><span class="p">)</span>
+
+<span class="n">fig_rep</span><span class="p">,</span> <span class="n">spread_rep</span> <span class="o">=</span> <span class="n">f1</span><span class="o">.</span><span class="n">plot_figure_1</span><span class="p">(</span><span class="n">monthly</span><span class="p">,</span> <span class="n">f1</span><span class="o">.</span><span class="n">BUFFER_START</span><span class="p">,</span> <span class="n">f1</span><span class="o">.</span><span class="n">REP_END</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span>
+    <span class="sa">f</span><span class="s2">"n=</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">spread_rep</span><span class="p">)</span><span class="si">}</span><span class="s2"> months, </span><span class="si">{</span><span class="n">spread_rep</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">min</span><span class="p">()</span><span class="o">.</span><span class="n">date</span><span class="p">()</span><span class="si">}</span><span class="s2"> to </span><span class="si">{</span><span class="n">spread_rep</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="o">.</span><span class="n">date</span><span class="p">()</span><span class="si">}</span><span class="s2">"</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../../../_images/aca19aaa4d6b15ad7140a6066d23a34028a11dd4a51c3aab244329984daefdb6.png" src="../../../_images/aca19aaa4d6b15ad7140a6066d23a34028a11dd4a51c3aab244329984daefdb6.png" />
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>n=1092 months, 1925-01-01 to 2015-12-01
+</pre></div>
+</div>
+</div>
+</div>
+<p>This matches the printed Figure I closely: the Depression-era spike tops out
+just above 7 percentage points in 1932, the spread compresses to under 1pp
+through the mid-1960s “Great Moderation” prelude, and every NBER recession
+band (shaded) lines up with a local spike (1974-75, the double-dip of the
+early 1980s, 2001, and the roughly 6pp peak of the 2008–09 financial crisis).</p>
+<section id="extended-window">
+<h3>Extended Window<a class="headerlink" href="#extended-window" title="Link to this heading">#</a></h3>
+<p>Pushing the same construction through the most recent available complete year in the
+underlying FRED data (2025) gives us ten more years to look at.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">fig_ext</span><span class="p">,</span> <span class="n">spread_ext</span> <span class="o">=</span> <span class="n">f1</span><span class="o">.</span><span class="n">plot_figure_1</span><span class="p">(</span><span class="n">monthly</span><span class="p">,</span> <span class="n">f1</span><span class="o">.</span><span class="n">BUFFER_START</span><span class="p">,</span> <span class="n">f1</span><span class="o">.</span><span class="n">EXT_END</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span>
+    <span class="sa">f</span><span class="s2">"n=</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">spread_ext</span><span class="p">)</span><span class="si">}</span><span class="s2"> months, </span><span class="si">{</span><span class="n">spread_ext</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">min</span><span class="p">()</span><span class="o">.</span><span class="n">date</span><span class="p">()</span><span class="si">}</span><span class="s2"> to </span><span class="si">{</span><span class="n">spread_ext</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="o">.</span><span class="n">date</span><span class="p">()</span><span class="si">}</span><span class="s2">"</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../../../_images/150d670d04c7c2d2d712bf12aa2472999ef710461499ea886f23f79f082fbbb0.png" src="../../../_images/150d670d04c7c2d2d712bf12aa2472999ef710461499ea886f23f79f082fbbb0.png" />
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>n=1212 months, 1925-01-01 to 2025-12-01
+</pre></div>
+</div>
+</div>
+</div>
+<p>Three things stand out in the post-2015 tail that weren’t in the original
+sample:</p>
+<ol class="arabic simple">
+<li><p><strong>2020</strong>: a very sharp, very short spike (the NBER recession itself
+lasted only two months, February–April 2020) that is compressed and
+quickly reversed by aggressive Fed intervention, so it appears as a thin
+sliver rather than a wide shaded band like 2008–09.</p></li>
+<li><p><strong>2016</strong>: a standalone spread widening around the energy-sector
+high-yield stress episode that is <strong>not</strong> flagged as an NBER recession at
+all. This is a useful reminder that the spread is a noisy signal at the
+individual-episode level.</p></li>
+<li><p><strong>2022–2025</strong>: a brief widening to just above 2.3pp in mid-2022 as the
+Fed’s hiking cycle repriced credit risk (again without an NBER recession
+call in this sample), followed by compression back to around 1.4pp by
+late 2024 and a modest partial re-widening toward 1.8–1.9pp through 2025
+— well short of the 2008–09 or Depression-era peaks.</p></li>
+</ol>
+</section>
+</section>
+<section id="table-i-credit-spreads-vs-stock-returns-as-growth-predictors">
+<h2>Table I: Credit Spreads vs. Stock Returns as Growth Predictors<a class="headerlink" href="#table-i-credit-spreads-vs-stock-returns-as-growth-predictors" title="Link to this heading">#</a></h2>
+<section id="definitions">
+<h3>Definitions<a class="headerlink" href="#definitions" title="Link to this heading">#</a></h3>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Code column</p></th>
+<th class="head"><p>Paper symbol</p></th>
+<th class="head"><p>Definition</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">dy_next</span></code> (dependent variable)</p></td>
+<td><p><span class="math notranslate nohighlight">\(\Delta y_t\)</span></p></td>
+<td><p>Log-difference of real GDP per capita, year <span class="math notranslate nohighlight">\(t-1\)</span> to <span class="math notranslate nohighlight">\(t\)</span></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">d_credit_spread</span></code></p></td>
+<td><p><span class="math notranslate nohighlight">\(\Delta s_{t-1}\)</span></p></td>
+<td><p>Change in the Baa-Treasury credit spread over year <span class="math notranslate nohighlight">\(t-1\)</span></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">sp_return</span></code></p></td>
+<td><p><span class="math notranslate nohighlight">\(r_{t-1}^{SP}\)</span></p></td>
+<td><p>S&amp;P 500 total (price + dividend) log return over year <span class="math notranslate nohighlight">\(t-1\)</span></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">gdp_pc_growth</span></code></p></td>
+<td><p><span class="math notranslate nohighlight">\(\Delta y_{t-1}\)</span></p></td>
+<td><p>Lagged control: real GDP-per-capita growth over year <span class="math notranslate nohighlight">\(t-1\)</span></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">d_treasury_3mo</span></code></p></td>
+<td><p><span class="math notranslate nohighlight">\(\Delta i_{t-1}^{(3m)}\)</span></p></td>
+<td><p>Change in the 3-month Treasury yield over year <span class="math notranslate nohighlight">\(t-1\)</span></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">d_treasury_10yr</span></code></p></td>
+<td><p><span class="math notranslate nohighlight">\(\Delta i_{t-1}^{(10y)}\)</span></p></td>
+<td><p>Change in the 10-year Treasury yield over year <span class="math notranslate nohighlight">\(t-1\)</span></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">CPI_inflation</span></code></p></td>
+<td><p><span class="math notranslate nohighlight">\(\pi_{t-1}\)</span></p></td>
+<td><p>CPI inflation rate over year <span class="math notranslate nohighlight">\(t-1\)</span></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">const</span></code></p></td>
+<td><p>—</p></td>
+<td><p>Regression intercept</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="regressions">
+<h3>Regressions<a class="headerlink" href="#regressions" title="Link to this heading">#</a></h3>
+<p>Table I is a simple, one-step warm-up before the paper’s real machinery in
+Table II. It asks: does last year’s change in the credit spread, or last
+year’s stock return, forecast this year’s real GDP-per-capita growth? The
+paper’s regression (equation (1), p. 1387) is the following:</p>
+<div class="math notranslate nohighlight">
+\[\Delta y_t = \beta_1 \Delta s_{t-1} + \beta_2 r_{t-1}^{SP} + \gamma' \mathbf{x}_{t-1} + \epsilon_t\]</div>
+<p>The paper runs this regression 3 times:</p>
+<ol class="arabic simple">
+<li><p>Using only the credit spread as the independent variable (<span class="math notranslate nohighlight">\(\Delta s_{t-1}\)</span>)</p></li>
+<li><p>Using only the equity returns as the independent variable (<span class="math notranslate nohighlight">\(r_{t-1}^{SP}\)</span>)</p></li>
+<li><p>Using both together plus rate/inflation control variables (<span class="math notranslate nohighlight">\(\Delta i_{t-1}^{(3m)}\)</span>,
+<span class="math notranslate nohighlight">\(\Delta i_{t-1}^{(10y)}\)</span>, <span class="math notranslate nohighlight">\(\pi_{t-1}\)</span>).</p></li>
+</ol>
+<p>Standard errors are Newey-West (HAC),
+using the Newey and West (1994) automatic bandwidth rule
+<span class="math notranslate nohighlight">\(\lfloor 4(n/100)^{2/9}\rfloor\)</span>.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">df1</span> <span class="o">=</span> <span class="n">t1</span><span class="o">.</span><span class="n">build_panel</span><span class="p">()</span>
+<span class="n">df1</span><span class="p">[[</span><span class="s2">"d_credit_spread"</span><span class="p">,</span> <span class="s2">"sp_return"</span><span class="p">,</span> <span class="s2">"gdp_pc_growth"</span><span class="p">,</span> <span class="s2">"dy_next"</span><span class="p">]]</span><span class="o">.</span><span class="n">tail</span><span class="p">()</span><span class="o">.</span><span class="n">style</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"</span><span class="si">{:.3f}</span><span class="s2">"</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><style type="text/css">
+</style>
+<table id="T_35449">
+  <thead>
+    <tr>
+      <th class="blank level0" >&nbsp;</th>
+      <th id="T_35449_level0_col0" class="col_heading level0 col0" >d_credit_spread</th>
+      <th id="T_35449_level0_col1" class="col_heading level0 col1" >sp_return</th>
+      <th id="T_35449_level0_col2" class="col_heading level0 col2" >gdp_pc_growth</th>
+      <th id="T_35449_level0_col3" class="col_heading level0 col3" >dy_next</th>
+    </tr>
+    <tr>
+      <th class="index_name level0" >year</th>
+      <th class="blank col0" >&nbsp;</th>
+      <th class="blank col1" >&nbsp;</th>
+      <th class="blank col2" >&nbsp;</th>
+      <th class="blank col3" >&nbsp;</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th id="T_35449_level0_row0" class="row_heading level0 row0" >2021</th>
+      <td id="T_35449_row0_col0" class="data row0 col0" >-0.400</td>
+      <td id="T_35449_row0_col1" class="data row0 col1" >24.795</td>
+      <td id="T_35449_row0_col2" class="data row0 col2" >5.771</td>
+      <td id="T_35449_row0_col3" class="data row0 col3" >1.939</td>
+    </tr>
+    <tr>
+      <th id="T_35449_level0_row1" class="row_heading level0 row1" >2022</th>
+      <td id="T_35449_row1_col0" class="data row1 col0" >0.140</td>
+      <td id="T_35449_row1_col1" class="data row1 col1" >-16.107</td>
+      <td id="T_35449_row1_col2" class="data row1 col2" >1.939</td>
+      <td id="T_35449_row1_col3" class="data row1 col3" >2.077</td>
+    </tr>
+    <tr>
+      <th id="T_35449_level0_row2" class="row_heading level0 row2" >2023</th>
+      <td id="T_35449_row2_col0" class="data row2 col0" >-0.350</td>
+      <td id="T_35449_row2_col1" class="data row2 col1" >19.513</td>
+      <td id="T_35449_row2_col2" class="data row2 col2" >2.077</td>
+      <td id="T_35449_row2_col3" class="data row2 col3" >1.866</td>
+    </tr>
+    <tr>
+      <th id="T_35449_level0_row3" class="row_heading level0 row3" >2024</th>
+      <td id="T_35449_row3_col0" class="data row3 col0" >-0.210</td>
+      <td id="T_35449_row3_col1" class="data row3 col1" >26.157</td>
+      <td id="T_35449_row3_col2" class="data row3 col2" >1.866</td>
+      <td id="T_35449_row3_col3" class="data row3 col3" >1.542</td>
+    </tr>
+    <tr>
+      <th id="T_35449_level0_row4" class="row_heading level0 row4" >2025</th>
+      <td id="T_35449_row4_col0" class="data row4 col0" >0.350</td>
+      <td id="T_35449_row4_col1" class="data row4 col1" >14.265</td>
+      <td id="T_35449_row4_col2" class="data row4 col2" >1.542</td>
+      <td id="T_35449_row4_col3" class="data row4 col3" >nan</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<p>Column (3) — the paper’s headline specification, where credit and equity
+compete head-to-head — is worth looking at directly through <code class="docutils literal notranslate"><span class="pre">statsmodels</span></code>
+before we get to the formatted table:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">res_col3</span> <span class="o">=</span> <span class="n">t1</span><span class="o">.</span><span class="n">run_regression</span><span class="p">(</span>
+    <span class="n">df1</span><span class="p">,</span>
+    <span class="p">[</span>
+        <span class="s2">"d_credit_spread"</span><span class="p">,</span>
+        <span class="s2">"sp_return"</span><span class="p">,</span>
+        <span class="s2">"d_treasury_3mo"</span><span class="p">,</span>
+        <span class="s2">"d_treasury_10yr"</span><span class="p">,</span>
+        <span class="s2">"CPI_inflation"</span><span class="p">,</span>
+        <span class="s2">"gdp_pc_growth"</span><span class="p">,</span>
+    <span class="p">],</span>
+    <span class="n">REP_START</span><span class="p">,</span>
+    <span class="n">REP_END</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">res_col3</span><span class="o">.</span><span class="n">summary</span><span class="p">())</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>                            OLS Regression Results                            
+==============================================================================
+Dep. Variable:                dy_next   R-squared:                       0.492
+Model:                            OLS   Adj. R-squared:                  0.453
+Method:                 Least Squares   F-statistic:                     19.44
+Date:                Wed, 19 Aug 2026   Prob (F-statistic):           8.60e-14
+Time:                        22:03:35   Log-Likelihood:                -224.17
+No. Observations:                  86   AIC:                             462.3
+Df Residuals:                      79   BIC:                             479.5
+Df Model:                           6                                         
+Covariance Type:                  HAC                                         
+===================================================================================
+                      coef    std err          z      P&gt;|z|      [0.025      0.975]
+-----------------------------------------------------------------------------------
+const               0.7517      0.473      1.588      0.112      -0.176       1.679
+d_credit_spread    -2.1236      0.578     -3.674      0.000      -3.256      -0.991
+sp_return           0.0217      0.035      0.617      0.537      -0.047       0.090
+d_treasury_3mo     -0.2483      0.290     -0.857      0.392      -0.816       0.320
+d_treasury_10yr    -0.8141      0.360     -2.260      0.024      -1.520      -0.108
+CPI_inflation       0.0948      0.076      1.242      0.214      -0.055       0.244
+gdp_pc_growth       0.4641      0.114      4.064      0.000       0.240       0.688
+==============================================================================
+Omnibus:                       18.620   Durbin-Watson:                   1.726
+Prob(Omnibus):                  0.000   Jarque-Bera (JB):               82.092
+Skew:                          -0.368   Prob(JB):                     1.49e-18
+Kurtosis:                       7.729   Cond. No.                         37.9
+==============================================================================
+
+Notes:
+[1] Standard Errors are heteroscedasticity and autocorrelation robust (HAC) using 3 lags and without small sample correction
+</pre></div>
+</div>
+</div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">replicate_table_1.emit</span></code> runs all three columns and formats them into a LaTeX
+table matching the paper’s layout (coefficients, HAC standard errors,
+significance stars) so the
+economic size of the credit and equity channels is directly comparable. We call it for both windows, then display each
+table.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">t1</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">df1</span><span class="p">,</span> <span class="n">REP_START</span><span class="p">,</span> <span class="n">REP_END</span><span class="p">,</span> <span class="s2">"replication"</span><span class="p">)</span>
+<span class="n">t1</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">df1</span><span class="p">,</span> <span class="n">REP_START</span><span class="p">,</span> <span class="n">EXT_END</span><span class="p">,</span> <span class="s2">"extended"</span><span class="p">)</span>
+
+<span class="n">display</span><span class="p">(</span><span class="n">t1</span><span class="o">.</span><span class="n">pretty_table_1</span><span class="p">(</span><span class="n">df1</span><span class="p">,</span> <span class="n">REP_START</span><span class="p">,</span> <span class="n">REP_END</span><span class="p">))</span>
+<span class="n">display</span><span class="p">(</span><span class="n">t1</span><span class="o">.</span><span class="n">pretty_table_1</span><span class="p">(</span><span class="n">df1</span><span class="p">,</span> <span class="n">REP_START</span><span class="p">,</span> <span class="n">EXT_END</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>replication: col1 d_s=-1.958, col2 r_sp=0.075, col3 d_s=-2.124/r_sp=0.022 -&gt; table_1_replication.tex
+extended: col1 d_s=-1.871, col2 r_sp=0.069, col3 d_s=-2.033/r_sp=0.017 -&gt; table_1_extended.tex
+</pre></div>
+</div>
+<div class="output text_html"><style type="text/css">
+#T_44182 caption {
+  caption-side: top;
+  text-align: left;
+  font-weight: 600;
+  padding-bottom: 6px;
+}
+#T_44182 th {
+  padding: 3px 14px;
+  text-align: center;
+}
+#T_44182  td {
+  padding: 3px 14px;
+  text-align: center;
+}
+#T_44182 th.row_heading {
+  text-align: left;
+  font-weight: normal;
+}
+#T_44182 thead tr:first-child th {
+  border-top: 1.5px solid #333;
+}
+#T_44182 thead tr:last-child th {
+  border-bottom: 1px solid #333;
+}
+#T_44182 tbody tr:last-child td {
+  border-bottom: 1.5px solid #333;
+}
+#T_44182  tbody tr:last-child th {
+  border-bottom: 1.5px solid #333;
+}
+#T_44182 tbody tr:nth-child(13) td {
+  border-top: 1px solid #999;
+}
+#T_44182  tbody tr:nth-child(13) th {
+  border-top: 1px solid #999;
+}
+</style>
+<table id="T_44182">
+  <caption>Table I -- 1929-2015, credit spread = BAA_Treasury_spread</caption>
+  <thead>
+    <tr>
+      <th class="blank level0" >&nbsp;</th>
+      <th id="T_44182_level0_col0" class="col_heading level0 col0" colspan="3">Dependent variable: Δy<sub>t</sub></th>
+    </tr>
+    <tr>
+      <th class="blank level1" >&nbsp;</th>
+      <th id="T_44182_level1_col0" class="col_heading level1 col0" >(1)</th>
+      <th id="T_44182_level1_col1" class="col_heading level1 col1" >(2)</th>
+      <th id="T_44182_level1_col2" class="col_heading level1 col2" >(3)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th id="T_44182_level0_row0" class="row_heading level0 row0" >Δs<sub>t−1</sub></th>
+      <td id="T_44182_row0_col0" class="data row0 col0" >-1.958***</td>
+      <td id="T_44182_row0_col1" class="data row0 col1" >---</td>
+      <td id="T_44182_row0_col2" class="data row0 col2" >-2.124***</td>
+    </tr>
+    <tr>
+      <th id="T_44182_level0_row1" class="row_heading level0 row1" ></th>
+      <td id="T_44182_row1_col0" class="data row1 col0" >(0.585)</td>
+      <td id="T_44182_row1_col1" class="data row1 col1" ></td>
+      <td id="T_44182_row1_col2" class="data row1 col2" >(0.578)</td>
+    </tr>
+    <tr>
+      <th id="T_44182_level0_row2" class="row_heading level0 row2" >r<sup>SP</sup><sub>t</sub></th>
+      <td id="T_44182_row2_col0" class="data row2 col0" >---</td>
+      <td id="T_44182_row2_col1" class="data row2 col1" >0.075**</td>
+      <td id="T_44182_row2_col2" class="data row2 col2" >0.022</td>
+    </tr>
+    <tr>
+      <th id="T_44182_level0_row3" class="row_heading level0 row3" ></th>
+      <td id="T_44182_row3_col0" class="data row3 col0" ></td>
+      <td id="T_44182_row3_col1" class="data row3 col1" >(0.033)</td>
+      <td id="T_44182_row3_col2" class="data row3 col2" >(0.035)</td>
+    </tr>
+    <tr>
+      <th id="T_44182_level0_row4" class="row_heading level0 row4" >Δy<sub>t−1</sub></th>
+      <td id="T_44182_row4_col0" class="data row4 col0" >0.476***</td>
+      <td id="T_44182_row4_col1" class="data row4 col1" >0.478***</td>
+      <td id="T_44182_row4_col2" class="data row4 col2" >0.464***</td>
+    </tr>
+    <tr>
+      <th id="T_44182_level0_row5" class="row_heading level0 row5" ></th>
+      <td id="T_44182_row5_col0" class="data row5 col0" >(0.104)</td>
+      <td id="T_44182_row5_col1" class="data row5 col1" >(0.136)</td>
+      <td id="T_44182_row5_col2" class="data row5 col2" >(0.114)</td>
+    </tr>
+    <tr>
+      <th id="T_44182_level0_row6" class="row_heading level0 row6" >Δi<sub>t−1</sub><sup>(3m)</sup></th>
+      <td id="T_44182_row6_col0" class="data row6 col0" >---</td>
+      <td id="T_44182_row6_col1" class="data row6 col1" >---</td>
+      <td id="T_44182_row6_col2" class="data row6 col2" >-0.248</td>
+    </tr>
+    <tr>
+      <th id="T_44182_level0_row7" class="row_heading level0 row7" ></th>
+      <td id="T_44182_row7_col0" class="data row7 col0" ></td>
+      <td id="T_44182_row7_col1" class="data row7 col1" ></td>
+      <td id="T_44182_row7_col2" class="data row7 col2" >(0.290)</td>
+    </tr>
+    <tr>
+      <th id="T_44182_level0_row8" class="row_heading level0 row8" >Δi<sub>t−1</sub><sup>(10y)</sup></th>
+      <td id="T_44182_row8_col0" class="data row8 col0" >---</td>
+      <td id="T_44182_row8_col1" class="data row8 col1" >---</td>
+      <td id="T_44182_row8_col2" class="data row8 col2" >-0.814**</td>
+    </tr>
+    <tr>
+      <th id="T_44182_level0_row9" class="row_heading level0 row9" ></th>
+      <td id="T_44182_row9_col0" class="data row9 col0" ></td>
+      <td id="T_44182_row9_col1" class="data row9 col1" ></td>
+      <td id="T_44182_row9_col2" class="data row9 col2" >(0.360)</td>
+    </tr>
+    <tr>
+      <th id="T_44182_level0_row10" class="row_heading level0 row10" >π<sub>t−1</sub></th>
+      <td id="T_44182_row10_col0" class="data row10 col0" >---</td>
+      <td id="T_44182_row10_col1" class="data row10 col1" >---</td>
+      <td id="T_44182_row10_col2" class="data row10 col2" >0.095</td>
+    </tr>
+    <tr>
+      <th id="T_44182_level0_row11" class="row_heading level0 row11" ></th>
+      <td id="T_44182_row11_col0" class="data row11 col0" ></td>
+      <td id="T_44182_row11_col1" class="data row11 col1" ></td>
+      <td id="T_44182_row11_col2" class="data row11 col2" >(0.076)</td>
+    </tr>
+    <tr>
+      <th id="T_44182_level0_row12" class="row_heading level0 row12" >Adj. R²</th>
+      <td id="T_44182_row12_col0" class="data row12 col0" >0.426</td>
+      <td id="T_44182_row12_col1" class="data row12 col1" >0.381</td>
+      <td id="T_44182_row12_col2" class="data row12 col2" >0.453</td>
+    </tr>
+    <tr>
+      <th id="T_44182_level0_row13" class="row_heading level0 row13" >Standardized effect on Δy<sub>t</sub></th>
+      <td id="T_44182_row13_col0" class="data row13 col0" ></td>
+      <td id="T_44182_row13_col1" class="data row13 col1" ></td>
+      <td id="T_44182_row13_col2" class="data row13 col2" ></td>
+    </tr>
+    <tr>
+      <th id="T_44182_level0_row14" class="row_heading level0 row14" >Δs<sub>t−1</sub></th>
+      <td id="T_44182_row14_col0" class="data row14 col0" >-0.365</td>
+      <td id="T_44182_row14_col1" class="data row14 col1" >---</td>
+      <td id="T_44182_row14_col2" class="data row14 col2" >-0.396</td>
+    </tr>
+    <tr>
+      <th id="T_44182_level0_row15" class="row_heading level0 row15" >r<sup>SP</sup><sub>t</sub></th>
+      <td id="T_44182_row15_col0" class="data row15 col0" >---</td>
+      <td id="T_44182_row15_col1" class="data row15 col1" >0.299</td>
+      <td id="T_44182_row15_col2" class="data row15 col2" >0.087</td>
+    </tr>
+  </tbody>
+</table>
+</div><div class="output text_html"><style type="text/css">
+#T_08fd3 caption {
+  caption-side: top;
+  text-align: left;
+  font-weight: 600;
+  padding-bottom: 6px;
+}
+#T_08fd3 th {
+  padding: 3px 14px;
+  text-align: center;
+}
+#T_08fd3  td {
+  padding: 3px 14px;
+  text-align: center;
+}
+#T_08fd3 th.row_heading {
+  text-align: left;
+  font-weight: normal;
+}
+#T_08fd3 thead tr:first-child th {
+  border-top: 1.5px solid #333;
+}
+#T_08fd3 thead tr:last-child th {
+  border-bottom: 1px solid #333;
+}
+#T_08fd3 tbody tr:last-child td {
+  border-bottom: 1.5px solid #333;
+}
+#T_08fd3  tbody tr:last-child th {
+  border-bottom: 1.5px solid #333;
+}
+#T_08fd3 tbody tr:nth-child(13) td {
+  border-top: 1px solid #999;
+}
+#T_08fd3  tbody tr:nth-child(13) th {
+  border-top: 1px solid #999;
+}
+</style>
+<table id="T_08fd3">
+  <caption>Table I -- 1929-2025, credit spread = BAA_Treasury_spread</caption>
+  <thead>
+    <tr>
+      <th class="blank level0" >&nbsp;</th>
+      <th id="T_08fd3_level0_col0" class="col_heading level0 col0" colspan="3">Dependent variable: Δy<sub>t</sub></th>
+    </tr>
+    <tr>
+      <th class="blank level1" >&nbsp;</th>
+      <th id="T_08fd3_level1_col0" class="col_heading level1 col0" >(1)</th>
+      <th id="T_08fd3_level1_col1" class="col_heading level1 col1" >(2)</th>
+      <th id="T_08fd3_level1_col2" class="col_heading level1 col2" >(3)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th id="T_08fd3_level0_row0" class="row_heading level0 row0" >Δs<sub>t−1</sub></th>
+      <td id="T_08fd3_row0_col0" class="data row0 col0" >-1.871***</td>
+      <td id="T_08fd3_row0_col1" class="data row0 col1" >---</td>
+      <td id="T_08fd3_row0_col2" class="data row0 col2" >-2.033***</td>
+    </tr>
+    <tr>
+      <th id="T_08fd3_level0_row1" class="row_heading level0 row1" ></th>
+      <td id="T_08fd3_row1_col0" class="data row1 col0" >(0.566)</td>
+      <td id="T_08fd3_row1_col1" class="data row1 col1" ></td>
+      <td id="T_08fd3_row1_col2" class="data row1 col2" >(0.571)</td>
+    </tr>
+    <tr>
+      <th id="T_08fd3_level0_row2" class="row_heading level0 row2" >r<sup>SP</sup><sub>t</sub></th>
+      <td id="T_08fd3_row2_col0" class="data row2 col0" >---</td>
+      <td id="T_08fd3_row2_col1" class="data row2 col1" >0.069**</td>
+      <td id="T_08fd3_row2_col2" class="data row2 col2" >0.017</td>
+    </tr>
+    <tr>
+      <th id="T_08fd3_level0_row3" class="row_heading level0 row3" ></th>
+      <td id="T_08fd3_row3_col0" class="data row3 col0" ></td>
+      <td id="T_08fd3_row3_col1" class="data row3 col1" >(0.032)</td>
+      <td id="T_08fd3_row3_col2" class="data row3 col2" >(0.034)</td>
+    </tr>
+    <tr>
+      <th id="T_08fd3_level0_row4" class="row_heading level0 row4" >Δy<sub>t−1</sub></th>
+      <td id="T_08fd3_row4_col0" class="data row4 col0" >0.461***</td>
+      <td id="T_08fd3_row4_col1" class="data row4 col1" >0.465***</td>
+      <td id="T_08fd3_row4_col2" class="data row4 col2" >0.449***</td>
+    </tr>
+    <tr>
+      <th id="T_08fd3_level0_row5" class="row_heading level0 row5" ></th>
+      <td id="T_08fd3_row5_col0" class="data row5 col0" >(0.108)</td>
+      <td id="T_08fd3_row5_col1" class="data row5 col1" >(0.136)</td>
+      <td id="T_08fd3_row5_col2" class="data row5 col2" >(0.116)</td>
+    </tr>
+    <tr>
+      <th id="T_08fd3_level0_row6" class="row_heading level0 row6" >Δi<sub>t−1</sub><sup>(3m)</sup></th>
+      <td id="T_08fd3_row6_col0" class="data row6 col0" >---</td>
+      <td id="T_08fd3_row6_col1" class="data row6 col1" >---</td>
+      <td id="T_08fd3_row6_col2" class="data row6 col2" >-0.170</td>
+    </tr>
+    <tr>
+      <th id="T_08fd3_level0_row7" class="row_heading level0 row7" ></th>
+      <td id="T_08fd3_row7_col0" class="data row7 col0" ></td>
+      <td id="T_08fd3_row7_col1" class="data row7 col1" ></td>
+      <td id="T_08fd3_row7_col2" class="data row7 col2" >(0.265)</td>
+    </tr>
+    <tr>
+      <th id="T_08fd3_level0_row8" class="row_heading level0 row8" >Δi<sub>t−1</sub><sup>(10y)</sup></th>
+      <td id="T_08fd3_row8_col0" class="data row8 col0" >---</td>
+      <td id="T_08fd3_row8_col1" class="data row8 col1" >---</td>
+      <td id="T_08fd3_row8_col2" class="data row8 col2" >-0.776**</td>
+    </tr>
+    <tr>
+      <th id="T_08fd3_level0_row9" class="row_heading level0 row9" ></th>
+      <td id="T_08fd3_row9_col0" class="data row9 col0" ></td>
+      <td id="T_08fd3_row9_col1" class="data row9 col1" ></td>
+      <td id="T_08fd3_row9_col2" class="data row9 col2" >(0.358)</td>
+    </tr>
+    <tr>
+      <th id="T_08fd3_level0_row10" class="row_heading level0 row10" >π<sub>t−1</sub></th>
+      <td id="T_08fd3_row10_col0" class="data row10 col0" >---</td>
+      <td id="T_08fd3_row10_col1" class="data row10 col1" >---</td>
+      <td id="T_08fd3_row10_col2" class="data row10 col2" >0.089</td>
+    </tr>
+    <tr>
+      <th id="T_08fd3_level0_row11" class="row_heading level0 row11" ></th>
+      <td id="T_08fd3_row11_col0" class="data row11 col0" ></td>
+      <td id="T_08fd3_row11_col1" class="data row11 col1" ></td>
+      <td id="T_08fd3_row11_col2" class="data row11 col2" >(0.078)</td>
+    </tr>
+    <tr>
+      <th id="T_08fd3_level0_row12" class="row_heading level0 row12" >Adj. R²</th>
+      <td id="T_08fd3_row12_col0" class="data row12 col0" >0.395</td>
+      <td id="T_08fd3_row12_col1" class="data row12 col1" >0.352</td>
+      <td id="T_08fd3_row12_col2" class="data row12 col2" >0.415</td>
+    </tr>
+    <tr>
+      <th id="T_08fd3_level0_row13" class="row_heading level0 row13" >Standardized effect on Δy<sub>t</sub></th>
+      <td id="T_08fd3_row13_col0" class="data row13 col0" ></td>
+      <td id="T_08fd3_row13_col1" class="data row13 col1" ></td>
+      <td id="T_08fd3_row13_col2" class="data row13 col2" ></td>
+    </tr>
+    <tr>
+      <th id="T_08fd3_level0_row14" class="row_heading level0 row14" >Δs<sub>t−1</sub></th>
+      <td id="T_08fd3_row14_col0" class="data row14 col0" >-0.350</td>
+      <td id="T_08fd3_row14_col1" class="data row14 col1" >---</td>
+      <td id="T_08fd3_row14_col2" class="data row14 col2" >-0.380</td>
+    </tr>
+    <tr>
+      <th id="T_08fd3_level0_row15" class="row_heading level0 row15" >r<sup>SP</sup><sub>t</sub></th>
+      <td id="T_08fd3_row15_col0" class="data row15 col0" >---</td>
+      <td id="T_08fd3_row15_col1" class="data row15 col1" >0.283</td>
+      <td id="T_08fd3_row15_col2" class="data row15 col2" >0.068</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+</section>
+<section id="replication-vs-published-vs-extended">
+<h3>Replication vs. Published vs. Extended<a class="headerlink" href="#replication-vs-published-vs-extended" title="Link to this heading">#</a></h3>
+<p>With the full tables rendered above, we can also pull their headline
+coefficients into a compact side-by-side comparison against the numbers
+printed in the paper (Table I, p. 1386):</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">specs_t1</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">"(1)"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"d_credit_spread"</span><span class="p">,</span> <span class="s2">"gdp_pc_growth"</span><span class="p">],</span>
+    <span class="s2">"(2)"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"sp_return"</span><span class="p">,</span> <span class="s2">"gdp_pc_growth"</span><span class="p">],</span>
+    <span class="s2">"(3)"</span><span class="p">:</span> <span class="p">[</span>
+        <span class="s2">"d_credit_spread"</span><span class="p">,</span>
+        <span class="s2">"sp_return"</span><span class="p">,</span>
+        <span class="s2">"d_treasury_3mo"</span><span class="p">,</span>
+        <span class="s2">"d_treasury_10yr"</span><span class="p">,</span>
+        <span class="s2">"CPI_inflation"</span><span class="p">,</span>
+        <span class="s2">"gdp_pc_growth"</span><span class="p">,</span>
+    <span class="p">],</span>
+<span class="p">}</span>
+<span class="n">res_rep_t1</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="n">c</span><span class="p">:</span> <span class="n">t1</span><span class="o">.</span><span class="n">run_regression</span><span class="p">(</span><span class="n">df1</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">REP_START</span><span class="p">,</span> <span class="n">REP_END</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span><span class="p">,</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">specs_t1</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+<span class="p">}</span>
+<span class="n">res_ext_t1</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="n">c</span><span class="p">:</span> <span class="n">t1</span><span class="o">.</span><span class="n">run_regression</span><span class="p">(</span><span class="n">df1</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">REP_START</span><span class="p">,</span> <span class="n">EXT_END</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span><span class="p">,</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">specs_t1</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+<span class="p">}</span>
+
+<span class="c1"># Published QJE Table I, p. 1386.</span>
+<span class="n">published_t1</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">"column 1 Δs&lt;sub&gt;t−1&lt;/sub&gt;"</span><span class="p">:</span> <span class="o">-</span><span class="mf">1.997</span><span class="p">,</span>
+    <span class="s2">"column 2 r&lt;sup&gt;SP&lt;/sup&gt;&lt;sub&gt;t−1&lt;/sub&gt;"</span><span class="p">:</span> <span class="mf">0.081</span><span class="p">,</span>
+    <span class="s2">"column 3 Δs&lt;sub&gt;t−1&lt;/sub&gt;"</span><span class="p">:</span> <span class="o">-</span><span class="mf">2.061</span><span class="p">,</span>
+    <span class="s2">"column 3 r&lt;sup&gt;SP&lt;/sup&gt;&lt;sub&gt;t−1&lt;/sub&gt;"</span><span class="p">:</span> <span class="mf">0.029</span><span class="p">,</span>
+<span class="p">}</span>
+<span class="n">compare_t1</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+    <span class="p">{</span>
+        <span class="s2">"Published QJE"</span><span class="p">:</span> <span class="n">published_t1</span><span class="o">.</span><span class="n">values</span><span class="p">(),</span>
+        <span class="s2">"Replication (1929-2015)"</span><span class="p">:</span> <span class="p">[</span>
+            <span class="n">res_rep_t1</span><span class="p">[</span><span class="s2">"(1)"</span><span class="p">]</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">"d_credit_spread"</span><span class="p">],</span>
+            <span class="n">res_rep_t1</span><span class="p">[</span><span class="s2">"(2)"</span><span class="p">]</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">"sp_return"</span><span class="p">],</span>
+            <span class="n">res_rep_t1</span><span class="p">[</span><span class="s2">"(3)"</span><span class="p">]</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">"d_credit_spread"</span><span class="p">],</span>
+            <span class="n">res_rep_t1</span><span class="p">[</span><span class="s2">"(3)"</span><span class="p">]</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">"sp_return"</span><span class="p">],</span>
+        <span class="p">],</span>
+        <span class="s2">"Extended (1929-2025)"</span><span class="p">:</span> <span class="p">[</span>
+            <span class="n">res_ext_t1</span><span class="p">[</span><span class="s2">"(1)"</span><span class="p">]</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">"d_credit_spread"</span><span class="p">],</span>
+            <span class="n">res_ext_t1</span><span class="p">[</span><span class="s2">"(2)"</span><span class="p">]</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">"sp_return"</span><span class="p">],</span>
+            <span class="n">res_ext_t1</span><span class="p">[</span><span class="s2">"(3)"</span><span class="p">]</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">"d_credit_spread"</span><span class="p">],</span>
+            <span class="n">res_ext_t1</span><span class="p">[</span><span class="s2">"(3)"</span><span class="p">]</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">"sp_return"</span><span class="p">],</span>
+        <span class="p">],</span>
+    <span class="p">},</span>
+    <span class="n">index</span><span class="o">=</span><span class="n">published_t1</span><span class="o">.</span><span class="n">keys</span><span class="p">(),</span>
+<span class="p">)</span>
+<span class="n">compare_t1</span><span class="p">[</span><span class="s2">"Diff (Replication - Published)"</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">compare_t1</span><span class="p">[</span><span class="s2">"Replication (1929-2015)"</span><span class="p">]</span> <span class="o">-</span> <span class="n">compare_t1</span><span class="p">[</span><span class="s2">"Published QJE"</span><span class="p">]</span>
+<span class="p">)</span>
+
+<span class="n">compare_t1</span><span class="o">.</span><span class="n">style</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"</span><span class="si">{:.3f}</span><span class="s2">"</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><style type="text/css">
+</style>
+<table id="T_51328">
+  <thead>
+    <tr>
+      <th class="blank level0" >&nbsp;</th>
+      <th id="T_51328_level0_col0" class="col_heading level0 col0" >Published QJE</th>
+      <th id="T_51328_level0_col1" class="col_heading level0 col1" >Replication (1929-2015)</th>
+      <th id="T_51328_level0_col2" class="col_heading level0 col2" >Extended (1929-2025)</th>
+      <th id="T_51328_level0_col3" class="col_heading level0 col3" >Diff (Replication - Published)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th id="T_51328_level0_row0" class="row_heading level0 row0" >column 1 Δs<sub>t−1</sub></th>
+      <td id="T_51328_row0_col0" class="data row0 col0" >-1.997</td>
+      <td id="T_51328_row0_col1" class="data row0 col1" >-1.958</td>
+      <td id="T_51328_row0_col2" class="data row0 col2" >-1.871</td>
+      <td id="T_51328_row0_col3" class="data row0 col3" >0.039</td>
+    </tr>
+    <tr>
+      <th id="T_51328_level0_row1" class="row_heading level0 row1" >column 2 r<sup>SP</sup><sub>t−1</sub></th>
+      <td id="T_51328_row1_col0" class="data row1 col0" >0.081</td>
+      <td id="T_51328_row1_col1" class="data row1 col1" >0.075</td>
+      <td id="T_51328_row1_col2" class="data row1 col2" >0.069</td>
+      <td id="T_51328_row1_col3" class="data row1 col3" >-0.006</td>
+    </tr>
+    <tr>
+      <th id="T_51328_level0_row2" class="row_heading level0 row2" >column 3 Δs<sub>t−1</sub></th>
+      <td id="T_51328_row2_col0" class="data row2 col0" >-2.061</td>
+      <td id="T_51328_row2_col1" class="data row2 col1" >-2.124</td>
+      <td id="T_51328_row2_col2" class="data row2 col2" >-2.033</td>
+      <td id="T_51328_row2_col3" class="data row2 col3" >-0.063</td>
+    </tr>
+    <tr>
+      <th id="T_51328_level0_row3" class="row_heading level0 row3" >column 3 r<sup>SP</sup><sub>t−1</sub></th>
+      <td id="T_51328_row3_col0" class="data row3 col0" >0.029</td>
+      <td id="T_51328_row3_col1" class="data row3 col1" >0.022</td>
+      <td id="T_51328_row3_col2" class="data row3 col2" >0.017</td>
+      <td id="T_51328_row3_col3" class="data row3 col3" >-0.007</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<p>Three takeaways:</p>
+<ul class="simple">
+<li><p><strong>Column (1) and (2) replicate closely.</strong> Credit alone gives us -1.958 vs.
+the paper’s -1.997; equity alone gives 0.075 vs. 0.081. The small gaps are
+exactly the kind of thing you’d expect from updated data vintages (FRED
+and Shiller have both revised and re-benchmarked several of these series
+since the research was published).</p></li>
+<li><p><strong>The paper’s headline result in column (3) reproduces.</strong> With both
+predictors in the same regression, the credit-spread coefficient barely
+moves (-2.124 vs. published -2.061) and stays highly significant, while
+the equity coefficient collapses toward zero and loses significance - credit beats equities as a
+growth predictor, exactly as the paper argues.</p></li>
+<li><p><strong>The extended window tells the same story, slightly attenuated.</strong> Every
+coefficient keeps its sign and rough magnitude through 2025 (credit column
+(3) comes out to -2.033 vs. -2.124 in the replication window), so the relationship
+isn’t an artifact of the specific 1929-2015 sample.</p></li>
+</ul>
+</section>
+</section>
+<section id="table-ii-the-two-step-credit-sentiment-regression">
+<h2>Table II: The Two-Step Credit-Sentiment Regression<a class="headerlink" href="#table-ii-the-two-step-credit-sentiment-regression" title="Link to this heading">#</a></h2>
+<section id="id1">
+<h3>Definitions<a class="headerlink" href="#id1" title="Link to this heading">#</a></h3>
+<p><em>Second-step (growth) regressions</em> - dependent variable <code class="docutils literal notranslate"><span class="pre">dy</span></code> (<span class="math notranslate nohighlight">\(\Delta y_t\)</span>, real GDP-per-capita growth in year <span class="math notranslate nohighlight">\(t\)</span>):</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Code column</p></th>
+<th class="head"><p>Paper symbol</p></th>
+<th class="head"><p>Definition</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">d_s_hat</span></code></p></td>
+<td><p><span class="math notranslate nohighlight">\(\Delta \hat s_t\)</span></p></td>
+<td><p>Fitted change in the credit spread in year <span class="math notranslate nohighlight">\(t\)</span>, from the auxiliary spread regression below — the paper’s “credit-market sentiment”</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">r_sp_hat</span></code></p></td>
+<td><p><span class="math notranslate nohighlight">\(\hat r_t^{SP}\)</span></p></td>
+<td><p>Fitted S&amp;P 500 return in year <span class="math notranslate nohighlight">\(t\)</span>, from the auxiliary return regression below</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">dy_lag1</span></code></p></td>
+<td><p><span class="math notranslate nohighlight">\(\Delta y_{t-1}\)</span></p></td>
+<td><p>Lagged real GDP-per-capita growth</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">d_3mo_lag1</span></code></p></td>
+<td><p><span class="math notranslate nohighlight">\(\Delta i_{t-1}^{(3m)}\)</span></p></td>
+<td><p>Lagged change in the 3-month Treasury yield</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">d_10yr_lag1</span></code></p></td>
+<td><p><span class="math notranslate nohighlight">\(\Delta i_{t-1}^{(10y)}\)</span></p></td>
+<td><p>Lagged change in the 10-year Treasury yield</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">inflation_pct_lag1</span></code></p></td>
+<td><p><span class="math notranslate nohighlight">\(\pi_{t-1}\)</span></p></td>
+<td><p>Lagged CPI inflation rate</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><em>Auxiliary (first-step) regressions</em> - forecast credit-market sentiment two years ahead:</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Code column</p></th>
+<th class="head"><p>Paper symbol</p></th>
+<th class="head"><p>Definition</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">d_spread</span></code> (dependent)</p></td>
+<td><p><span class="math notranslate nohighlight">\(\Delta s_t\)</span></p></td>
+<td><p>Realized change in the credit spread in year <span class="math notranslate nohighlight">\(t\)</span></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">ln_hys_lag2</span></code></p></td>
+<td><p><span class="math notranslate nohighlight">\(\ln \mathrm{HYS}_{t-2}\)</span></p></td>
+<td><p>Log of the high-yield share of bond issuance, two years earlier</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">spread_lag2</span></code></p></td>
+<td><p><span class="math notranslate nohighlight">\(s_{t-2}\)</span></p></td>
+<td><p>Level of the credit spread, two years earlier</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">sp_return</span></code> (dependent)</p></td>
+<td><p><span class="math notranslate nohighlight">\(r_t^{SP}\)</span></p></td>
+<td><p>Realized S&amp;P 500 total log return in year <span class="math notranslate nohighlight">\(t\)</span></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">ln_pe10_lag2</span></code></p></td>
+<td><p><span class="math notranslate nohighlight">\(\ln[P/E10]_{t-2}\)</span></p></td>
+<td><p>Log of Shiller’s cyclically adjusted P/E ratio, two years earlier</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">d_s_hat</span></code> and <code class="docutils literal notranslate"><span class="pre">r_sp_hat</span></code> aren’t raw data — they’re the fitted values from the two auxiliary regressions, substituted into the second-step regression in place of the realized <span class="math notranslate nohighlight">\(\Delta s_t\)</span> and <span class="math notranslate nohighlight">\(r_t^{SP}\)</span>.</p>
+</section>
+<section id="id2">
+<h3>Regressions<a class="headerlink" href="#id2" title="Link to this heading">#</a></h3>
+<p>Table II is the paper’s central exhibit. Instead of using the realized
+change in the credit spread as a regressor (Table I), it uses a forecast
+of that change, built two years in advance from lagged valuation signals —
+this forecast is what the paper calls “credit-market sentiment.” The
+construction is a two-step regression (equations (2)-(4), p. 1387):</p>
+<p><strong>Step 1 (auxiliary regressions, twice-lagged predictors):</strong></p>
+<div class="math notranslate nohighlight">
+\[\Delta s_t = \theta_1 \ln \mathrm{HYS}_{t-2} + \theta_2 s_{t-2} + \nu_t \qquad\qquad r_t^{SP} = \theta_3 \ln[P/E10]_{t-2} + \nu_t'\]</div>
+<p><strong>Step 2 (growth regression on the fitted values):</strong></p>
+<div class="math notranslate nohighlight">
+\[\Delta y_t = \beta_1 \Delta \hat s_t + \beta_2 \hat r_t^{SP} + \gamma' \mathbf{x}_{t-1} + \epsilon_t\]</div>
+<p>Economically, <span class="math notranslate nohighlight">\(\ln \mathrm{HYS}_{t-2}\)</span> is the (log) high-yield share of bond
+issuance two years ago, and <span class="math notranslate nohighlight">\(s_{t-2}\)</span> is the level of the spread two years
+ago - both from <code class="docutils literal notranslate"><span class="pre">01_summary_statistics.ipynb</span></code>’s Greenwood-Hanson and FRED
+sections. When issuance quality was low and spreads were already narrow two
+years ago, the auxiliary regression predicts spreads will widen this year;
+that widening (<span class="math notranslate nohighlight">\(\Delta \hat s_t\)</span>) is what step 2 uses to forecast growth.</p>
+<p><code class="docutils literal notranslate"><span class="pre">build_panel</span></code> assembles all three source files into one annual panel.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">df2</span> <span class="o">=</span> <span class="n">t2</span><span class="o">.</span><span class="n">build_panel</span><span class="p">()</span>
+<span class="n">df2</span><span class="p">[</span>
+    <span class="p">[</span><span class="s2">"dy"</span><span class="p">,</span> <span class="s2">"d_spread"</span><span class="p">,</span> <span class="s2">"sp_return"</span><span class="p">,</span> <span class="s2">"ln_hys_lag2"</span><span class="p">,</span> <span class="s2">"spread_lag2"</span><span class="p">,</span> <span class="s2">"ln_pe10_lag2"</span><span class="p">]</span>
+<span class="p">]</span><span class="o">.</span><span class="n">tail</span><span class="p">()</span><span class="o">.</span><span class="n">style</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"</span><span class="si">{:.3f}</span><span class="s2">"</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><style type="text/css">
+</style>
+<table id="T_c97e6">
+  <thead>
+    <tr>
+      <th class="blank level0" >&nbsp;</th>
+      <th id="T_c97e6_level0_col0" class="col_heading level0 col0" >dy</th>
+      <th id="T_c97e6_level0_col1" class="col_heading level0 col1" >d_spread</th>
+      <th id="T_c97e6_level0_col2" class="col_heading level0 col2" >sp_return</th>
+      <th id="T_c97e6_level0_col3" class="col_heading level0 col3" >ln_hys_lag2</th>
+      <th id="T_c97e6_level0_col4" class="col_heading level0 col4" >spread_lag2</th>
+      <th id="T_c97e6_level0_col5" class="col_heading level0 col5" >ln_pe10_lag2</th>
+    </tr>
+    <tr>
+      <th class="index_name level0" >year</th>
+      <th class="blank col0" >&nbsp;</th>
+      <th class="blank col1" >&nbsp;</th>
+      <th class="blank col2" >&nbsp;</th>
+      <th class="blank col3" >&nbsp;</th>
+      <th class="blank col4" >&nbsp;</th>
+      <th class="blank col5" >&nbsp;</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th id="T_c97e6_level0_row0" class="row_heading level0 row0" >2021</th>
+      <td id="T_c97e6_row0_col0" class="data row0 col0" >5.771</td>
+      <td id="T_c97e6_row0_col1" class="data row0 col1" >-0.400</td>
+      <td id="T_c97e6_row0_col2" class="data row0 col2" >24.795</td>
+      <td id="T_c97e6_row0_col3" class="data row0 col3" >-1.363</td>
+      <td id="T_c97e6_row0_col4" class="data row0 col4" >2.020</td>
+      <td id="T_c97e6_row0_col5" class="data row0 col5" >3.412</td>
+    </tr>
+    <tr>
+      <th id="T_c97e6_level0_row1" class="row_heading level0 row1" >2022</th>
+      <td id="T_c97e6_row1_col0" class="data row1 col0" >1.939</td>
+      <td id="T_c97e6_row1_col1" class="data row1 col1" >0.140</td>
+      <td id="T_c97e6_row1_col2" class="data row1 col2" >-16.107</td>
+      <td id="T_c97e6_row1_col3" class="data row1 col3" >-1.581</td>
+      <td id="T_c97e6_row1_col4" class="data row1 col4" >2.230</td>
+      <td id="T_c97e6_row1_col5" class="data row1 col5" >3.519</td>
+    </tr>
+    <tr>
+      <th id="T_c97e6_level0_row2" class="row_heading level0 row2" >2023</th>
+      <td id="T_c97e6_row2_col0" class="data row2 col0" >2.077</td>
+      <td id="T_c97e6_row2_col1" class="data row2 col1" >-0.350</td>
+      <td id="T_c97e6_row2_col2" class="data row2 col2" >19.513</td>
+      <td id="T_c97e6_row2_col3" class="data row2 col3" >-1.220</td>
+      <td id="T_c97e6_row2_col4" class="data row2 col4" >1.830</td>
+      <td id="T_c97e6_row2_col5" class="data row2 col5" >3.646</td>
+    </tr>
+    <tr>
+      <th id="T_c97e6_level0_row3" class="row_heading level0 row3" >2024</th>
+      <td id="T_c97e6_row3_col0" class="data row3 col0" >1.866</td>
+      <td id="T_c97e6_row3_col1" class="data row3 col1" >-0.210</td>
+      <td id="T_c97e6_row3_col2" class="data row3 col2" >26.157</td>
+      <td id="T_c97e6_row3_col3" class="data row3 col3" >-2.072</td>
+      <td id="T_c97e6_row3_col4" class="data row3 col4" >1.970</td>
+      <td id="T_c97e6_row3_col5" class="data row3 col5" >3.343</td>
+    </tr>
+    <tr>
+      <th id="T_c97e6_level0_row4" class="row_heading level0 row4" >2025</th>
+      <td id="T_c97e6_row4_col0" class="data row4 col0" >1.542</td>
+      <td id="T_c97e6_row4_col1" class="data row4 col1" >0.350</td>
+      <td id="T_c97e6_row4_col2" class="data row4 col2" >14.265</td>
+      <td id="T_c97e6_row4_col3" class="data row4 col3" >-1.911</td>
+      <td id="T_c97e6_row4_col4" class="data row4 col4" >1.620</td>
+      <td id="T_c97e6_row4_col5" class="data row4 col5" >3.448</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">run_table_2</span></code> fits the two auxiliary regressions and the four second-step
+growth columns — (1) spread sentiment
+only, (2) equity sentiment only, (3) both, (4) spread sentiment plus
+macro controls — and <code class="docutils literal notranslate"><span class="pre">emit_table_2</span></code> writes the formatted LaTeX and prints a
+diagnostic summary, exactly like the <code class="docutils literal notranslate"><span class="pre">doit</span> <span class="pre">replicate_table_2</span></code> task does. As
+with Table I, we then display each table rendered.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">res2_rep</span> <span class="o">=</span> <span class="n">t2</span><span class="o">.</span><span class="n">run_table_2</span><span class="p">(</span><span class="n">df2</span><span class="p">,</span> <span class="n">REP_START</span><span class="p">,</span> <span class="n">REP_END</span><span class="p">)</span>
+<span class="n">t2</span><span class="o">.</span><span class="n">emit_table_2</span><span class="p">(</span><span class="n">res2_rep</span><span class="p">,</span> <span class="n">REP_START</span><span class="p">,</span> <span class="n">REP_END</span><span class="p">,</span> <span class="s2">"replication"</span><span class="p">)</span>
+
+<span class="n">main_rep</span><span class="p">,</span> <span class="n">aux_rep</span> <span class="o">=</span> <span class="n">t2</span><span class="o">.</span><span class="n">pretty_table_2</span><span class="p">(</span><span class="n">res2_rep</span><span class="p">,</span> <span class="n">REP_START</span><span class="p">,</span> <span class="n">REP_END</span><span class="p">)</span>
+<span class="n">display</span><span class="p">(</span><span class="n">main_rep</span><span class="p">)</span>
+<span class="n">display</span><span class="p">(</span><span class="n">aux_rep</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>replication (1929-2015):
+  (1) N=84 R2=0.377 d_s_hat=-4.281, dy_lag1=0.597
+  (2) N=85 R2=0.337 r_sp_hat=0.145, dy_lag1=0.534
+  (3) N=84 R2=0.380 d_s_hat=-3.861, r_sp_hat=0.053, dy_lag1=0.590
+  (4) N=84 R2=0.394 d_s_hat=-4.907, dy_lag1=0.581, d_3mo_lag1=0.099, d_10yr_lag1=-0.616, inflation_pct_lag1=0.123
+  aux Delta s_t: N=84 R2=0.102 ln_hys_lag2=0.147 spread_lag2=-0.245
+  aux r_t^SP:    N=85 R2=0.083 ln_pe10_lag2=-13.171
+  -&gt; table_2_replication.tex
+</pre></div>
+</div>
+<div class="output text_html"><style type="text/css">
+#T_9a666 caption {
+  caption-side: top;
+  text-align: left;
+  font-weight: 600;
+  padding-bottom: 6px;
+}
+#T_9a666 th {
+  padding: 3px 14px;
+  text-align: center;
+}
+#T_9a666  td {
+  padding: 3px 14px;
+  text-align: center;
+}
+#T_9a666 th.row_heading {
+  text-align: left;
+  font-weight: normal;
+}
+#T_9a666 thead tr:first-child th {
+  border-top: 1.5px solid #333;
+}
+#T_9a666 thead tr:last-child th {
+  border-bottom: 1px solid #333;
+}
+#T_9a666 tbody tr:last-child td {
+  border-bottom: 1.5px solid #333;
+}
+#T_9a666  tbody tr:last-child th {
+  border-bottom: 1.5px solid #333;
+}
+#T_9a666 tbody tr:nth-child(13) td {
+  border-top: 1px solid #999;
+}
+#T_9a666  tbody tr:nth-child(13) th {
+  border-top: 1px solid #999;
+}
+</style>
+<table id="T_9a666">
+  <caption>Table II -- second-step (growth) regressions: 1929-2015, credit spread = BAA_Treasury_spread</caption>
+  <thead>
+    <tr>
+      <th class="blank level0" >&nbsp;</th>
+      <th id="T_9a666_level0_col0" class="col_heading level0 col0" colspan="4">Dependent variable: Δy<sub>t</sub></th>
+    </tr>
+    <tr>
+      <th class="blank level1" >&nbsp;</th>
+      <th id="T_9a666_level1_col0" class="col_heading level1 col0" >(1)</th>
+      <th id="T_9a666_level1_col1" class="col_heading level1 col1" >(2)</th>
+      <th id="T_9a666_level1_col2" class="col_heading level1 col2" >(3)</th>
+      <th id="T_9a666_level1_col3" class="col_heading level1 col3" >(4)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th id="T_9a666_level0_row0" class="row_heading level0 row0" >Δŝ<sub>t</sub></th>
+      <td id="T_9a666_row0_col0" class="data row0 col0" >-4.281***</td>
+      <td id="T_9a666_row0_col1" class="data row0 col1" >---</td>
+      <td id="T_9a666_row0_col2" class="data row0 col2" >-3.861**</td>
+      <td id="T_9a666_row0_col3" class="data row0 col3" >-4.907***</td>
+    </tr>
+    <tr>
+      <th id="T_9a666_level0_row1" class="row_heading level0 row1" ></th>
+      <td id="T_9a666_row1_col0" class="data row1 col0" >(1.432)</td>
+      <td id="T_9a666_row1_col1" class="data row1 col1" ></td>
+      <td id="T_9a666_row1_col2" class="data row1 col2" >(1.492)</td>
+      <td id="T_9a666_row1_col3" class="data row1 col3" >(1.832)</td>
+    </tr>
+    <tr>
+      <th id="T_9a666_level0_row2" class="row_heading level0 row2" >r̂<sup>SP</sup><sub>t</sub></th>
+      <td id="T_9a666_row2_col0" class="data row2 col0" >---</td>
+      <td id="T_9a666_row2_col1" class="data row2 col1" >0.145*</td>
+      <td id="T_9a666_row2_col2" class="data row2 col2" >0.053</td>
+      <td id="T_9a666_row2_col3" class="data row2 col3" >---</td>
+    </tr>
+    <tr>
+      <th id="T_9a666_level0_row3" class="row_heading level0 row3" ></th>
+      <td id="T_9a666_row3_col0" class="data row3 col0" ></td>
+      <td id="T_9a666_row3_col1" class="data row3 col1" >(0.078)</td>
+      <td id="T_9a666_row3_col2" class="data row3 col2" >(0.071)</td>
+      <td id="T_9a666_row3_col3" class="data row3 col3" ></td>
+    </tr>
+    <tr>
+      <th id="T_9a666_level0_row4" class="row_heading level0 row4" >Δy<sub>t−1</sub></th>
+      <td id="T_9a666_row4_col0" class="data row4 col0" >0.597***</td>
+      <td id="T_9a666_row4_col1" class="data row4 col1" >0.534***</td>
+      <td id="T_9a666_row4_col2" class="data row4 col2" >0.590***</td>
+      <td id="T_9a666_row4_col3" class="data row4 col3" >0.581***</td>
+    </tr>
+    <tr>
+      <th id="T_9a666_level0_row5" class="row_heading level0 row5" ></th>
+      <td id="T_9a666_row5_col0" class="data row5 col0" >(0.114)</td>
+      <td id="T_9a666_row5_col1" class="data row5 col1" >(0.099)</td>
+      <td id="T_9a666_row5_col2" class="data row5 col2" >(0.111)</td>
+      <td id="T_9a666_row5_col3" class="data row5 col3" >(0.096)</td>
+    </tr>
+    <tr>
+      <th id="T_9a666_level0_row6" class="row_heading level0 row6" >Δi<sub>t−1</sub><sup>(3m)</sup></th>
+      <td id="T_9a666_row6_col0" class="data row6 col0" >---</td>
+      <td id="T_9a666_row6_col1" class="data row6 col1" >---</td>
+      <td id="T_9a666_row6_col2" class="data row6 col2" >---</td>
+      <td id="T_9a666_row6_col3" class="data row6 col3" >0.099</td>
+    </tr>
+    <tr>
+      <th id="T_9a666_level0_row7" class="row_heading level0 row7" ></th>
+      <td id="T_9a666_row7_col0" class="data row7 col0" ></td>
+      <td id="T_9a666_row7_col1" class="data row7 col1" ></td>
+      <td id="T_9a666_row7_col2" class="data row7 col2" ></td>
+      <td id="T_9a666_row7_col3" class="data row7 col3" >(0.316)</td>
+    </tr>
+    <tr>
+      <th id="T_9a666_level0_row8" class="row_heading level0 row8" >Δi<sub>t−1</sub><sup>(10y)</sup></th>
+      <td id="T_9a666_row8_col0" class="data row8 col0" >---</td>
+      <td id="T_9a666_row8_col1" class="data row8 col1" >---</td>
+      <td id="T_9a666_row8_col2" class="data row8 col2" >---</td>
+      <td id="T_9a666_row8_col3" class="data row8 col3" >-0.616</td>
+    </tr>
+    <tr>
+      <th id="T_9a666_level0_row9" class="row_heading level0 row9" ></th>
+      <td id="T_9a666_row9_col0" class="data row9 col0" ></td>
+      <td id="T_9a666_row9_col1" class="data row9 col1" ></td>
+      <td id="T_9a666_row9_col2" class="data row9 col2" ></td>
+      <td id="T_9a666_row9_col3" class="data row9 col3" >(0.414)</td>
+    </tr>
+    <tr>
+      <th id="T_9a666_level0_row10" class="row_heading level0 row10" >π<sub>t−1</sub></th>
+      <td id="T_9a666_row10_col0" class="data row10 col0" >---</td>
+      <td id="T_9a666_row10_col1" class="data row10 col1" >---</td>
+      <td id="T_9a666_row10_col2" class="data row10 col2" >---</td>
+      <td id="T_9a666_row10_col3" class="data row10 col3" >0.123</td>
+    </tr>
+    <tr>
+      <th id="T_9a666_level0_row11" class="row_heading level0 row11" ></th>
+      <td id="T_9a666_row11_col0" class="data row11 col0" ></td>
+      <td id="T_9a666_row11_col1" class="data row11 col1" ></td>
+      <td id="T_9a666_row11_col2" class="data row11 col2" ></td>
+      <td id="T_9a666_row11_col3" class="data row11 col3" >(0.151)</td>
+    </tr>
+    <tr>
+      <th id="T_9a666_level0_row12" class="row_heading level0 row12" >R²</th>
+      <td id="T_9a666_row12_col0" class="data row12 col0" >0.377</td>
+      <td id="T_9a666_row12_col1" class="data row12 col1" >0.337</td>
+      <td id="T_9a666_row12_col2" class="data row12 col2" >0.380</td>
+      <td id="T_9a666_row12_col3" class="data row12 col3" >0.394</td>
+    </tr>
+  </tbody>
+</table>
+</div><div class="output text_html"><style type="text/css">
+#T_6fcdc caption {
+  caption-side: top;
+  text-align: left;
+  font-weight: 600;
+  padding-bottom: 6px;
+}
+#T_6fcdc th {
+  padding: 3px 14px;
+  text-align: center;
+}
+#T_6fcdc  td {
+  padding: 3px 14px;
+  text-align: center;
+}
+#T_6fcdc th.row_heading {
+  text-align: left;
+  font-weight: normal;
+}
+#T_6fcdc thead tr:first-child th {
+  border-top: 1.5px solid #333;
+}
+#T_6fcdc thead tr:last-child th {
+  border-bottom: 1px solid #333;
+}
+#T_6fcdc tbody tr:last-child td {
+  border-bottom: 1.5px solid #333;
+}
+#T_6fcdc  tbody tr:last-child th {
+  border-bottom: 1.5px solid #333;
+}
+#T_6fcdc tbody tr:nth-child(7) td {
+  border-top: 1px solid #999;
+}
+#T_6fcdc  tbody tr:nth-child(7) th {
+  border-top: 1px solid #999;
+}
+</style>
+<table id="T_6fcdc">
+  <caption>Table II -- auxiliary (first-step) regressions: 1929-2015, credit spread = BAA_Treasury_spread</caption>
+  <thead>
+    <tr>
+      <th class="blank level0" >&nbsp;</th>
+      <th id="T_6fcdc_level0_col0" class="col_heading level0 col0" >Δs<sub>t</sub></th>
+      <th id="T_6fcdc_level0_col1" class="col_heading level0 col1" >r<sup>SP</sup><sub>t</sub></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th id="T_6fcdc_level0_row0" class="row_heading level0 row0" >ln HYS<sub>t−2</sub></th>
+      <td id="T_6fcdc_row0_col0" class="data row0 col0" >0.147***</td>
+      <td id="T_6fcdc_row0_col1" class="data row0 col1" >---</td>
+    </tr>
+    <tr>
+      <th id="T_6fcdc_level0_row1" class="row_heading level0 row1" ></th>
+      <td id="T_6fcdc_row1_col0" class="data row1 col0" >(0.042)</td>
+      <td id="T_6fcdc_row1_col1" class="data row1 col1" ></td>
+    </tr>
+    <tr>
+      <th id="T_6fcdc_level0_row2" class="row_heading level0 row2" >s<sub>t−2</sub></th>
+      <td id="T_6fcdc_row2_col0" class="data row2 col0" >-0.245***</td>
+      <td id="T_6fcdc_row2_col1" class="data row2 col1" >---</td>
+    </tr>
+    <tr>
+      <th id="T_6fcdc_level0_row3" class="row_heading level0 row3" ></th>
+      <td id="T_6fcdc_row3_col0" class="data row3 col0" >(0.047)</td>
+      <td id="T_6fcdc_row3_col1" class="data row3 col1" ></td>
+    </tr>
+    <tr>
+      <th id="T_6fcdc_level0_row4" class="row_heading level0 row4" >ln[P/E10]<sub>t−2</sub></th>
+      <td id="T_6fcdc_row4_col0" class="data row4 col0" >---</td>
+      <td id="T_6fcdc_row4_col1" class="data row4 col1" >-0.132***</td>
+    </tr>
+    <tr>
+      <th id="T_6fcdc_level0_row5" class="row_heading level0 row5" ></th>
+      <td id="T_6fcdc_row5_col0" class="data row5 col0" ></td>
+      <td id="T_6fcdc_row5_col1" class="data row5 col1" >(0.040)</td>
+    </tr>
+    <tr>
+      <th id="T_6fcdc_level0_row6" class="row_heading level0 row6" >R²</th>
+      <td id="T_6fcdc_row6_col0" class="data row6 col0" >0.102</td>
+      <td id="T_6fcdc_row6_col1" class="data row6 col1" >0.083</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">res2_ext</span> <span class="o">=</span> <span class="n">t2</span><span class="o">.</span><span class="n">run_table_2</span><span class="p">(</span><span class="n">df2</span><span class="p">,</span> <span class="n">REP_START</span><span class="p">,</span> <span class="n">EXT_END</span><span class="p">)</span>
+<span class="n">t2</span><span class="o">.</span><span class="n">emit_table_2</span><span class="p">(</span><span class="n">res2_ext</span><span class="p">,</span> <span class="n">REP_START</span><span class="p">,</span> <span class="n">EXT_END</span><span class="p">,</span> <span class="s2">"extended"</span><span class="p">)</span>
+
+<span class="n">main_ext</span><span class="p">,</span> <span class="n">aux_ext</span> <span class="o">=</span> <span class="n">t2</span><span class="o">.</span><span class="n">pretty_table_2</span><span class="p">(</span><span class="n">res2_ext</span><span class="p">,</span> <span class="n">REP_START</span><span class="p">,</span> <span class="n">EXT_END</span><span class="p">)</span>
+<span class="n">display</span><span class="p">(</span><span class="n">main_ext</span><span class="p">)</span>
+<span class="n">display</span><span class="p">(</span><span class="n">aux_ext</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>extended (1929-2025):
+  (1) N=94 R2=0.353 d_s_hat=-4.271, dy_lag1=0.577
+  (2) N=95 R2=0.313 r_sp_hat=0.176, dy_lag1=0.516
+  (3) N=94 R2=0.356 d_s_hat=-3.884, r_sp_hat=0.068, dy_lag1=0.570
+  (4) N=94 R2=0.368 d_s_hat=-4.900, dy_lag1=0.559, d_3mo_lag1=0.117, d_10yr_lag1=-0.603, inflation_pct_lag1=0.121
+  aux Delta s_t: N=94 R2=0.096 ln_hys_lag2=0.130 spread_lag2=-0.244
+  aux r_t^SP:    N=95 R2=0.047 ln_pe10_lag2=-9.090
+  -&gt; table_2_extended.tex
+</pre></div>
+</div>
+<div class="output text_html"><style type="text/css">
+#T_47f4f caption {
+  caption-side: top;
+  text-align: left;
+  font-weight: 600;
+  padding-bottom: 6px;
+}
+#T_47f4f th {
+  padding: 3px 14px;
+  text-align: center;
+}
+#T_47f4f  td {
+  padding: 3px 14px;
+  text-align: center;
+}
+#T_47f4f th.row_heading {
+  text-align: left;
+  font-weight: normal;
+}
+#T_47f4f thead tr:first-child th {
+  border-top: 1.5px solid #333;
+}
+#T_47f4f thead tr:last-child th {
+  border-bottom: 1px solid #333;
+}
+#T_47f4f tbody tr:last-child td {
+  border-bottom: 1.5px solid #333;
+}
+#T_47f4f  tbody tr:last-child th {
+  border-bottom: 1.5px solid #333;
+}
+#T_47f4f tbody tr:nth-child(13) td {
+  border-top: 1px solid #999;
+}
+#T_47f4f  tbody tr:nth-child(13) th {
+  border-top: 1px solid #999;
+}
+</style>
+<table id="T_47f4f">
+  <caption>Table II -- second-step (growth) regressions: 1929-2025, credit spread = BAA_Treasury_spread</caption>
+  <thead>
+    <tr>
+      <th class="blank level0" >&nbsp;</th>
+      <th id="T_47f4f_level0_col0" class="col_heading level0 col0" colspan="4">Dependent variable: Δy<sub>t</sub></th>
+    </tr>
+    <tr>
+      <th class="blank level1" >&nbsp;</th>
+      <th id="T_47f4f_level1_col0" class="col_heading level1 col0" >(1)</th>
+      <th id="T_47f4f_level1_col1" class="col_heading level1 col1" >(2)</th>
+      <th id="T_47f4f_level1_col2" class="col_heading level1 col2" >(3)</th>
+      <th id="T_47f4f_level1_col3" class="col_heading level1 col3" >(4)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th id="T_47f4f_level0_row0" class="row_heading level0 row0" >Δŝ<sub>t</sub></th>
+      <td id="T_47f4f_row0_col0" class="data row0 col0" >-4.271***</td>
+      <td id="T_47f4f_row0_col1" class="data row0 col1" >---</td>
+      <td id="T_47f4f_row0_col2" class="data row0 col2" >-3.884***</td>
+      <td id="T_47f4f_row0_col3" class="data row0 col3" >-4.900***</td>
+    </tr>
+    <tr>
+      <th id="T_47f4f_level0_row1" class="row_heading level0 row1" ></th>
+      <td id="T_47f4f_row1_col0" class="data row1 col0" >(1.436)</td>
+      <td id="T_47f4f_row1_col1" class="data row1 col1" ></td>
+      <td id="T_47f4f_row1_col2" class="data row1 col2" >(1.448)</td>
+      <td id="T_47f4f_row1_col3" class="data row1 col3" >(1.817)</td>
+    </tr>
+    <tr>
+      <th id="T_47f4f_level0_row2" class="row_heading level0 row2" >r̂<sup>SP</sup><sub>t</sub></th>
+      <td id="T_47f4f_row2_col0" class="data row2 col0" >---</td>
+      <td id="T_47f4f_row2_col1" class="data row2 col1" >0.176*</td>
+      <td id="T_47f4f_row2_col2" class="data row2 col2" >0.068</td>
+      <td id="T_47f4f_row2_col3" class="data row2 col3" >---</td>
+    </tr>
+    <tr>
+      <th id="T_47f4f_level0_row3" class="row_heading level0 row3" ></th>
+      <td id="T_47f4f_row3_col0" class="data row3 col0" ></td>
+      <td id="T_47f4f_row3_col1" class="data row3 col1" >(0.105)</td>
+      <td id="T_47f4f_row3_col2" class="data row3 col2" >(0.088)</td>
+      <td id="T_47f4f_row3_col3" class="data row3 col3" ></td>
+    </tr>
+    <tr>
+      <th id="T_47f4f_level0_row4" class="row_heading level0 row4" >Δy<sub>t−1</sub></th>
+      <td id="T_47f4f_row4_col0" class="data row4 col0" >0.577***</td>
+      <td id="T_47f4f_row4_col1" class="data row4 col1" >0.516***</td>
+      <td id="T_47f4f_row4_col2" class="data row4 col2" >0.570***</td>
+      <td id="T_47f4f_row4_col3" class="data row4 col3" >0.559***</td>
+    </tr>
+    <tr>
+      <th id="T_47f4f_level0_row5" class="row_heading level0 row5" ></th>
+      <td id="T_47f4f_row5_col0" class="data row5 col0" >(0.117)</td>
+      <td id="T_47f4f_row5_col1" class="data row5 col1" >(0.103)</td>
+      <td id="T_47f4f_row5_col2" class="data row5 col2" >(0.114)</td>
+      <td id="T_47f4f_row5_col3" class="data row5 col3" >(0.099)</td>
+    </tr>
+    <tr>
+      <th id="T_47f4f_level0_row6" class="row_heading level0 row6" >Δi<sub>t−1</sub><sup>(3m)</sup></th>
+      <td id="T_47f4f_row6_col0" class="data row6 col0" >---</td>
+      <td id="T_47f4f_row6_col1" class="data row6 col1" >---</td>
+      <td id="T_47f4f_row6_col2" class="data row6 col2" >---</td>
+      <td id="T_47f4f_row6_col3" class="data row6 col3" >0.117</td>
+    </tr>
+    <tr>
+      <th id="T_47f4f_level0_row7" class="row_heading level0 row7" ></th>
+      <td id="T_47f4f_row7_col0" class="data row7 col0" ></td>
+      <td id="T_47f4f_row7_col1" class="data row7 col1" ></td>
+      <td id="T_47f4f_row7_col2" class="data row7 col2" ></td>
+      <td id="T_47f4f_row7_col3" class="data row7 col3" >(0.288)</td>
+    </tr>
+    <tr>
+      <th id="T_47f4f_level0_row8" class="row_heading level0 row8" >Δi<sub>t−1</sub><sup>(10y)</sup></th>
+      <td id="T_47f4f_row8_col0" class="data row8 col0" >---</td>
+      <td id="T_47f4f_row8_col1" class="data row8 col1" >---</td>
+      <td id="T_47f4f_row8_col2" class="data row8 col2" >---</td>
+      <td id="T_47f4f_row8_col3" class="data row8 col3" >-0.603</td>
+    </tr>
+    <tr>
+      <th id="T_47f4f_level0_row9" class="row_heading level0 row9" ></th>
+      <td id="T_47f4f_row9_col0" class="data row9 col0" ></td>
+      <td id="T_47f4f_row9_col1" class="data row9 col1" ></td>
+      <td id="T_47f4f_row9_col2" class="data row9 col2" ></td>
+      <td id="T_47f4f_row9_col3" class="data row9 col3" >(0.402)</td>
+    </tr>
+    <tr>
+      <th id="T_47f4f_level0_row10" class="row_heading level0 row10" >π<sub>t−1</sub></th>
+      <td id="T_47f4f_row10_col0" class="data row10 col0" >---</td>
+      <td id="T_47f4f_row10_col1" class="data row10 col1" >---</td>
+      <td id="T_47f4f_row10_col2" class="data row10 col2" >---</td>
+      <td id="T_47f4f_row10_col3" class="data row10 col3" >0.121</td>
+    </tr>
+    <tr>
+      <th id="T_47f4f_level0_row11" class="row_heading level0 row11" ></th>
+      <td id="T_47f4f_row11_col0" class="data row11 col0" ></td>
+      <td id="T_47f4f_row11_col1" class="data row11 col1" ></td>
+      <td id="T_47f4f_row11_col2" class="data row11 col2" ></td>
+      <td id="T_47f4f_row11_col3" class="data row11 col3" >(0.151)</td>
+    </tr>
+    <tr>
+      <th id="T_47f4f_level0_row12" class="row_heading level0 row12" >R²</th>
+      <td id="T_47f4f_row12_col0" class="data row12 col0" >0.353</td>
+      <td id="T_47f4f_row12_col1" class="data row12 col1" >0.313</td>
+      <td id="T_47f4f_row12_col2" class="data row12 col2" >0.356</td>
+      <td id="T_47f4f_row12_col3" class="data row12 col3" >0.368</td>
+    </tr>
+  </tbody>
+</table>
+</div><div class="output text_html"><style type="text/css">
+#T_524ff caption {
+  caption-side: top;
+  text-align: left;
+  font-weight: 600;
+  padding-bottom: 6px;
+}
+#T_524ff th {
+  padding: 3px 14px;
+  text-align: center;
+}
+#T_524ff  td {
+  padding: 3px 14px;
+  text-align: center;
+}
+#T_524ff th.row_heading {
+  text-align: left;
+  font-weight: normal;
+}
+#T_524ff thead tr:first-child th {
+  border-top: 1.5px solid #333;
+}
+#T_524ff thead tr:last-child th {
+  border-bottom: 1px solid #333;
+}
+#T_524ff tbody tr:last-child td {
+  border-bottom: 1.5px solid #333;
+}
+#T_524ff  tbody tr:last-child th {
+  border-bottom: 1.5px solid #333;
+}
+#T_524ff tbody tr:nth-child(7) td {
+  border-top: 1px solid #999;
+}
+#T_524ff  tbody tr:nth-child(7) th {
+  border-top: 1px solid #999;
+}
+</style>
+<table id="T_524ff">
+  <caption>Table II -- auxiliary (first-step) regressions: 1929-2025, credit spread = BAA_Treasury_spread</caption>
+  <thead>
+    <tr>
+      <th class="blank level0" >&nbsp;</th>
+      <th id="T_524ff_level0_col0" class="col_heading level0 col0" >Δs<sub>t</sub></th>
+      <th id="T_524ff_level0_col1" class="col_heading level0 col1" >r<sup>SP</sup><sub>t</sub></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th id="T_524ff_level0_row0" class="row_heading level0 row0" >ln HYS<sub>t−2</sub></th>
+      <td id="T_524ff_row0_col0" class="data row0 col0" >0.130***</td>
+      <td id="T_524ff_row0_col1" class="data row0 col1" >---</td>
+    </tr>
+    <tr>
+      <th id="T_524ff_level0_row1" class="row_heading level0 row1" ></th>
+      <td id="T_524ff_row1_col0" class="data row1 col0" >(0.039)</td>
+      <td id="T_524ff_row1_col1" class="data row1 col1" ></td>
+    </tr>
+    <tr>
+      <th id="T_524ff_level0_row2" class="row_heading level0 row2" >s<sub>t−2</sub></th>
+      <td id="T_524ff_row2_col0" class="data row2 col0" >-0.244***</td>
+      <td id="T_524ff_row2_col1" class="data row2 col1" >---</td>
+    </tr>
+    <tr>
+      <th id="T_524ff_level0_row3" class="row_heading level0 row3" ></th>
+      <td id="T_524ff_row3_col0" class="data row3 col0" >(0.046)</td>
+      <td id="T_524ff_row3_col1" class="data row3 col1" ></td>
+    </tr>
+    <tr>
+      <th id="T_524ff_level0_row4" class="row_heading level0 row4" >ln[P/E10]<sub>t−2</sub></th>
+      <td id="T_524ff_row4_col0" class="data row4 col0" >---</td>
+      <td id="T_524ff_row4_col1" class="data row4 col1" >-0.091***</td>
+    </tr>
+    <tr>
+      <th id="T_524ff_level0_row5" class="row_heading level0 row5" ></th>
+      <td id="T_524ff_row5_col0" class="data row5 col0" ></td>
+      <td id="T_524ff_row5_col1" class="data row5 col1" >(0.035)</td>
+    </tr>
+    <tr>
+      <th id="T_524ff_level0_row6" class="row_heading level0 row6" >R²</th>
+      <td id="T_524ff_row6_col0" class="data row6 col0" >0.096</td>
+      <td id="T_524ff_row6_col1" class="data row6 col1" >0.047</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+</section>
+<section id="id3">
+<h3>Replication vs. Published vs. Extended<a class="headerlink" href="#id3" title="Link to this heading">#</a></h3>
+<p>With the full tables rendered above, we pull their headline coefficients —
+both the second-step growth regression and the two first-step auxiliary
+regressions — into a compact comparison against the paper’s published
+numbers (Table II, p. 1389):</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Published QJE Table II, p. 1389.</span>
+<span class="n">published_t2_main</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">"column 1 Δŝ&lt;sub&gt;t&lt;/sub&gt;"</span><span class="p">:</span> <span class="o">-</span><span class="mf">4.800</span><span class="p">,</span>
+    <span class="s2">"column 2 r̂&lt;sup&gt;SP&lt;/sup&gt;&lt;sub&gt;t&lt;/sub&gt;"</span><span class="p">:</span> <span class="mf">0.145</span><span class="p">,</span>
+    <span class="s2">"column 3 Δŝ&lt;sub&gt;t&lt;/sub&gt;"</span><span class="p">:</span> <span class="o">-</span><span class="mf">4.409</span><span class="p">,</span>
+    <span class="s2">"column 3 r̂&lt;sup&gt;SP&lt;/sup&gt;&lt;sub&gt;t&lt;/sub&gt;"</span><span class="p">:</span> <span class="mf">0.069</span><span class="p">,</span>
+    <span class="s2">"column 4 Δŝ&lt;sub&gt;t&lt;/sub&gt;"</span><span class="p">:</span> <span class="o">-</span><span class="mf">5.389</span><span class="p">,</span>
+<span class="p">}</span>
+<span class="n">compare_t2_main</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+    <span class="p">{</span>
+        <span class="s2">"Published QJE"</span><span class="p">:</span> <span class="n">published_t2_main</span><span class="o">.</span><span class="n">values</span><span class="p">(),</span>
+        <span class="s2">"Replication (1929-2015)"</span><span class="p">:</span> <span class="p">[</span>
+            <span class="n">res2_rep</span><span class="p">[</span><span class="s2">"col1"</span><span class="p">]</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">"d_s_hat"</span><span class="p">],</span>
+            <span class="n">res2_rep</span><span class="p">[</span><span class="s2">"col2"</span><span class="p">]</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">"r_sp_hat"</span><span class="p">],</span>
+            <span class="n">res2_rep</span><span class="p">[</span><span class="s2">"col3"</span><span class="p">]</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">"d_s_hat"</span><span class="p">],</span>
+            <span class="n">res2_rep</span><span class="p">[</span><span class="s2">"col3"</span><span class="p">]</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">"r_sp_hat"</span><span class="p">],</span>
+            <span class="n">res2_rep</span><span class="p">[</span><span class="s2">"col4"</span><span class="p">]</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">"d_s_hat"</span><span class="p">],</span>
+        <span class="p">],</span>
+        <span class="s2">"Extended (1929-2025)"</span><span class="p">:</span> <span class="p">[</span>
+            <span class="n">res2_ext</span><span class="p">[</span><span class="s2">"col1"</span><span class="p">]</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">"d_s_hat"</span><span class="p">],</span>
+            <span class="n">res2_ext</span><span class="p">[</span><span class="s2">"col2"</span><span class="p">]</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">"r_sp_hat"</span><span class="p">],</span>
+            <span class="n">res2_ext</span><span class="p">[</span><span class="s2">"col3"</span><span class="p">]</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">"d_s_hat"</span><span class="p">],</span>
+            <span class="n">res2_ext</span><span class="p">[</span><span class="s2">"col3"</span><span class="p">]</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">"r_sp_hat"</span><span class="p">],</span>
+            <span class="n">res2_ext</span><span class="p">[</span><span class="s2">"col4"</span><span class="p">]</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">"d_s_hat"</span><span class="p">],</span>
+        <span class="p">],</span>
+    <span class="p">},</span>
+    <span class="n">index</span><span class="o">=</span><span class="n">published_t2_main</span><span class="o">.</span><span class="n">keys</span><span class="p">(),</span>
+<span class="p">)</span>
+<span class="n">compare_t2_main</span><span class="p">[</span><span class="s2">"Diff (Replication - Published)"</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">compare_t2_main</span><span class="p">[</span><span class="s2">"Replication (1929-2015)"</span><span class="p">]</span> <span class="o">-</span> <span class="n">compare_t2_main</span><span class="p">[</span><span class="s2">"Published QJE"</span><span class="p">]</span>
+<span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Second-step (growth) regression:"</span><span class="p">)</span>
+<span class="n">compare_t2_main</span><span class="o">.</span><span class="n">style</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"</span><span class="si">{:.3f}</span><span class="s2">"</span><span class="p">)</span>
+
+<span class="c1"># Published QJE Table II auxiliary regressions, p. 1389.</span>
+<span class="c1"># ln[P/E10]_{t-2}'s fitted coefficient is ~100x the paper's display convention</span>
+<span class="c1"># (see the `_AUX_ROWS` comment in replicate_table_2.py); we apply the same 0.01</span>
+<span class="c1"># display rescaling here for a fair comparison.</span>
+<span class="n">published_t2_aux</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">"ln HYS&lt;sub&gt;t−2&lt;/sub&gt;"</span><span class="p">:</span> <span class="mf">0.095</span><span class="p">,</span>
+    <span class="s2">"s&lt;sub&gt;t−2&lt;/sub&gt;"</span><span class="p">:</span> <span class="o">-</span><span class="mf">0.248</span><span class="p">,</span>
+    <span class="s2">"ln[P/E10]&lt;sub&gt;t−2&lt;/sub&gt;"</span><span class="p">:</span> <span class="o">-</span><span class="mf">0.134</span><span class="p">,</span>
+<span class="p">}</span>
+<span class="n">compare_t2_aux</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+    <span class="p">{</span>
+        <span class="s2">"Published QJE"</span><span class="p">:</span> <span class="n">published_t2_aux</span><span class="o">.</span><span class="n">values</span><span class="p">(),</span>
+        <span class="s2">"Replication (1929-2015)"</span><span class="p">:</span> <span class="p">[</span>
+            <span class="n">res2_rep</span><span class="p">[</span><span class="s2">"aux_spread"</span><span class="p">]</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">"ln_hys_lag2"</span><span class="p">],</span>
+            <span class="n">res2_rep</span><span class="p">[</span><span class="s2">"aux_spread"</span><span class="p">]</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">"spread_lag2"</span><span class="p">],</span>
+            <span class="n">res2_rep</span><span class="p">[</span><span class="s2">"aux_return"</span><span class="p">]</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">"ln_pe10_lag2"</span><span class="p">]</span> <span class="o">*</span> <span class="mf">0.01</span><span class="p">,</span>
+        <span class="p">],</span>
+        <span class="s2">"Extended (1929-2025)"</span><span class="p">:</span> <span class="p">[</span>
+            <span class="n">res2_ext</span><span class="p">[</span><span class="s2">"aux_spread"</span><span class="p">]</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">"ln_hys_lag2"</span><span class="p">],</span>
+            <span class="n">res2_ext</span><span class="p">[</span><span class="s2">"aux_spread"</span><span class="p">]</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">"spread_lag2"</span><span class="p">],</span>
+            <span class="n">res2_ext</span><span class="p">[</span><span class="s2">"aux_return"</span><span class="p">]</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">"ln_pe10_lag2"</span><span class="p">]</span> <span class="o">*</span> <span class="mf">0.01</span><span class="p">,</span>
+        <span class="p">],</span>
+    <span class="p">},</span>
+    <span class="n">index</span><span class="o">=</span><span class="n">published_t2_aux</span><span class="o">.</span><span class="n">keys</span><span class="p">(),</span>
+<span class="p">)</span>
+<span class="n">compare_t2_aux</span><span class="p">[</span><span class="s2">"Diff (Replication - Published)"</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">compare_t2_aux</span><span class="p">[</span><span class="s2">"Replication (1929-2015)"</span><span class="p">]</span> <span class="o">-</span> <span class="n">compare_t2_aux</span><span class="p">[</span><span class="s2">"Published QJE"</span><span class="p">]</span>
+<span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">First-step (auxiliary) regressions:"</span><span class="p">)</span>
+<span class="n">compare_t2_aux</span><span class="o">.</span><span class="n">style</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"</span><span class="si">{:.3f}</span><span class="s2">"</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Second-step (growth) regression:
+
+First-step (auxiliary) regressions:
+</pre></div>
+</div>
+<div class="output text_html"><style type="text/css">
+</style>
+<table id="T_87118">
+  <thead>
+    <tr>
+      <th class="blank level0" >&nbsp;</th>
+      <th id="T_87118_level0_col0" class="col_heading level0 col0" >Published QJE</th>
+      <th id="T_87118_level0_col1" class="col_heading level0 col1" >Replication (1929-2015)</th>
+      <th id="T_87118_level0_col2" class="col_heading level0 col2" >Extended (1929-2025)</th>
+      <th id="T_87118_level0_col3" class="col_heading level0 col3" >Diff (Replication - Published)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th id="T_87118_level0_row0" class="row_heading level0 row0" >ln HYS<sub>t−2</sub></th>
+      <td id="T_87118_row0_col0" class="data row0 col0" >0.095</td>
+      <td id="T_87118_row0_col1" class="data row0 col1" >0.147</td>
+      <td id="T_87118_row0_col2" class="data row0 col2" >0.130</td>
+      <td id="T_87118_row0_col3" class="data row0 col3" >0.052</td>
+    </tr>
+    <tr>
+      <th id="T_87118_level0_row1" class="row_heading level0 row1" >s<sub>t−2</sub></th>
+      <td id="T_87118_row1_col0" class="data row1 col0" >-0.248</td>
+      <td id="T_87118_row1_col1" class="data row1 col1" >-0.245</td>
+      <td id="T_87118_row1_col2" class="data row1 col2" >-0.244</td>
+      <td id="T_87118_row1_col3" class="data row1 col3" >0.003</td>
+    </tr>
+    <tr>
+      <th id="T_87118_level0_row2" class="row_heading level0 row2" >ln[P/E10]<sub>t−2</sub></th>
+      <td id="T_87118_row2_col0" class="data row2 col0" >-0.134</td>
+      <td id="T_87118_row2_col1" class="data row2 col1" >-0.132</td>
+      <td id="T_87118_row2_col2" class="data row2 col2" >-0.091</td>
+      <td id="T_87118_row2_col3" class="data row2 col3" >0.002</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<p>Three takeaways:</p>
+<ul class="simple">
+<li><p><strong>Column (2) is essentially exact</strong>: 0.145 in both the paper and our
+replication. Column (1)’s credit-sentiment coefficient (-4.281 vs.
+published -4.800) and column (4) (-4.907 vs. -5.389) are within about
+10% — same sign, same order of magnitude, same conclusion (credit-market
+sentiment two years ago has a large, negative, statistically significant
+effect on growth today).</p></li>
+<li><p><strong>The auxiliary regressions confirm the mechanism</strong>: <span class="math notranslate nohighlight">\(s_{t-2}\)</span> predicts
+mean reversion in the spread almost exactly as published (-0.245 vs.
+-0.248), and <span class="math notranslate nohighlight">\(\ln[P/E10]_{t-2}\)</span>’s coefficient (-0.132) sits right
+on top of the paper’s -0.134. <span class="math notranslate nohighlight">\(\ln \mathrm{HYS}_{t-2}\)</span> is the one
+meaningfully different auxiliary coefficient (0.147 vs. published 0.095). In this case,
+the Greenwood-Hanson high-yield share
+we pull is a newer, revised vintage of that series than the one the
+authors used in 2017, which is the most likely source of this gap.</p></li>
+<li><p><strong>The extended window changes very little in the main regression</strong>
+(column (1) results in -4.271 vs. -4.281), but the equity-sentiment auxiliary
+regression’s <span class="math notranslate nohighlight">\(R^2\)</span> drops noticeably (0.083 → 0.047, and its coefficient
+from -0.132 to -0.091) — CAPE became a weaker within-sample predictor of
+next-year equity returns once the low-rate, high-valuation 2016-2025 era
+is folded in, a pattern consistent with well-documented critiques of
+Shiller CAPE’s predictive power in this more recent period.</p></li>
+</ul>
+</section>
+</section>
+<section id="figure-ii-credit-market-sentiment-and-growth">
+<h2>Figure II: Credit-Market Sentiment and Growth<a class="headerlink" href="#figure-ii-credit-market-sentiment-and-growth" title="Link to this heading">#</a></h2>
+<p>Figure II (p. 1392) is a visualization of Table II’s column (1): it plots
+credit-market sentiment at <span class="math notranslate nohighlight">\(t-2\)</span> against real GDP-per-capita growth at <span class="math notranslate nohighlight">\(t\)</span>,
+both orthogonalized against column (1)’s other regressor
+(<span class="math notranslate nohighlight">\(\Delta y_{t-1}\)</span>), with the fitted line’s slope equal to column (1)’s
+<span class="math notranslate nohighlight">\(\beta\)</span> on <span class="math notranslate nohighlight">\(\Delta \hat s_t\)</span>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">replicate_figure_2.orthogonalize</span></code> implements this. The paper also flags a handful of
+“influential observations” and so does <code class="docutils literal notranslate"><span class="pre">find_influential</span></code>, using the same rule the paper
+applies in its own Figure III discussion (p. 1393).</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">fig2_rep</span> <span class="o">=</span> <span class="n">f2</span><span class="o">.</span><span class="n">plot_figure_2</span><span class="p">(</span><span class="n">df2</span><span class="p">,</span> <span class="n">REP_START</span><span class="p">,</span> <span class="n">REP_END</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../../../_images/6184b19ade02d22634b0298536a53cf8f0528c64cecdc4cbf23452af30ddb231.png" src="../../../_images/6184b19ade02d22634b0298536a53cf8f0528c64cecdc4cbf23452af30ddb231.png" />
+</div>
+</div>
+<p>Compared with the printed Figure II, the negative slope, the spread of
+points, and even the specific years flagged as influential are all a close
+match — the paper calls out <strong>1932, 1934, and 1977</strong> as its three most
+influential observations; our replication flags those same three, plus a
+fourth, <strong>1947</strong>. This extra flagged year is most likely a data-vintage artifact rather than a
+methodology difference. It’s a
+good example of a “close but not pixel-identical” replication result, and
+worth naming rather than papering over.</p>
+<section id="id4">
+<h3>Extended Window<a class="headerlink" href="#id4" title="Link to this heading">#</a></h3>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">fig2_ext</span> <span class="o">=</span> <span class="n">f2</span><span class="o">.</span><span class="n">plot_figure_2</span><span class="p">(</span><span class="n">df2</span><span class="p">,</span> <span class="n">REP_START</span><span class="p">,</span> <span class="n">EXT_END</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../../../_images/bc16efec223bc891d7879f95aefb5d7cd6eef1328551730038edb2ddd50d3241.png" src="../../../_images/bc16efec223bc891d7879f95aefb5d7cd6eef1328551730038edb2ddd50d3241.png" />
+</div>
+</div>
+<p>Visually the two figures are nearly indistinguishable — most of the ten
+additional (2016-2025) points cluster close to the origin on both axes,
+consistent with the muted post-2015 spread swings we saw in the extended
+Figure I. We can make the “nearly indistinguishable” claim concrete rather
+than just visual:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">beta_rep</span> <span class="o">=</span> <span class="n">res2_rep</span><span class="p">[</span><span class="s2">"col1"</span><span class="p">]</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">"d_s_hat"</span><span class="p">]</span>
+<span class="n">beta_ext</span> <span class="o">=</span> <span class="n">res2_ext</span><span class="p">[</span><span class="s2">"col1"</span><span class="p">]</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">"d_s_hat"</span><span class="p">]</span>
+<span class="n">infl_rep</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">f2</span><span class="o">.</span><span class="n">find_influential</span><span class="p">(</span><span class="n">res2_rep</span><span class="p">[</span><span class="s2">"col1"</span><span class="p">],</span> <span class="s2">"d_s_hat"</span><span class="p">))</span>
+<span class="n">infl_ext</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">f2</span><span class="o">.</span><span class="n">find_influential</span><span class="p">(</span><span class="n">res2_ext</span><span class="p">[</span><span class="s2">"col1"</span><span class="p">],</span> <span class="s2">"d_s_hat"</span><span class="p">))</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Fitted slope, replication window: </span><span class="si">{</span><span class="n">beta_rep</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Fitted slope, extended window:    </span><span class="si">{</span><span class="n">beta_ext</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Influential years, replication window: </span><span class="si">{</span><span class="n">infl_rep</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Influential years, extended window:    </span><span class="si">{</span><span class="n">infl_ext</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Same influential years in both windows:"</span><span class="p">,</span> <span class="n">infl_rep</span> <span class="o">==</span> <span class="n">infl_ext</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Fitted slope, replication window: -4.281
+Fitted slope, extended window:    -4.271
+Influential years, replication window: [1932, 1934, 1947, 1977]
+Influential years, extended window:    [1932, 1934, 1947, 1977]
+Same influential years in both windows: True
+</pre></div>
+</div>
+</div>
+</div>
+<p>The fitted slope moves by less than 0.3%, and the same four years remain the
+influential ones — no observation from 2016-2025, including the extreme 2020
+pandemic growth print, crosses the cutoff to be considered an influential observation.
+That’s a meaningful robustness result on its own: even the
+sharpest GDP shock in the extended sample doesn’t look unusual once we
+condition on the credit-sentiment/growth relationship the paper documents —
+it’s a big move in <span class="math notranslate nohighlight">\(y\)</span>, but not a big <em>surprise</em> relative to what
+credit-market sentiment two years earlier and last year’s growth already
+implied.</p>
+</section>
+</section>
+<section id="summary">
+<h2>Summary<a class="headerlink" href="#summary" title="Link to this heading">#</a></h2>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Exhibit</p></th>
+<th class="head"><p>Replicates published paper?</p></th>
+<th class="head"><p>Holds up through 2025?</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Figure I</p></td>
+<td><p>Yes, recession-timed spikes match at every date, exact prefix match with the extended series</p></td>
+<td><p>Yes, same pattern continues, with a sharp-but-brief 2020 spike and a 2022 widening that fades by 2024</p></td>
+</tr>
+<tr class="row-odd"><td><p>Table I</p></td>
+<td><p>Yes, closely — column 3’s “credit beats equities” result reproduces (credit stays significant, equity collapses)</p></td>
+<td><p>Yes, with mild attenuation (credit coefficient -2.124 → -2.033)</p></td>
+</tr>
+<tr class="row-even"><td><p>Table II</p></td>
+<td><p>Yes, especially column 2 (0.145 vs. published 0.145) and the auxiliary <span class="math notranslate nohighlight">\(s_{t-2}\)</span>/<span class="math notranslate nohighlight">\(\ln[P/E10]_{t-2}\)</span> rows; columns 1 and 4 within ~10%</p></td>
+<td><p>Yes, the main coefficients nearly unchanged; CAPE’s auxiliary predictive power weakens noticeably</p></td>
+</tr>
+<tr class="row-odd"><td><p>Figure II</p></td>
+<td><p>Yes, same slope, same three published influential years plus one data-vintage-driven fourth (1947)</p></td>
+<td><p>Yes, fitted slope and influential year set both essentially unchanged</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Across all four exhibits, our replication of Lopez-Salido, Stein &amp;
+Zakrajšek (2017) using the Baa-Treasury spread reproduces the paper’s
+central claim - that elevated credit-market sentiment two years prior
+forecasts materially weaker subsequent growth. We see this in both the original
+1929-2015 sample and after extending the same construction through 2025.
+The remaining gaps from the published numbers are small.</p>
+</section>
+</section>
+
+<div class="section ablog__blog_comments">
+   
+</div>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="01_summary_statistics.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Data Walkthrough &amp; Summary Statistics</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="03_extension.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Lopez-Salido, Stein &amp; Zakrajšek (2017): Aaa-Spread Extension</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item"><div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#introduction">Introduction</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#setup">Setup</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#figure-i-the-baa-treasury-credit-spread">Figure I: The Baa-Treasury Credit Spread</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#extended-window">Extended Window</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#table-i-credit-spreads-vs-stock-returns-as-growth-predictors">Table I: Credit Spreads vs. Stock Returns as Growth Predictors</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#definitions">Definitions</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#regressions">Regressions</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#replication-vs-published-vs-extended">Replication vs. Published vs. Extended</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#table-ii-the-two-step-credit-sentiment-regression">Table II: The Two-Step Credit-Sentiment Regression</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id1">Definitions</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">Regressions</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id3">Replication vs. Published vs. Extended</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#figure-ii-credit-market-sentiment-and-growth">Figure II: Credit-Market Sentiment and Growth</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id4">Extended Window</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#summary">Summary</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Fernando Raffo, Bangjie Xu
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2026, Fernando Raffo, Bangjie Xu.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../../_static/scripts/bootstrap.js?digest=90905a2f556bf617f1a9"></script>
+<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=90905a2f556bf617f1a9"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

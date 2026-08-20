@@ -1,0 +1,784 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Chart: Summary Statistics: Real GDP per Capita Growth (1930-present) &#8212; Credit-Market Sentiment and the Business Cycle</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=90905a2f556bf617f1a9" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=90905a2f556bf617f1a9" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/sphinx-book-theme.css?v=4418a689" />
+    <link rel="stylesheet" type="text/css" href="../../_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=206a6f58" />
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+  
+  <!-- So that users can add custom icons -->
+  <script defer src="../../_static/scripts/fontawesome.js?digest=90905a2f556bf617f1a9"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=90905a2f556bf617f1a9" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=90905a2f556bf617f1a9" />
+
+    <script src="../../_static/documentation_options.js?v=b9472d72"></script>
+    <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../_static/scripts/sphinx-book-theme.js?v=fab101a9"></script>
+    <script src="../../_static/design-tabs.js?v=f930bc37"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'cb/charts/P01.summary_statistics_gdp_growth';</script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <link rel="icon" href="../../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="" />
+  
+    
+    <script src="../../_static/searchtools.js"></script>
+    <script src="../../_static/language_data.js"></script>
+    <script src="../../searchindex.js"></script>
+     
+  </head>
+  <body data-default-mode="">
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+  
+  
+  
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search this book..."
+         aria-label="Search this book..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../_static/logo.png" class="logo__image only-light" alt="Credit-Market Sentiment and the Business Cycle - Home"/>
+    <img src="../../_static/logo.png" class="logo__image only-dark pst-js-only" alt="Credit-Market Sentiment and the Business Cycle - Home"/>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        
+        <ul class="nav bd-sidenav bd-sidenav__home-link">
+            <li class="toctree-l1">
+                <a class="reference internal" href="../../index.html">
+                    Credit-Market Sentiment and the Business Cycle
+                </a>
+            </li>
+        </ul>
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Project Notes</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../project_overview.html">Project Overview</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../project_overview/goals.html">Goals</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../project_overview/data_sources.html">Data Sources</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../project_overview/methodology.html">Methodology</a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Notebooks 📖</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../notebooks/P01/01_summary_statistics.html">Data Walkthrough &amp; Summary Statistics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../notebooks/P01/02_replication.html">Lopez-Salido, Stein &amp; Zakrajšek (2017): Replication Walkthrough</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../notebooks/P01/03_extension.html">Lopez-Salido, Stein &amp; Zakrajšek (2017): Aaa-Spread Extension</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../notebooks/P01/04_case_study.html">Case Study: Does the Lopez-Salido, Stein &amp; Zakrajsek (2017) Sentiment Signal Speak to the 2020-2022 Cycle?</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Pipeline Charts 📈</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../charts.html">Chart List</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Pipeline Dataframes 📊</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../dataframes/P01/fred_macroeconomic_variables.html">Dataframe: <code class="docutils literal notranslate"><span class="pre">P01:fred_macroeconomic_variables</span></code> - FRED Macroeconomic Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../dataframes/P01/fred_processed_annual_series.html">Dataframe: <code class="docutils literal notranslate"><span class="pre">P01:fred_processed_annual_series</span></code> - FRED Processed Annual Series</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../dataframes/P01/fred_processed_monthly_series.html">Dataframe: <code class="docutils literal notranslate"><span class="pre">P01:fred_processed_monthly_series</span></code> - FRED Processed Monthly Series</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../dataframes/P01/greenwood_hanson_hys.html">Dataframe: <code class="docutils literal notranslate"><span class="pre">P01:greenwood_hanson_hys</span></code> - Greenwood-Hanson High-Yield Share Data (Published Historical, 1926-2008)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../dataframes/P01/greenwood_hanson_hys_processed_series.html">Dataframe: <code class="docutils literal notranslate"><span class="pre">P01:greenwood_hanson_hys_processed_series</span></code> - Greenwood-Hanson High-Yield Share</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../dataframes/P01/mergent_fisd_bond_data.html">Dataframe: <code class="docutils literal notranslate"><span class="pre">P01:mergent_fisd_bond_data</span></code> - Mergent FISD High-Yield Share Data (Raw FISD Reconstruction, 1980s-present)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../dataframes/P01/shiller_market_variables.html">Dataframe: <code class="docutils literal notranslate"><span class="pre">P01:shiller_market_variables</span></code> - Robert Shiller’s Stock Market Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../dataframes/P01/shiller_processed_annual_series.html">Dataframe: <code class="docutils literal notranslate"><span class="pre">P01:shiller_processed_annual_series</span></code> - Robert Shiller Annual Stock Market Data</a></li>
+</ul>
+
+    </div>
+</nav></div>
+        <div class="sidebar-primary-item">
+<div class="ablog-sidebar-item ablog__categories">
+  <h3>
+    <a href="index/category.html">Categories</a>
+  </h3>
+  <ul>
+     
+    <li>
+      <a href="index/category/aaa.html">Aaa (5)</a>
+    </li>
+      
+    <li>
+      <a href="index/category/baa.html">Baa (5)</a>
+    </li>
+      
+    <li>
+      <a href="index/category/cape.html">Cape (1)</a>
+    </li>
+      
+    <li>
+      <a href="index/category/credit-spread.html">Credit Spread (5)</a>
+    </li>
+      
+    <li>
+      <a href="index/category/extension.html">Extension (6)</a>
+    </li>
+      
+    <li>
+      <a href="index/category/figure-1.html">Figure 1 (4)</a>
+    </li>
+      
+    <li>
+      <a href="index/category/figure-2.html">Figure 2 (4)</a>
+    </li>
+      
+    <li>
+      <a href="index/category/fred.html">Fred (2)</a>
+    </li>
+      
+    <li>
+      <a href="index/category/gdp-growth.html">Gdp Growth (5)</a>
+    </li>
+      
+    <li>
+      <a href="index/category/greenwood.html">Greenwood (1)</a>
+    </li>
+      
+    <li>
+      <a href="index/category/hanson.html">Hanson (1)</a>
+    </li>
+      
+    <li>
+      <a href="index/category/high-yield-share.html">High Yield Share (1)</a>
+    </li>
+      
+    <li>
+      <a href="index/category/hys.html">Hys (1)</a>
+    </li>
+      
+    <li>
+      <a href="index/category/sentiment.html">Sentiment (4)</a>
+    </li>
+      
+    <li>
+      <a href="index/category/shiller.html">Shiller (1)</a>
+    </li>
+      
+    <li>
+      <a href="index/category/summary-statistics.html">Summary Statistics (4)</a>
+    </li>
+     
+  </ul>
+</div>
+</div>
+        <div class="sidebar-primary-item">
+<div class="ablog-sidebar-item ablog__tagcloud">
+  <link
+    rel="stylesheet"
+    href="../../_static/ablog/tagcloud.css"
+    type="text/css"
+  />
+  <h3><a href="index/tag.html">Tags</a></h3>
+  <ul class="ablog-cloud">
+     
+    <li class="ablog-cloud ablog-cloud-1">
+      <a href="index/tag/14831525.html">1483–1525</a>
+    </li>
+      
+    <li class="ablog-cloud ablog-cloud-5">
+      <a href="index/tag/fred.html">FRED</a>
+    </li>
+      
+    <li class="ablog-cloud ablog-cloud-1">
+      <a href="index/tag/greenwood-hanson-2013.html">Greenwood & Hanson (2013)</a>
+    </li>
+      
+    <li class="ablog-cloud ablog-cloud-1">
+      <a href="index/tag/issuer-quality-and-corporate-bond-returns.html">Issuer Quality and Corporate Bond Returns</a>
+    </li>
+      
+    <li class="ablog-cloud ablog-cloud-1">
+      <a href="index/tag/mergent-fisd.html">Mergent FISD</a>
+    </li>
+      
+    <li class="ablog-cloud ablog-cloud-5">
+      <a href="index/tag/office-of-financial-research.html">Office of Financial Research</a>
+    </li>
+      
+    <li class="ablog-cloud ablog-cloud-1">
+      <a href="index/tag/review-of-financial-studies.html">Review of Financial Studies</a>
+    </li>
+      
+    <li class="ablog-cloud ablog-cloud-1">
+      <a href="index/tag/review-of-financial-studies-266.html">Review of Financial Studies 26(6)</a>
+    </li>
+      
+    <li class="ablog-cloud ablog-cloud-1">
+      <a href="index/tag/robert-shillers-data-website.html">Robert Shiller's Data Website</a>
+    </li>
+     
+  </ul>
+</div>
+</div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="../../_sources/cb/charts/P01.summary_statistics_gdp_growth.md" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.md</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button pst-navbar-icon"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div>
+
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+<button class="sidebar-toggle secondary-toggle btn btn-sm pst-navbar-icon" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>Chart: Summary Statistics: Real GDP per Capita Growth (1930-present)</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chart">Chart</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chart-specs">Chart Specs</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#dataframe-manifest">Dataframe Manifest</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#pipeline-manifest">Pipeline Manifest</a></li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                   <section class="tex2jax_ignore mathjax_ignore" id="chart-summary-statistics-real-gdp-per-capita-growth-1930-present">
+<h1>Chart: Summary Statistics: Real GDP per Capita Growth (1930-present)<a class="headerlink" href="#chart-summary-statistics-real-gdp-per-capita-growth-1930-present" title="Link to this heading">#</a></h1>
+<p>Annual year-over-year growth in real GDP per capita.</p>
+<section id="chart">
+<h2>Chart<a class="headerlink" href="#chart" title="Link to this heading">#</a></h2>
+<iframe src="../../_static/P01/summary_statistics_gdp_growth.html" height="500px" width="100%"></iframe>
+
+<p style="text-align: center;">Sources: FRED, Office of Financial Research</p><p><a class="reference download internal" download="" href="../../_downloads/70fe40f0027bd757d992f40ad2067e22/summary_statistics_gdp_growth.html"><span class="xref download myst">Full Screen Chart</span></a></p>
+<p>Log growth of <code class="docutils literal notranslate"><span class="pre">GDP_per_capita</span></code> from <code class="docutils literal notranslate"><span class="pre">fred_final_series_annual.parquet</span></code>.</p>
+</section>
+<section id="chart-specs">
+<h2>Chart Specs<a class="headerlink" href="#chart-specs" title="Link to this heading">#</a></h2>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Chart Name</p></th>
+<th class="head"><p>Summary Statistics: Real GDP per Capita Growth (1930-present)</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Chart ID</p></td>
+<td><p>summary_statistics_gdp_growth</p></td>
+</tr>
+<tr class="row-odd"><td><p>Tags</p></td>
+<td><p>Summary Statistics, Gdp Growth, Fred</p></td>
+</tr>
+<tr class="row-even"><td><p>Data Series Start Date</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Data Frequency</p></td>
+<td><p>Annual</p></td>
+</tr>
+<tr class="row-even"><td><p>Observation Period</p></td>
+<td><p>Calendar Year</p></td>
+</tr>
+<tr class="row-odd"><td><p>Lag in Data Release</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>Data Release Timing</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Seasonal Adjustment</p></td>
+<td><p>Not Seasonally Adjusted</p></td>
+</tr>
+<tr class="row-even"><td><p>Units</p></td>
+<td><p>Log growth, y/y (pct.)</p></td>
+</tr>
+<tr class="row-odd"><td><p>HTML Chart</p></td>
+<td><p><a class="reference download internal" download="" href="../../_downloads/70fe40f0027bd757d992f40ad2067e22/summary_statistics_gdp_growth.html"><span class="xref download myst">HTML</span></a></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="dataframe-manifest">
+<h2>Dataframe Manifest<a class="headerlink" href="#dataframe-manifest" title="Link to this heading">#</a></h2>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Dataframe Name</p></th>
+<th class="head"><p>FRED Processed Annual Series</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Dataframe ID</p></td>
+<td><p><a class="reference internal" href="../dataframes/P01/fred_processed_annual_series.html"><span class="std std-doc">fred_processed_annual_series</span></a></p></td>
+</tr>
+<tr class="row-odd"><td><p>Sources</p></td>
+<td><p>FRED, Office of Financial Research</p></td>
+</tr>
+<tr class="row-even"><td><p>Providers</p></td>
+<td><p>FRED, Office of Financial Research</p></td>
+</tr>
+<tr class="row-odd"><td><p>Provider Links</p></td>
+<td><p><a class="reference external" href="https://fred.stlouisfed.org/">https://fred.stlouisfed.org/</a></p></td>
+</tr>
+<tr class="row-even"><td><p>Tags</p></td>
+<td><p>Processed Data, Macroeconomic Data, Fred</p></td>
+</tr>
+<tr class="row-odd"><td><p>Access Types</p></td>
+<td><p>Public</p></td>
+</tr>
+<tr class="row-even"><td><p>How is data pulled?</p></td>
+<td><p>Web API via Python <code class="docutils literal notranslate"><span class="pre">pandas_datareader.data.DataReader</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>Data available up to (min)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>Data available up to (max)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Dataframe Path</p></td>
+<td><p>C:\Users\fraff\OneDrive\Documentos\UChicago\FINM_32900_Full_Stack_Quantitative_Finance\Project\p03_lopez_salido_stein_zakrajsek_2017_data\processed_data\fred_final_series_annual.parquet</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><strong>Linked Charts:</strong></p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#../../charts/P01.figure_2_replication.md"><span class="xref myst">P01:figure_2_replication</span></a></p></li>
+<li><p><a class="reference internal" href="#../../charts/P01.figure_2_extended.md"><span class="xref myst">P01:figure_2_extended</span></a></p></li>
+<li><p><a class="reference internal" href="#../../charts/P01.figure_2_aaa_replication.md"><span class="xref myst">P01:figure_2_aaa_replication</span></a></p></li>
+<li><p><a class="reference internal" href="#../../charts/P01.figure_2_aaa_extended.md"><span class="xref myst">P01:figure_2_aaa_extended</span></a></p></li>
+<li><p><a class="reference internal" href="#../../charts/P01.summary_statistics_gdp_growth.md"><span class="xref myst">P01:summary_statistics_gdp_growth</span></a></p></li>
+</ul>
+</section>
+<section id="pipeline-manifest">
+<h2>Pipeline Manifest<a class="headerlink" href="#pipeline-manifest" title="Link to this heading">#</a></h2>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Pipeline Name</p></th>
+<th class="head"><p>Credit-Market Sentiment and the Business Cycle</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Pipeline ID</p></td>
+<td><p><a class="reference internal" href="../../index.html"><span class="std std-doc">P01</span></a></p></td>
+</tr>
+<tr class="row-odd"><td><p>Maintainer</p></td>
+<td><p>Fernando Raffo, Bangjie Xu</p></td>
+</tr>
+<tr class="row-even"><td><p>Contributors</p></td>
+<td><p>Fernando Raffo, Bangjie Xu</p></td>
+</tr>
+<tr class="row-odd"><td><p>Repository</p></td>
+<td><p><a class="github reference external" href="https://github.com/fernando-raffo/p03_lopez_salido_stein_zakrajsek_2017">fernando-raffo/p03_lopez_salido_stein_zakrajsek_2017</a></p></td>
+</tr>
+<tr class="row-even"><td><p>Pipeline Web Page</p></td>
+<td><p><a href="file://C:/Users/fraff/OneDrive/Documentos/UChicago/FINM_32900_Full_Stack_Quantitative_Finance/Project/p03_lopez_salido_stein_zakrajsek_2017/docs/index.html">Pipeline Web Page</p></td>
+</tr>
+<tr class="row-odd"><td><p>Date of Last Code Update</p></td>
+<td><p>2026-08-19 22:04:54</p></td>
+</tr>
+<tr class="row-even"><td><p>OS Compatibility</p></td>
+<td><p>Windows, Linux, MacOS</p></td>
+</tr>
+<tr class="row-odd"><td><p>Linked Dataframes</p></td>
+<td><p><a class="reference internal" href="../dataframes/P01/fred_macroeconomic_variables.html"><span class="std std-doc">P01:fred_macroeconomic_variables</span></a><br>  <a class="reference internal" href="../dataframes/P01/shiller_market_variables.html"><span class="std std-doc">P01:shiller_market_variables</span></a><br>  <a class="reference internal" href="../dataframes/P01/greenwood_hanson_hys.html"><span class="std std-doc">P01:greenwood_hanson_hys</span></a><br>  <a class="reference internal" href="../dataframes/P01/mergent_fisd_bond_data.html"><span class="std std-doc">P01:mergent_fisd_bond_data</span></a><br>  <a class="reference internal" href="../dataframes/P01/fred_processed_monthly_series.html"><span class="std std-doc">P01:fred_processed_monthly_series</span></a><br>  <a class="reference internal" href="../dataframes/P01/fred_processed_annual_series.html"><span class="std std-doc">P01:fred_processed_annual_series</span></a><br>  <a class="reference internal" href="../dataframes/P01/shiller_processed_annual_series.html"><span class="std std-doc">P01:shiller_processed_annual_series</span></a><br>  <a class="reference internal" href="../dataframes/P01/greenwood_hanson_hys_processed_series.html"><span class="std std-doc">P01:greenwood_hanson_hys_processed_series</span></a><br></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+</section>
+
+<div class="section ablog__blog_comments">
+     
+<div class="section ablog__prev-next">
+  <span class="ablog__prev">
+     
+    <a href="P01.summary_statistics_hy_share.html">
+      
+      <i class="fa fa-arrow-circle-left"></i>
+      
+      <span>Chart: Summary Statistics: Greenwood-Hanson High-Yield Share (1929-present)</span>
+    </a>
+    
+  </span>
+  <span class="ablog__spacer">&nbsp;</span>
+  <span class="ablog__next">
+    
+  </span>
+</div>
+  
+</div>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item"><div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chart">Chart</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chart-specs">Chart Specs</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#dataframe-manifest">Dataframe Manifest</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#pipeline-manifest">Pipeline Manifest</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Fernando Raffo, Bangjie Xu
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2026, Fernando Raffo, Bangjie Xu.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../_static/scripts/bootstrap.js?digest=90905a2f556bf617f1a9"></script>
+<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=90905a2f556bf617f1a9"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

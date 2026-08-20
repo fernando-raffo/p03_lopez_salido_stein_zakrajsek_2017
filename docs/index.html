@@ -1,0 +1,957 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="./" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Credit-Market Sentiment and the Business Cycle &#8212; Credit-Market Sentiment and the Business Cycle</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=90905a2f556bf617f1a9" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=90905a2f556bf617f1a9" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/sphinx-book-theme.css?v=4418a689" />
+    <link rel="stylesheet" type="text/css" href="_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
+    <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="_static/custom.css?v=206a6f58" />
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+  
+  <!-- So that users can add custom icons -->
+  <script defer src="_static/scripts/fontawesome.js?digest=90905a2f556bf617f1a9"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=90905a2f556bf617f1a9" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=90905a2f556bf617f1a9" />
+
+    <script src="_static/documentation_options.js?v=b9472d72"></script>
+    <script src="_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="_static/copybutton.js?v=f281be69"></script>
+    <script src="_static/scripts/sphinx-book-theme.js?v=fab101a9"></script>
+    <script src="_static/design-tabs.js?v=f930bc37"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'index';</script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <link rel="icon" href="_static/favicon.ico"/>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Project Overview" href="project_overview.html" /> 
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="" />
+  
+    
+    <script src="_static/searchtools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <script src="searchindex.js"></script>
+     
+  </head>
+  <body data-default-mode="">
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+  
+  
+  
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search this book..."
+         aria-label="Search this book..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="#">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="_static/logo.png" class="logo__image only-light" alt="Credit-Market Sentiment and the Business Cycle - Home"/>
+    <img src="_static/logo.png" class="logo__image only-dark pst-js-only" alt="Credit-Market Sentiment and the Business Cycle - Home"/>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        
+        <ul class="nav bd-sidenav bd-sidenav__home-link">
+            <li class="toctree-l1 current active">
+                <a class="reference internal" href="#">
+                    Credit-Market Sentiment and the Business Cycle
+                </a>
+            </li>
+        </ul>
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Project Notes</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="project_overview.html">Project Overview</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="project_overview/goals.html">Goals</a></li>
+<li class="toctree-l2"><a class="reference internal" href="project_overview/data_sources.html">Data Sources</a></li>
+<li class="toctree-l2"><a class="reference internal" href="project_overview/methodology.html">Methodology</a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Notebooks 📖</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="cb/notebooks/P01/01_summary_statistics.html">Data Walkthrough &amp; Summary Statistics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cb/notebooks/P01/02_replication.html">Lopez-Salido, Stein &amp; Zakrajšek (2017): Replication Walkthrough</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cb/notebooks/P01/03_extension.html">Lopez-Salido, Stein &amp; Zakrajšek (2017): Aaa-Spread Extension</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cb/notebooks/P01/04_case_study.html">Case Study: Does the Lopez-Salido, Stein &amp; Zakrajsek (2017) Sentiment Signal Speak to the 2020-2022 Cycle?</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Pipeline Charts 📈</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="cb/charts.html">Chart List</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Pipeline Dataframes 📊</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="cb/dataframes/P01/fred_macroeconomic_variables.html">Dataframe: <code class="docutils literal notranslate"><span class="pre">P01:fred_macroeconomic_variables</span></code> - FRED Macroeconomic Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cb/dataframes/P01/fred_processed_annual_series.html">Dataframe: <code class="docutils literal notranslate"><span class="pre">P01:fred_processed_annual_series</span></code> - FRED Processed Annual Series</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cb/dataframes/P01/fred_processed_monthly_series.html">Dataframe: <code class="docutils literal notranslate"><span class="pre">P01:fred_processed_monthly_series</span></code> - FRED Processed Monthly Series</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cb/dataframes/P01/greenwood_hanson_hys.html">Dataframe: <code class="docutils literal notranslate"><span class="pre">P01:greenwood_hanson_hys</span></code> - Greenwood-Hanson High-Yield Share Data (Published Historical, 1926-2008)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cb/dataframes/P01/greenwood_hanson_hys_processed_series.html">Dataframe: <code class="docutils literal notranslate"><span class="pre">P01:greenwood_hanson_hys_processed_series</span></code> - Greenwood-Hanson High-Yield Share</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cb/dataframes/P01/mergent_fisd_bond_data.html">Dataframe: <code class="docutils literal notranslate"><span class="pre">P01:mergent_fisd_bond_data</span></code> - Mergent FISD High-Yield Share Data (Raw FISD Reconstruction, 1980s-present)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cb/dataframes/P01/shiller_market_variables.html">Dataframe: <code class="docutils literal notranslate"><span class="pre">P01:shiller_market_variables</span></code> - Robert Shiller’s Stock Market Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cb/dataframes/P01/shiller_processed_annual_series.html">Dataframe: <code class="docutils literal notranslate"><span class="pre">P01:shiller_processed_annual_series</span></code> - Robert Shiller Annual Stock Market Data</a></li>
+</ul>
+
+    </div>
+</nav></div>
+        <div class="sidebar-primary-item">
+<div class="ablog-sidebar-item ablog__categories">
+  <h3>
+    <a href="cb/charts/index/category.html">Categories</a>
+  </h3>
+  <ul>
+     
+    <li>
+      <a href="cb/charts/index/category/aaa.html">Aaa (5)</a>
+    </li>
+      
+    <li>
+      <a href="cb/charts/index/category/baa.html">Baa (5)</a>
+    </li>
+      
+    <li>
+      <a href="cb/charts/index/category/cape.html">Cape (1)</a>
+    </li>
+      
+    <li>
+      <a href="cb/charts/index/category/credit-spread.html">Credit Spread (5)</a>
+    </li>
+      
+    <li>
+      <a href="cb/charts/index/category/extension.html">Extension (6)</a>
+    </li>
+      
+    <li>
+      <a href="cb/charts/index/category/figure-1.html">Figure 1 (4)</a>
+    </li>
+      
+    <li>
+      <a href="cb/charts/index/category/figure-2.html">Figure 2 (4)</a>
+    </li>
+      
+    <li>
+      <a href="cb/charts/index/category/fred.html">Fred (2)</a>
+    </li>
+      
+    <li>
+      <a href="cb/charts/index/category/gdp-growth.html">Gdp Growth (5)</a>
+    </li>
+      
+    <li>
+      <a href="cb/charts/index/category/greenwood.html">Greenwood (1)</a>
+    </li>
+      
+    <li>
+      <a href="cb/charts/index/category/hanson.html">Hanson (1)</a>
+    </li>
+      
+    <li>
+      <a href="cb/charts/index/category/high-yield-share.html">High Yield Share (1)</a>
+    </li>
+      
+    <li>
+      <a href="cb/charts/index/category/hys.html">Hys (1)</a>
+    </li>
+      
+    <li>
+      <a href="cb/charts/index/category/sentiment.html">Sentiment (4)</a>
+    </li>
+      
+    <li>
+      <a href="cb/charts/index/category/shiller.html">Shiller (1)</a>
+    </li>
+      
+    <li>
+      <a href="cb/charts/index/category/summary-statistics.html">Summary Statistics (4)</a>
+    </li>
+     
+  </ul>
+</div>
+</div>
+        <div class="sidebar-primary-item">
+<div class="ablog-sidebar-item ablog__tagcloud">
+  <link
+    rel="stylesheet"
+    href="_static/ablog/tagcloud.css"
+    type="text/css"
+  />
+  <h3><a href="cb/charts/index/tag.html">Tags</a></h3>
+  <ul class="ablog-cloud">
+     
+    <li class="ablog-cloud ablog-cloud-1">
+      <a href="cb/charts/index/tag/14831525.html">1483–1525</a>
+    </li>
+      
+    <li class="ablog-cloud ablog-cloud-5">
+      <a href="cb/charts/index/tag/fred.html">FRED</a>
+    </li>
+      
+    <li class="ablog-cloud ablog-cloud-1">
+      <a href="cb/charts/index/tag/greenwood-hanson-2013.html">Greenwood & Hanson (2013)</a>
+    </li>
+      
+    <li class="ablog-cloud ablog-cloud-1">
+      <a href="cb/charts/index/tag/issuer-quality-and-corporate-bond-returns.html">Issuer Quality and Corporate Bond Returns</a>
+    </li>
+      
+    <li class="ablog-cloud ablog-cloud-1">
+      <a href="cb/charts/index/tag/mergent-fisd.html">Mergent FISD</a>
+    </li>
+      
+    <li class="ablog-cloud ablog-cloud-5">
+      <a href="cb/charts/index/tag/office-of-financial-research.html">Office of Financial Research</a>
+    </li>
+      
+    <li class="ablog-cloud ablog-cloud-1">
+      <a href="cb/charts/index/tag/review-of-financial-studies.html">Review of Financial Studies</a>
+    </li>
+      
+    <li class="ablog-cloud ablog-cloud-1">
+      <a href="cb/charts/index/tag/review-of-financial-studies-266.html">Review of Financial Studies 26(6)</a>
+    </li>
+      
+    <li class="ablog-cloud ablog-cloud-1">
+      <a href="cb/charts/index/tag/robert-shillers-data-website.html">Robert Shiller's Data Website</a>
+    </li>
+     
+  </ul>
+</div>
+</div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="_sources/index.md" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.md</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button pst-navbar-icon"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div>
+
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+<button class="sidebar-toggle secondary-toggle btn btn-sm pst-navbar-icon" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>Credit-Market Sentiment and the Business Cycle</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#table-of-contents">Table of Contents</a><ul class="nav section-nav flex-column">
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#pipeline-specs">Pipeline Specs</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#about-this-project">About this project</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#data-sources">Data Sources</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#quick-start">Quick Start</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#software-access-prerequisites">0. Software &amp; Access Prerequisites</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#create-activate-virtual-environment">1. Create &amp; Activate Virtual Environment</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#configure-wrds-credentials">2. Configure WRDS Credentials</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#run-the-full-pipeline">3. Run the Full Pipeline</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#other-commands">4. Other commands</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#unit-tests-and-doc-tests">Unit Tests and Doc Tests</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#setting-environment-variables">Setting Environment Variables</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#formatting">Formatting</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#general-directory-structure">General Directory Structure</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#additional-notes">Additional Notes</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#data-and-output-storage">Data and Output Storage</a></li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                   <section class="tex2jax_ignore mathjax_ignore" id="credit-market-sentiment-and-the-business-cycle">
+<h1>Credit-Market Sentiment and the Business Cycle<a class="headerlink" href="#credit-market-sentiment-and-the-business-cycle" title="Link to this heading">#</a></h1>
+<p>Last updated: Aug 20, 2026, 2:05:03 AM</p>
+<div class="toctree-wrapper compound">
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Project Notes</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="project_overview.html">Project Overview</a></li>
+</ul>
+</div>
+<section id="table-of-contents">
+<h2>Table of Contents<a class="headerlink" href="#table-of-contents" title="Link to this heading">#</a></h2>
+<div class="toctree-wrapper compound">
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Notebooks 📖</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="cb/notebooks/P01/01_summary_statistics.html">Data Walkthrough &amp; Summary Statistics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cb/notebooks/P01/02_replication.html">Lopez-Salido, Stein &amp; Zakrajšek (2017): Replication Walkthrough</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cb/notebooks/P01/03_extension.html">Lopez-Salido, Stein &amp; Zakrajšek (2017): Aaa-Spread Extension</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cb/notebooks/P01/04_case_study.html">Case Study: Does the Lopez-Salido, Stein &amp; Zakrajsek (2017) Sentiment Signal Speak to the 2020-2022 Cycle?</a></li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Pipeline Charts 📈</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="cb/charts.html">Chart List</a></li>
+</ul>
+</div>
+<ul class="postlist-style-none postlist simple">
+<li class="ablog-post"><p class="ablog-post-title"><a class="reference internal" href="cb/charts/P01.summary_statistics_gdp_growth.html">Chart: Summary Statistics: Real GDP per Capita Growth (1930-present)</a></p></li>
+<li class="ablog-post"><p class="ablog-post-title"><a class="reference internal" href="cb/charts/P01.summary_statistics_hy_share.html">Chart: Summary Statistics: Greenwood-Hanson High-Yield Share (1929-present)</a></p></li>
+<li class="ablog-post"><p class="ablog-post-title"><a class="reference internal" href="cb/charts/P01.summary_statistics_cape.html">Chart: Summary Statistics: CAPE vs. Subsequent 10-Year S&amp;P Return (1929-present)</a></p></li>
+<li class="ablog-post"><p class="ablog-post-title"><a class="reference internal" href="cb/charts/P01.summary_statistics_credit_spreads.html">Chart: Summary Statistics: Baa/Aaa-Treasury Credit Spreads (1925-present)</a></p></li>
+<li class="ablog-post"><p class="ablog-post-title"><a class="reference internal" href="cb/charts/P01.figure_2_extended.html">Chart: Figure 2: Credit-Market Sentiment and GDP Growth (1929-present, extended)</a></p></li>
+<li class="ablog-post"><p class="ablog-post-title"><a class="reference internal" href="cb/charts/P01.figure_2_replication.html">Chart: Figure 2: Credit-Market Sentiment and GDP Growth (1929-2015)</a></p></li>
+<li class="ablog-post"><p class="ablog-post-title"><a class="reference internal" href="cb/charts/P01.figure_2_aaa_extended.html">Chart: Figure 2 (Aaa variant): Credit-Market Sentiment and GDP Growth (1929-present, extended)</a></p></li>
+<li class="ablog-post"><p class="ablog-post-title"><a class="reference internal" href="cb/charts/P01.figure_2_aaa_replication.html">Chart: Figure 2 (Aaa variant): Credit-Market Sentiment and GDP Growth (1929-2015)</a></p></li>
+<li class="ablog-post"><p class="ablog-post-title"><a class="reference internal" href="cb/charts/P01.figure_1_extended.html">Chart: Figure 1: Baa-Treasury Credit Spread (1925-2025, extended)</a></p></li>
+<li class="ablog-post"><p class="ablog-post-title"><a class="reference internal" href="cb/charts/P01.figure_1_replication.html">Chart: Figure 1: Baa-Treasury Credit Spread (1925-2015)</a></p></li>
+<li class="ablog-post"><p class="ablog-post-title"><a class="reference internal" href="cb/charts/P01.figure_1_aaa_extended.html">Chart: Figure 1 (Aaa variant): Aaa-Treasury Credit Spread (1925-2025, extended)</a></p></li>
+<li class="ablog-post"><p class="ablog-post-title"><a class="reference internal" href="cb/charts/P01.figure_1_aaa_replication.html">Chart: Figure 1 (Aaa variant): Aaa-Treasury Credit Spread (1925-2015)</a></p></li>
+</ul>
+<div class="toctree-wrapper compound">
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Pipeline Dataframes 📊</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="cb/dataframes/P01/fred_macroeconomic_variables.html">Dataframe: <code class="docutils literal notranslate"><span class="pre">P01:fred_macroeconomic_variables</span></code> - FRED Macroeconomic Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cb/dataframes/P01/fred_processed_annual_series.html">Dataframe: <code class="docutils literal notranslate"><span class="pre">P01:fred_processed_annual_series</span></code> - FRED Processed Annual Series</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cb/dataframes/P01/fred_processed_monthly_series.html">Dataframe: <code class="docutils literal notranslate"><span class="pre">P01:fred_processed_monthly_series</span></code> - FRED Processed Monthly Series</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cb/dataframes/P01/greenwood_hanson_hys.html">Dataframe: <code class="docutils literal notranslate"><span class="pre">P01:greenwood_hanson_hys</span></code> - Greenwood-Hanson High-Yield Share Data (Published Historical, 1926-2008)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cb/dataframes/P01/greenwood_hanson_hys_processed_series.html">Dataframe: <code class="docutils literal notranslate"><span class="pre">P01:greenwood_hanson_hys_processed_series</span></code> - Greenwood-Hanson High-Yield Share</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cb/dataframes/P01/mergent_fisd_bond_data.html">Dataframe: <code class="docutils literal notranslate"><span class="pre">P01:mergent_fisd_bond_data</span></code> - Mergent FISD High-Yield Share Data (Raw FISD Reconstruction, 1980s-present)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cb/dataframes/P01/shiller_market_variables.html">Dataframe: <code class="docutils literal notranslate"><span class="pre">P01:shiller_market_variables</span></code> - Robert Shiller’s Stock Market Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cb/dataframes/P01/shiller_processed_annual_series.html">Dataframe: <code class="docutils literal notranslate"><span class="pre">P01:shiller_processed_annual_series</span></code> - Robert Shiller Annual Stock Market Data</a></li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+</div>
+</section>
+<section id="pipeline-specs">
+<h2>Pipeline Specs<a class="headerlink" href="#pipeline-specs" title="Link to this heading">#</a></h2>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Pipeline Name</p></th>
+<th class="head"><p>Credit-Market Sentiment and the Business Cycle</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Pipeline ID</p></td>
+<td><p><a class="reference internal" href="#"><span class="std std-doc">P01</span></a></p></td>
+</tr>
+<tr class="row-odd"><td><p>Maintainer</p></td>
+<td><p>Fernando Raffo, Bangjie Xu</p></td>
+</tr>
+<tr class="row-even"><td><p>Contributors</p></td>
+<td><p>Fernando Raffo, Bangjie Xu</p></td>
+</tr>
+<tr class="row-odd"><td><p>Repository</p></td>
+<td><p><a class="github reference external" href="https://github.com/fernando-raffo/p03_lopez_salido_stein_zakrajsek_2017">fernando-raffo/p03_lopez_salido_stein_zakrajsek_2017</a></p></td>
+</tr>
+<tr class="row-even"><td><p>Pipeline Web Page</p></td>
+<td><p><a href="file://C:/Users/fraff/OneDrive/Documentos/UChicago/FINM_32900_Full_Stack_Quantitative_Finance/Project/p03_lopez_salido_stein_zakrajsek_2017/docs/index.html">Pipeline Web Page</p></td>
+</tr>
+<tr class="row-odd"><td><p>Date of Last Code Update</p></td>
+<td><p>2026-08-19 22:04:54</p></td>
+</tr>
+<tr class="row-even"><td><p>OS Compatibility</p></td>
+<td><p>Windows, Linux, MacOS</p></td>
+</tr>
+<tr class="row-odd"><td><p>Linked Dataframes</p></td>
+<td><p><a class="reference internal" href="cb/dataframes/P01/fred_macroeconomic_variables.html"><span class="std std-doc">P01:fred_macroeconomic_variables</span></a><br>  <a class="reference internal" href="cb/dataframes/P01/shiller_market_variables.html"><span class="std std-doc">P01:shiller_market_variables</span></a><br>  <a class="reference internal" href="cb/dataframes/P01/greenwood_hanson_hys.html"><span class="std std-doc">P01:greenwood_hanson_hys</span></a><br>  <a class="reference internal" href="cb/dataframes/P01/mergent_fisd_bond_data.html"><span class="std std-doc">P01:mergent_fisd_bond_data</span></a><br>  <a class="reference internal" href="cb/dataframes/P01/fred_processed_monthly_series.html"><span class="std std-doc">P01:fred_processed_monthly_series</span></a><br>  <a class="reference internal" href="cb/dataframes/P01/fred_processed_annual_series.html"><span class="std std-doc">P01:fred_processed_annual_series</span></a><br>  <a class="reference internal" href="cb/dataframes/P01/shiller_processed_annual_series.html"><span class="std std-doc">P01:shiller_processed_annual_series</span></a><br>  <a class="reference internal" href="cb/dataframes/P01/greenwood_hanson_hys_processed_series.html"><span class="std std-doc">P01:greenwood_hanson_hys_processed_series</span></a><br></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="about-this-project">
+<h2>About this project<a class="headerlink" href="#about-this-project" title="Link to this heading">#</a></h2>
+<p>This project replicates key results from:</p>
+<blockquote>
+<div><p>Lopez-Salido, D., Stein, J. C., and Zakrajsek, E. (2017), “Credit-Market Sentiment and the Business Cycle.” <em>The Quarterly Journal of Economics</em>, 132(3): 1373-1426. <a class="reference external" href="https://doi.org/10.1093/qje/qjx014">https://doi.org/10.1093/qje/qjx014</a></p>
+</div></blockquote>
+<p>The paper shows that elevated credit-market sentiment in year <em>t - 2</em> (proxied by narrow, aggressively priced credit spreads and a high share of junk-bond issuance) forecasts a subsequent widening of credit spreads and a decline in economic activity in years <em>t</em> and <em>t + 1</em>, using U.S. data from 1929 to 2015. This repo pulls the underlying data (FRED, Greenwood-Hanson credit-spread and issuance data, and Shiller’s stock-market data), reconstructs the paper’s credit-market sentiment measure via a two-step forecasting regression, and reproduces select tables and figures from the paper, including:</p>
+<ul class="simple">
+<li><p><strong>Figure 1</strong>: the Baa-Treasury credit spread over time</p></li>
+<li><p><strong>Figure 2</strong>: credit-market sentiment and economic growth</p></li>
+<li><p><strong>Table 1</strong>: forecasting economic growth with credit spreads and stock prices</p></li>
+<li><p><strong>Table 2</strong>: the two-step regression results linking financial-market sentiment to economic growth</p></li>
+</ul>
+<p><strong>Extension.</strong> The original paper builds its credit-market sentiment proxy from the spread between Moody’s seasoned <strong>Baa</strong>-rated (lowest investment-grade) corporate bond yields and the 10-year Treasury yield. This project extends the replication by rebuilding the same figures and regressions using the spread on Moody’s <strong>Aaa</strong>-rated (highest-grade) corporate bonds in place of Baa. The Aaa-based outputs are produced alongside the original Baa-based ones throughout the pipeline.</p>
+<p><strong>Case study.</strong> A second extension applies the paper’s Table II first-step sentiment regression - estimated and held fixed on 1929-2015 data - out of sample to the 2020-2022 COVID cycle, comparing its predicted change in the Baa-Treasury credit spread against the realized change.</p>
+</section>
+<section id="data-sources">
+<h2>Data Sources<a class="headerlink" href="#data-sources" title="Link to this heading">#</a></h2>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Source</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>FRED</p></td>
+<td><p>Moody’s Aaa/Baa seasoned corporate bond yields, 10-year Treasury yield, 3-month T-bill rate, CPI, population, real GDP, and the NBER recession indicator</p></td>
+</tr>
+<tr class="row-odd"><td><p>Robert Shiller’s Data Website</p></td>
+<td><p>Monthly S&amp;P Composite price, dividends, earnings, CPI, the 10-year Treasury rate, and the cyclically adjusted price-earnings ratio (CAPE / P/E10)</p></td>
+</tr>
+<tr class="row-even"><td><p>Greenwood &amp; Hanson (2013), via Harvard Business School</p></td>
+<td><p>Published historical annual high-yield share of nonfinancial corporate bond issuance, 1926-2008</p></td>
+</tr>
+<tr class="row-odd"><td><p>Mergent FISD via WRDS</p></td>
+<td><p>Bond-level issuance and rating data used to reconstruct the high-yield share from the early 1980s onward, spliced onto the published Greenwood-Hanson series</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="quick-start">
+<h2>Quick Start<a class="headerlink" href="#quick-start" title="Link to this heading">#</a></h2>
+<section id="software-access-prerequisites">
+<h3>0. Software &amp; Access Prerequisites<a class="headerlink" href="#software-access-prerequisites" title="Link to this heading">#</a></h3>
+<ol class="arabic simple">
+<li><p>Conda Package Manager (e.g. <a class="reference external" href="https://www.anaconda.com/">via Anaconda</a>)</p></li>
+<li><p><a class="reference external" href="https://www.python.org/">Python 3.12 or above</a></p></li>
+<li><p><a class="reference external" href="https://tug.org/mactex/mactex-download.html">MacTeX</a> or <a class="reference external" href="https://tug.org/texlive/">TeX Live</a></p></li>
+<li><p><a class="reference external" href="https://wrds-www.wharton.upenn.edu/">WRDS Subscription</a></p></li>
+</ol>
+</section>
+<section id="create-activate-virtual-environment">
+<h3>1. Create &amp; Activate Virtual Environment<a class="headerlink" href="#create-activate-virtual-environment" title="Link to this heading">#</a></h3>
+<p>You can create a conda environment and all dependencies direcly using the command below if you have the conda package manager:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda<span class="w"> </span>env<span class="w"> </span>create<span class="w"> </span>-f<span class="w"> </span>environment.yml
+conda<span class="w"> </span>activate<span class="w"> </span>p03_lopez_salido_stein_zakrajsek_2017_env
+</pre></div>
+</div>
+<p>Alternatively, we also include a <code class="docutils literal notranslate"><span class="pre">requirements.txt</span></code> file to create an environment with alternative package mangers or a simple Python virtual environment:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda<span class="w"> </span>create<span class="w"> </span>-n<span class="w"> </span>p03_lopez_salido_stein_zakrajsek_2017_env<span class="w"> </span><span class="nv">python</span><span class="o">=</span><span class="m">3</span>.12
+conda<span class="w"> </span>activate<span class="w"> </span>p03_lopez_salido_stein_zakrajsek_2017_env
+pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>requirements.txt
+</pre></div>
+</div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>-m<span class="w"> </span>venv<span class="w"> </span>.venv
+<span class="nb">source</span><span class="w"> </span>.venv/bin/activate<span class="w"> </span>
+pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>requirements.txt
+</pre></div>
+</div>
+</section>
+<section id="configure-wrds-credentials">
+<h3>2. Configure WRDS Credentials<a class="headerlink" href="#configure-wrds-credentials" title="Link to this heading">#</a></h3>
+<p>Copy .env.example into a new file called .env in the project:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>cp<span class="w"> </span>.env.example<span class="w"> </span>.env
+</pre></div>
+</div>
+<p>Then edit .env with your WRDS credentials. It should look like:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">WRDS_USERNAME</span><span class="o">=</span><span class="s2">"your_username"</span>
+</pre></div>
+</div>
+</section>
+<section id="run-the-full-pipeline">
+<h3>3. Run the Full Pipeline<a class="headerlink" href="#run-the-full-pipeline" title="Link to this heading">#</a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>doit
+</pre></div>
+</div>
+</section>
+<section id="other-commands">
+<h3>4. Other commands<a class="headerlink" href="#other-commands" title="Link to this heading">#</a></h3>
+<section id="unit-tests-and-doc-tests">
+<h4>Unit Tests and Doc Tests<a class="headerlink" href="#unit-tests-and-doc-tests" title="Link to this heading">#</a></h4>
+<p>You can run the unit test, including doctests, with the following command:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pytest</span> <span class="o">--</span><span class="n">doctest</span><span class="o">-</span><span class="n">modules</span>
+</pre></div>
+</div>
+<p>The full <code class="docutils literal notranslate"><span class="pre">doit</span></code> also ends with a <code class="docutils literal notranslate"><span class="pre">run_pytest</span></code> task that executes this same suite as its final step, after the data pulls and the Table I / II replications. This means the integration tests that check the replicated coefficients against the published paper run automatically at the end of the pipeline; they skip on their own if the processed data has not been built.</p>
+<p>You can build the documentation site (also run automatically by <code class="docutils literal notranslate"><span class="pre">doit</span></code>) with:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">chartbook</span> <span class="n">build</span> <span class="o">-</span><span class="n">f</span>
+</pre></div>
+</div>
+</section>
+<section id="setting-environment-variables">
+<h4>Setting Environment Variables<a class="headerlink" href="#setting-environment-variables" title="Link to this heading">#</a></h4>
+<p>You can <a class="reference external" href="https://stackoverflow.com/questions/43267413/how-to-set-environment-variables-from-env-file">export your environment variables</a>
+from your <code class="docutils literal notranslate"><span class="pre">.env</span></code> files like so, if you wish. This can be done easily in a Linux or Mac terminal with the following command:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">set</span><span class="w"> </span>-a<span class="w">  </span><span class="c1"># automatically export all variables</span>
+<span class="nb">source</span><span class="w"> </span>.env
+<span class="nb">set</span><span class="w"> </span>+a
+</pre></div>
+</div>
+<p>On Windows (PowerShell):</p>
+<div class="highlight-powershell notranslate"><div class="highlight"><pre><span></span><span class="nb">Get-Content</span> <span class="p">.</span><span class="n">env</span> <span class="p">|</span> <span class="k">ForEach</span><span class="n">-Object</span> <span class="p">{</span> <span class="k">if</span> <span class="p">(</span><span class="nv">$_</span> <span class="o">-match</span> <span class="s1">'^([^=]+)=(.*)$'</span><span class="p">)</span> <span class="p">{</span> <span class="no">[Environment]</span><span class="p">::</span><span class="n">SetEnvironmentVariable</span><span class="p">(</span><span class="nv">$matches</span><span class="p">[</span><span class="n">1</span><span class="p">],</span> <span class="nv">$matches</span><span class="p">[</span><span class="n">2</span><span class="p">],</span> <span class="s1">'Process'</span><span class="p">)</span> <span class="p">}</span> <span class="p">}</span>
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+<section id="formatting">
+<h2>Formatting<a class="headerlink" href="#formatting" title="Link to this heading">#</a></h2>
+<p>This project uses <a class="reference external" href="https://docs.astral.sh/ruff/">Ruff</a> for linting and formatting Python code.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Auto-fix linting issues (e.g., unused imports, undefined names)</span>
+ruff<span class="w"> </span>check<span class="w"> </span>.<span class="w"> </span>--fix
+
+<span class="c1"># Format code (consistent style, spacing, line length)</span>
+ruff<span class="w"> </span>format<span class="w"> </span>.
+
+<span class="c1"># Sort imports, then fix linting issues, then format</span>
+ruff<span class="w"> </span>format<span class="w"> </span>.<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>ruff<span class="w"> </span>check<span class="w"> </span>--select<span class="w"> </span>I<span class="w"> </span>--fix<span class="w"> </span>.<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>ruff<span class="w"> </span>check<span class="w"> </span>--fix<span class="w"> </span>.
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">ruff</span> <span class="pre">check</span> <span class="pre">--fix</span></code> applies safe auto-fixes for linting violations</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ruff</span> <span class="pre">format</span></code> formats code similar to Black</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--select</span> <span class="pre">I</span></code> targets only import sorting rules (isort-compatible)</p></li>
+</ul>
+</section>
+<section id="general-directory-structure">
+<h2>General Directory Structure<a class="headerlink" href="#general-directory-structure" title="Link to this heading">#</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>p03_lopez_salido_stein_zakrajsek_2017/
+├── chartbook.toml       # the manifest — configuration for the published ChartBook site
+├── dodo.py              # PyDoit task runner — defines and runs the full pipeline
+├── environment.yml      # conda environment spec
+├── requirements.txt     # pip requirements (alternative to the conda environment)
+├── README.md            # this file — also acts as the site's front page
+├── .env.example         # sample .env for private paths &amp; WRDS credentials (not tracked in Git)
+├── assets/              # hand-drawn figures/logo not generated from code
+├── data_manual/         # manually-collected data that can't be recreated (tracked)
+├── _data/               # data pulled/processed by the pipeline (gitignored, regenerable)
+│   ├── raw_data/        
+│   ├── processed_data/          
+│   └── data_dictionaries/       
+├── _output/             # chart HTML/PDF and tables generated by the pipeline (gitignored, regenerable)
+├── docs_src/
+│   └── site/            # extra site pages merged into the published site
+├── docs/                # built ChartBook/Jupyter Book site (gitignored)
+├── reports/             # LaTeX report and bibliography
+└── src/                 # code that produces the artifacts: pulls, processing, replication, notebooks, tests
+</pre></div>
+</div>
+<section id="additional-notes">
+<h3>Additional Notes<a class="headerlink" href="#additional-notes" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>We are using the <code class="docutils literal notranslate"><span class="pre">doit</span></code> Python module as a task runner. It works like <code class="docutils literal notranslate"><span class="pre">make</span></code> and
+the associated <code class="docutils literal notranslate"><span class="pre">Makefile</span></code>s. To rerun the code, install <code class="docutils literal notranslate"><span class="pre">doit</span></code>
+(<a class="reference external" href="https://pydoit.org/">https://pydoit.org/</a>) and execute the command <code class="docutils literal notranslate"><span class="pre">doit</span></code> from the project’s
+root directory (where <code class="docutils literal notranslate"><span class="pre">dodo.py</span></code> lives). Note that doit is very flexible and
+can be used to run code commands from the command prompt, thus making it
+suitable for projects that use scripts written in multiple different
+programming languages.</p></li>
+<li><p>We are using the <code class="docutils literal notranslate"><span class="pre">.env</span></code> file as a container for absolute paths that are private
+to each collaborator in the project. You can also use it for private
+credentials, if needed. It should not be tracked in Git.</p></li>
+</ul>
+</section>
+</section>
+<section id="data-and-output-storage">
+<h2>Data and Output Storage<a class="headerlink" href="#data-and-output-storage" title="Link to this heading">#</a></h2>
+<p>We’ll often use a separate folder for storing data. Any data in the data folder
+can be deleted and recreated by rerunning the PyDoit command (the pulls are in
+the <a class="reference external" href="http://dodo.py">dodo.py</a> file). Any data that cannot be automatically recreated should be
+stored in the “data_manual” folder. Because of the risk of manually-created data
+getting changed or lost, we keep it under version control where we can.
+Thus, data in the “_data” folder is excluded from Git (see the .gitignore file),
+while the “data_manual” folder is tracked by Git.</p>
+<p>Output is stored in the “_output” directory. This includes dataframes, charts, and
+rendered notebooks.</p>
+</section>
+</section>
+
+<div class="section ablog__blog_comments">
+   
+</div>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="right-next"
+       href="project_overview.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Project Overview</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item"><div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#table-of-contents">Table of Contents</a><ul class="nav section-nav flex-column">
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#pipeline-specs">Pipeline Specs</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#about-this-project">About this project</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#data-sources">Data Sources</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#quick-start">Quick Start</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#software-access-prerequisites">0. Software &amp; Access Prerequisites</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#create-activate-virtual-environment">1. Create &amp; Activate Virtual Environment</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#configure-wrds-credentials">2. Configure WRDS Credentials</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#run-the-full-pipeline">3. Run the Full Pipeline</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#other-commands">4. Other commands</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#unit-tests-and-doc-tests">Unit Tests and Doc Tests</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#setting-environment-variables">Setting Environment Variables</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#formatting">Formatting</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#general-directory-structure">General Directory Structure</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#additional-notes">Additional Notes</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#data-and-output-storage">Data and Output Storage</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Fernando Raffo, Bangjie Xu
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2026, Fernando Raffo, Bangjie Xu.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="_static/scripts/bootstrap.js?digest=90905a2f556bf617f1a9"></script>
+<script defer src="_static/scripts/pydata-sphinx-theme.js?digest=90905a2f556bf617f1a9"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>
